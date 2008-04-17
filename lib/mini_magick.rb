@@ -30,11 +30,12 @@ module MiniMagick
       end
 
       # Use this if you don't want to overwrite the image file
-      def from_file(image_path)
+      def open(image_path)
         File.open(image_path, "rb") do |f|
           self.from_blob(f.read, File.extname(image_path))
         end
       end
+      alias_method :from_file, :open
     end
 
     # Instance Methods
