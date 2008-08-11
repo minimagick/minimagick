@@ -19,7 +19,7 @@ module MiniMagick
     class <<self
       def from_blob(blob, extension=nil)
         begin
-          tempfile = ImageTempFile.new("minimagick#{extension}")
+          tempfile = ImageTempFile.new("minimagick.#{extension}")
           tempfile.binmode
           tempfile.write(blob)
         ensure

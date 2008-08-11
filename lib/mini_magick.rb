@@ -1,5 +1,3 @@
 $:.unshift File.dirname(__FILE__)
 
-module MiniMagick
-  
-end
+require 'mini_magick/mini_magick'
