@@ -2,3 +2,4 @@
 
 * Add << method to images. Let's you send raw commands to mogrify
 
+test
