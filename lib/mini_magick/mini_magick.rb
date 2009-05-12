@@ -132,7 +132,7 @@ module MiniMagick
     def run_command(command, *args)
       args.collect! do |arg|
         arg = arg.to_s
-        arg = %|"#{arg}"| unless arg[0].match(/^\+|\-/) # values quoted because they can contain characters like '>', but don't quote switches
+        arg = %|"#{arg}"| unless arg.match(/^\+|\-/) # values quoted because they can contain characters like '>', but don't quote switches
         arg
       end
 
