@@ -8,11 +8,6 @@ require 'mini_magick'
 desc 'Default: run unit tests.'
 task :default => :test
 
-desc 'Clean generated files.'
-task :clean => :clobber_rdoc do
-  rm FileList['test/output/*.png']
-end
-
 desc 'Test the mini_magick plugin.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
@@ -30,11 +25,15 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
-desc 'Update gemspec.'
-task :update_gemspec => :clean do
-  files = `git-ls-files`.split
-  data = File.read('mini_magick.gemspec')
-  data.sub!(/^  s.version = .*$/, "  s.version = #{MiniMagick::VERSION.inspect}")
-  data.sub!(/^  s.files = .*$/, "  s.files = %w(#{files.join(' ')})")
-  open('mini_magick.gemspec', 'w'){|f| f.write(data)}
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "mini_magick"
+    gemspec.summary = "Manipulate images with minimal use of memory."
+    gemspec.email = "probablycorey@gmail.com"
+    gemspec.homepage = "http://github.com/probablycorey/mini_magick"
+    gemspec.authors = ["Corey Johnson"]
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end

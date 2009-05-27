@@ -8,8 +8,6 @@ require File.join(File.dirname(__FILE__), '/image_temp_file')
 module MiniMagick
   class MiniMagickError < RuntimeError; end
 
-  VERSION = '1.2.5'
-
   class Image
     attr :path
     attr :tempfile
@@ -87,13 +85,13 @@ module MiniMagick
 
       old_path = @path.dup
       @path.sub!(/(\.\w+)?$/, ".#{format}")
-      File.unlink(old_path) unless old_path == @path
+      File.delete(old_path) unless old_path == @path
 
       unless File.exists?(@path)
         begin
           FileUtils.copy_file(@path.sub(".#{format}", "-#{page}.#{format}"), @path)
-        rescue => ex
-          raise MiniMagickError, "Unable to format to #{format}; #{ex}" unless File.exist?(@path)
+        rescue e
+          raise MiniMagickError, "Unable to format to #{format}; #{e}" unless File.exist?(@path)
         end
       end
     ensure
@@ -143,9 +141,13 @@ module MiniMagick
     end
 
     def run_command(command, *args)
-      args.collect! do |arg|
-        # values quoted because they can contain characters like '>', but don't quote switches
-        arg =~ /^\+|\-/) ? %|"#{arg}"| : arg.to_s
+      args.collect! do |arg|        
+        # args can contain characters like '>' so we must escape them, but don't quote switches
+        if arg !~ /^\+|\-/
+          "\"#{arg}\""
+        else
+          arg.to_s
+        end
       end
 
       command = "#{command} #{args.join(' ')}"
