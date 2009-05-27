@@ -1,4 +1,0 @@
-== 0.2.0 2008-05-20
-
-* Add << method to images. Let's you send raw commands to mogrify
-
