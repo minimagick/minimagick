@@ -12,12 +12,14 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
-    "MIT-LICENSE",
+    ".gitignore",
+     "MIT-LICENSE",
      "README.rdoc",
      "Rakefile",
      "VERSION",
      "lib/image_temp_file.rb",
      "lib/mini_magick.rb",
+     "mini_magick.gemspec",
      "test/actually_a_gif.jpg",
      "test/animation.gif",
      "test/command_builder_test.rb",
