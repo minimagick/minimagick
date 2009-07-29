@@ -143,7 +143,7 @@ module MiniMagick
     def run_command(command, *args)
       args.collect! do |arg|        
         # args can contain characters like '>' so we must escape them, but don't quote switches
-        if arg !~ /^\+|\-/
+        if arg !~ /^[\+\-]/
           "\"#{arg}\""
         else
           arg.to_s

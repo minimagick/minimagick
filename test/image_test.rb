@@ -7,6 +7,7 @@ class ImageTest < Test::Unit::TestCase
   CURRENT_DIR = File.dirname(File.expand_path(__FILE__)) + "/"
 
   SIMPLE_IMAGE_PATH = CURRENT_DIR + "simple.gif"
+  MINUS_IMAGE_PATH = CURRENT_DIR + "simple-minus.gif"
   TIFF_IMAGE_PATH = CURRENT_DIR + "leaves.tiff"
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
   GIF_WITH_JPG_EXT = CURRENT_DIR + "actually_a_gif.jpg"
@@ -104,6 +105,15 @@ class ImageTest < Test::Unit::TestCase
     assert_equal 20, image[:width]
     assert_equal 30, image[:height]
     assert_match(/^gif$/i, image[:format])
+  end
+  
+  def test_image_combine_options_with_filename_with_minusses_in_it
+    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    assert_nothing_raised do
+      image.combine_options do |c|
+        c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
+      end
+    end
   end
 
   def test_exif
