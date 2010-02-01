@@ -6,6 +6,10 @@ require "open3"
 require File.join(File.dirname(__FILE__), '/image_temp_file')
 
 module MiniMagick
+  class << self
+    attr_accessor :processor
+  end
+  
   class MiniMagickError < RuntimeError; end
 
   class Image
@@ -156,7 +160,7 @@ module MiniMagick
         end
       end
 
-      command = "gm #{command} #{args.join(' ')}"
+      command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
       output = `#{command} 2>&1`
 
       if $?.exitstatus != 0
