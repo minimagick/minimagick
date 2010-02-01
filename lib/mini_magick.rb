@@ -99,6 +99,12 @@ module MiniMagick
         File.unlink(fname)
       end
     end
+    
+    # Collapse images with sequences to the first frame (ie. animated gifs) and
+    # preserve quality
+    def collapse!
+      run_command("mogrify", "-quality", "100", "#{path}[0]")
+    end
 
     # Writes the temporary image that we are using for processing to the output path
     def write(output_path)
@@ -150,7 +156,7 @@ module MiniMagick
         end
       end
 
-      command = "#{command} #{args.join(' ')}"
+      command = "gm #{command} #{args.join(' ')}"
       output = `#{command} 2>&1`
 
       if $?.exitstatus != 0
