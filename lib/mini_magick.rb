@@ -2,8 +2,7 @@ require "open-uri"
 require "stringio"
 require "fileutils"
 require "open3"
-
-require File.join(File.dirname(__FILE__), '/image_temp_file')
+require "tempfile"
 
 module MiniMagick
   class << self
@@ -22,7 +21,7 @@ module MiniMagick
     class << self
       def from_blob(blob, ext = nil)
         begin
-          tempfile = ImageTempFile.new(ext)
+          tempfile = Tempfile.new(['mini_magick', ext.to_s])
           tempfile.binmode
           tempfile.write(blob)
         ensure
@@ -161,6 +160,8 @@ module MiniMagick
       end
 
       command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
+      $stderr.puts "=====> #{command}"
+      
       output = `#{command} 2>&1`
 
       if $?.exitstatus != 0
