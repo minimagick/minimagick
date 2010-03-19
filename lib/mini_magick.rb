@@ -160,7 +160,7 @@ module MiniMagick
       end
 
       command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
-      $stderr.puts "=====> #{command}"
+      # $stderr.puts "=====> #{command}"
       
       output = `#{command} 2>&1`
 
