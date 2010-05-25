@@ -15,5 +15,5 @@ Gem::Specification.new do |s|
   s.test_files   = Dir['test/**/*']
   s.require_path = 'lib'
   
-  s.add_runtime_dependency('subexec')
+  s.add_runtime_dependency('subexec', ['~> 0.0.2'])
 end

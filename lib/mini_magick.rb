@@ -7,7 +7,8 @@ module MiniMagick
     attr_accessor :timeout
   end
   
-  class MiniMagickError < RuntimeError; end
+  class Error < RuntimeError; end
+  class Invalid < StandardError; end
 
   class Image
     attr :path
@@ -158,15 +159,27 @@ module MiniMagick
       end
 
       command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
-      $stderr.puts "=====> #{command}"
-      
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
       
       if sub.exitstatus != 0
-        raise MiniMagickError, "MiniMagick command (#{command.inspect}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
+        # Clean up after ourselves in case of an error
+        destroy!
+        
+        # Raise the appropriate error
+        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
+          raise Invalid, sub.output
+        else
+          raise Error, "Command (#{command.inspect}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
+        end
       else
         sub.output
       end
+    end
+    
+    def destroy!
+      return if tempfile.nil?
+      File.unlink(tempfile.path)
+      @tempfile = nil
     end
   end
 
