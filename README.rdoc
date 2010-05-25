@@ -1,6 +1,6 @@
 = MiniMagick
 
-A ruby wrapper for ImageMagick command line.
+A ruby wrapper for ImageMagick or GraphicsMagick command line.
 
 
 == Why?
@@ -69,4 +69,4 @@ http://www.imagemagick.org/script/command-line-options.php#format
 
 == Requirements
 
-You must have ImageMagick installed.
+You must have ImageMagick or GraphicsMagick installed.

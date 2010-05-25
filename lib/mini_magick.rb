@@ -1,12 +1,10 @@
-require "open-uri"
-require "stringio"
-require "fileutils"
-require "open3"
-require "tempfile"
+require 'tempfile'
+require 'subexec'
 
 module MiniMagick
   class << self
     attr_accessor :processor
+    attr_accessor :timeout
   end
   
   class MiniMagickError < RuntimeError; end
@@ -87,14 +85,14 @@ module MiniMagick
       run_command("mogrify", "-format", format, @path)
 
       old_path = @path.dup
-      @path.sub!(/(\.\w+)?$/, ".#{format}")
+      @path.sub!(/(\.\w*)?$/, ".#{format}")
       File.delete(old_path) unless old_path == @path
 
       unless File.exists?(@path)
         begin
           FileUtils.copy_file(@path.sub(".#{format}", "-#{page}.#{format}"), @path)
-        rescue e
-          raise MiniMagickError, "Unable to format to #{format}; #{e}" unless File.exist?(@path)
+        rescue => ex
+          raise MiniMagickError, "Unable to format to #{format}; #{ex}" unless File.exist?(@path)
         end
       end
     ensure
@@ -160,14 +158,14 @@ module MiniMagick
       end
 
       command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
-      # $stderr.puts "=====> #{command}"
+      $stderr.puts "=====> #{command}"
       
-      output = `#{command} 2>&1`
-
-      if $?.exitstatus != 0
-        raise MiniMagickError, "ImageMagick command (#{command.inspect}) failed: #{{:status_code => $?, :output => output}.inspect}"
+      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      
+      if sub.exitstatus != 0
+        raise MiniMagickError, "MiniMagick command (#{command.inspect}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
       else
-        output
+        sub.output
       end
     end
   end
