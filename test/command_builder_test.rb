@@ -1,5 +1,5 @@
 require 'test/unit'
-require File.join(File.dirname(__FILE__), '../lib/mini_magick')
+require File.expand_path('../../lib/mini_magick', __FILE__)
 
 class CommandBuilderTest < Test::Unit::TestCase
   include MiniMagick

@@ -1,7 +1,7 @@
 require 'test/unit'
-require File.join(File.dirname(__FILE__), '../lib/mini_magick')
+require File.expand_path('../../lib/mini_magick', __FILE__)
 
-MiniMagick.processor = :gm
+#MiniMagick.processor = :gm
 
 class ImageTest < Test::Unit::TestCase
   include MiniMagick
