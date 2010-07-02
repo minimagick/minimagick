@@ -1,10 +1,16 @@
 require 'tempfile'
-require 'subexec'
 
 module MiniMagick
   class << self
     attr_accessor :processor
+    attr_accessor :use_subexec
     attr_accessor :timeout
+  end
+  
+  # Subexec only works with 1.9
+  if RUBY_VERSION[0..2].to_f < 1.8
+    self.use_subexec = true
+    require 'subexec'
   end
   
   class Error < RuntimeError; end
@@ -67,7 +73,12 @@ module MiniMagick
         # Get the EXIF original capture as a Time object
         Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
-        run_command('identify', '-format', "\"%[#{value}]\"", @path).chop
+        result = run_command('identify', '-format', "\"%[#{value}]\"", @path).chop
+        if result.include?(",")
+          read_character_data(result)
+        else
+          result
+        end
       else
         run_command('identify', '-format', "\"#{value}\"", @path).split("\n")[0]
       end
@@ -159,20 +170,28 @@ module MiniMagick
       end
 
       command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+
+      if ::MiniMagick.use_subexec
+        sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+        exit_status = sub.exitstatus
+        output = sub.output
+      else
+        output = `#{command} 2>&1`
+        exit_status = $?.exitstatus
+      end
       
-      if sub.exitstatus != 0
+      if exit_status != 0
         # Clean up after ourselves in case of an error
         destroy!
         
         # Raise the appropriate error
-        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          raise Invalid, sub.output
+        if output =~ /no decode delegate/i || output =~ /did not return an image/i
+          raise Invalid, output
         else
-          raise Error, "Command (#{command.inspect}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
+          raise Error, "Command (#{command.inspect}) failed: #{{:status_code => exit_status, :output => output}.inspect}"
         end
       else
-        sub.output
+        output
       end
     end
     
@@ -181,6 +200,17 @@ module MiniMagick
       File.unlink(tempfile.path)
       @tempfile = nil
     end
+    
+    private
+      # Sometimes we get back a list of character values
+      def read_character_data(list_of_characters)
+        chars = list_of_characters.gsub(" ", "").split(",")
+        result = ""
+        chars.each do |val|
+          result << ("%c" % val.to_i)
+        end
+        result
+      end
   end
 
   class CommandBuilder
