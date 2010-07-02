@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.summary     = "Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick"
   s.description = "Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick"
   
-  s.authors     = ["Corey Johnson", "Peter Kieltyka"]
-  s.email       = ["probablycorey@gmail.com", "peter@nulayer.com"]
-  s.homepage    = "http://github.com/nulayer/mini_magick"
+  s.authors     = ["Corey Johnson", "Hampton Catlin", "Peter Kieltyka"]
+  s.email       = ["probablycorey@gmail.com", "hcatlin@gmail.com", "peter@nulayer.com"]
+  s.homepage    = "http://github.com/hcatlin/mini_magick"
 
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.test_files   = Dir['test/**/*']
