@@ -1,5 +1,8 @@
 = MiniMagick
 
+NOTE: I'm not actively using MiniMagick anymore and am looking to hand it off
+to someone with more interest. Contact me through github if that person is you!
+
 A ruby wrapper for ImageMagick or GraphicsMagick command line.
 
 
