@@ -9,11 +9,11 @@ Gem::Specification.new do |s|
   
   s.authors     = ["Corey Johnson", "Peter Kieltyka"]
   s.email       = ["probablycorey@gmail.com", "peter@nulayer.com"]
-  s.homepage    = "http://github.com/nulayer/mini_magick"
+  s.homepage    = "http://github.com/pkieltyka/mini_magick"
 
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.test_files   = Dir['test/**/*']
   s.require_path = 'lib'
   
-  s.add_runtime_dependency('subexec', ['~> 0.0.2'])
+  s.add_runtime_dependency('subexec', ['~> 0.0.4'])
 end

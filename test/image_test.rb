@@ -1,5 +1,6 @@
+require 'rubygems'
 require 'test/unit'
-require File.join(File.dirname(__FILE__), '../lib/mini_magick')
+require 'mini_magick'
 
 MiniMagick.processor = :gm
 
