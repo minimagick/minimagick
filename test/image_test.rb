@@ -66,8 +66,8 @@ class ImageTest < Test::Unit::TestCase
   def test_tiff
     image = Image.new(TIFF_IMAGE_PATH)
     assert_equal "tiff", image[:format].downcase
-    assert_equal 295, image[:width]
-    assert_equal 242, image[:height]
+    assert_equal 50, image[:width]
+    assert_equal 41, image[:height]
     image.destroy!
   end
 
