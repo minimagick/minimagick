@@ -188,6 +188,9 @@ module MiniMagick
         if output =~ /no decode delegate/i || output =~ /did not return an image/i
           raise Invalid, output
         else
+
+          # TODO: should we do something different if the command times out ...?
+          # its definitely better for logging.. otherwise we dont really know
           raise Error, "Command (#{command.inspect}) failed: #{{:status_code => exit_status, :output => output}.inspect}"
         end
       else

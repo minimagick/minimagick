@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'test/unit'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
