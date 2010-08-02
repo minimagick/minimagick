@@ -179,6 +179,7 @@ class ImageTest < Test::Unit::TestCase
     end
     image.to_blob
     assert true #we made it this far without error
+    image.destroy!
   end
 
   # def test_mini_magick_error_when_referencing_not_existing_page
