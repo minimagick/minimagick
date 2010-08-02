@@ -7,6 +7,8 @@ module MiniMagick
     attr_accessor :timeout
   end
   
+  MOGRIFY_COMMANDS = %w{adaptive-blur adaptive-resize adaptive-sharpen adjoin affine alpha annotate antialias append authenticate auto-gamma auto-level auto-orient background bench iterations bias black-threshold blue-primary point blue-shift factor blur border bordercolor brightness-contrast caption string cdl filename channel type charcoal radius chop clip clamp clip-mask filename clip-path id clone index clut contrast-stretch coalesce colorize color-matrix colors colorspace type combine comment string compose operator composite compress type contrast convolve coefficients crop cycle amount decipher filename debug events define format:option deconstruct delay delete index density depth despeckle direction type display server dispose method distort type coefficients dither method draw string edge radius emboss radius encipher filename encoding type endian type enhance equalize evaluate operator evaluate-sequence operator extent extract family name fft fill filter type flatten flip floodfill flop font name format string frame function name fuzz distance fx expression gamma gaussian-blur geometry gravity type green-primary point help identify ifft implode amount insert index intent type interlace type interline-spacing interpolate method interword-spacing kerning label string lat layers method level limit type linear-stretch liquid-rescale log format loop iterations mask filename mattecolor median radius modulate monitor monochrome morph morphology method kernel motion-blur negate noise radius normalize opaque ordered-dither NxN orient type page paint radius ping pointsize polaroid angle posterize levels precision preview type print string process image-filter profile filename quality quantizespace quiet radial-blur angle raise random-threshold low,high red-primary point regard-warnings region remap filename render repage resample resize respect-parentheses roll rotate degrees sample sampling-factor scale scene seed segments selective-blur separate sepia-tone threshold set attribute shade degrees shadow sharpen shave shear sigmoidal-contrast size sketch solarize threshold splice spread radius strip stroke strokewidth stretch type style type swap indexes swirl degrees texture filename threshold thumbnail tile filename tile-offset tint transform transparent transparent-color transpose transverse treedepth trim type type undercolor unique-colors units type unsharp verbose version view vignette virtual-pixel method wave weight type white-point point white-threshold write filename}
+  
   # Subexec only works with 1.9
   if RUBY_VERSION[0..2].to_f < 1.8
     self.use_subexec = true
@@ -137,9 +139,13 @@ module MiniMagick
     # If an unknown method is called then it is sent through the morgrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
-      args.push(@path) # push the path onto the end
-      run_command("mogrify", "-#{symbol}", *args)
-      self
+      if MOGRIFY_COMMANDS.include?(symbol.to_s)
+        args.push(@path) # push the path onto the end
+        run_command("mogrify", "-#{symbol}", *args)
+        self
+      else
+        super(symbol, *args)
+      end
     end
 
     # You can use multiple commands together using this method
@@ -179,7 +185,7 @@ module MiniMagick
         output = `#{command} 2>&1`
         exit_status = $?.exitstatus
       end
-      
+
       if exit_status != 0
         # Clean up after ourselves in case of an error
         destroy!
@@ -188,7 +194,6 @@ module MiniMagick
         if output =~ /no decode delegate/i || output =~ /did not return an image/i
           raise Invalid, output
         else
-
           # TODO: should we do something different if the command times out ...?
           # its definitely better for logging.. otherwise we dont really know
           raise Error, "Command (#{command.inspect}) failed: #{{:status_code => exit_status, :output => output}.inspect}"
