@@ -18,4 +18,10 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.lingo "mome fingo"
     assert_equal "-resize 30x40 -input 1 3 4 -lingo mome fingo", c.args.join(" ")
   end
+
+  def test_dashed
+    c = CommandBuilder.new
+    c.auto_orient
+    assert_equal "-auto-orient", c.args.join(" ")
+  end
 end

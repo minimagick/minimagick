@@ -15,6 +15,7 @@ class ImageTest < Test::Unit::TestCase
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
   GIF_WITH_JPG_EXT = CURRENT_DIR + "actually_a_gif.jpg"
   EXIF_IMAGE_PATH = CURRENT_DIR + "trogdor.jpg"
+  ORIENTED_IMAGE_PATH = CURRENT_DIR + "oliver.jpg"
   ANIMATION_PATH = CURRENT_DIR + "animation.gif"
 
   def test_image_from_blob
@@ -138,6 +139,14 @@ class ImageTest < Test::Unit::TestCase
     assert_equal('0220', image["exif:ExifVersion"])
     image = Image.from_file(SIMPLE_IMAGE_PATH)
     assert_equal('', image["EXIF:ExifVersion"])
+    image.destroy!
+  end
+  
+  def test_auto_rotate
+    image = Image.from_file(ORIENTED_IMAGE_PATH)
+    assert_equal('6', image["exif:Orientation"])
+    image.auto_orient
+    assert_equal('1', image["exif:Orientation"])
     image.destroy!
   end
 

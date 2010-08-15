@@ -139,9 +139,11 @@ module MiniMagick
     # If an unknown method is called then it is sent through the morgrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
-      if MOGRIFY_COMMANDS.include?(symbol.to_s)
+      symbol_s = symbol.to_s.gsub('_','-')
+
+      if MOGRIFY_COMMANDS.include?(symbol_s)
         args.push(@path) # push the path onto the end
-        run_command("mogrify", "-#{symbol}", *args)
+        run_command("mogrify", "-#{symbol_s}", *args)
         self
       else
         super(symbol, *args)
@@ -229,7 +231,7 @@ module MiniMagick
     end
 
     def method_missing(symbol, *args)
-      @args << "-#{symbol}"
+      @args << "-#{symbol.to_s.gsub('_','-')}"
       @args += args
     end
 
