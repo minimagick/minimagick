@@ -1,2 +1,3 @@
+* August 16, 2010 - Merged in a bugfix change from kepi that makes 'dashed' commands (like "auto-correct") work well with the method_missing overrides. I made some changes to that patch that included simplifying the tests and also decreasing the size of the test images again. Sorry cute cats.... but your bits aren't needed!
 * July 29, 2010 - Made the test images much, much smaller. Now, the size of the gem has gone from 1,080kb to 68kb. Should save a bunch of bandwidth with bundler deploys. [hcatlin]
 * July 29, 2010 - Merged in my changes to allow it to work under 1.8. subex is only used in 1.9.2.
