@@ -8,7 +8,7 @@ module MiniMagick
   end
   
   MOGRIFY_COMMANDS = %w{adaptive-blur adaptive-resize adaptive-sharpen adjoin affine alpha annotate antialias append authenticate auto-gamma auto-level auto-orient background bench iterations bias black-threshold blue-primary point blue-shift factor blur border bordercolor brightness-contrast caption string cdl filename channel type charcoal radius chop clip clamp clip-mask filename clip-path id clone index clut contrast-stretch coalesce colorize color-matrix colors colorspace type combine comment string compose operator composite compress type contrast convolve coefficients crop cycle amount decipher filename debug events define format:option deconstruct delay delete index density depth despeckle direction type display server dispose method distort type coefficients dither method draw string edge radius emboss radius encipher filename encoding type endian type enhance equalize evaluate operator evaluate-sequence operator extent extract family name fft fill filter type flatten flip floodfill flop font name format string frame function name fuzz distance fx expression gamma gaussian-blur geometry gravity type green-primary point help identify ifft implode amount insert index intent type interlace type interline-spacing interpolate method interword-spacing kerning label string lat layers method level limit type linear-stretch liquid-rescale log format loop iterations mask filename mattecolor median radius modulate monitor monochrome morph morphology method kernel motion-blur negate noise radius normalize opaque ordered-dither NxN orient type page paint radius ping pointsize polaroid angle posterize levels precision preview type print string process image-filter profile filename quality quantizespace quiet radial-blur angle raise random-threshold low,high red-primary point regard-warnings region remap filename render repage resample resize respect-parentheses roll rotate degrees sample sampling-factor scale scene seed segments selective-blur separate sepia-tone threshold set attribute shade degrees shadow sharpen shave shear sigmoidal-contrast size sketch solarize threshold splice spread radius strip stroke strokewidth stretch type style type swap indexes swirl degrees texture filename threshold thumbnail tile filename tile-offset tint transform transparent transparent-color transpose transverse treedepth trim type type undercolor unique-colors units type unsharp verbose version view vignette virtual-pixel method wave weight type white-point point white-threshold write filename}
-  
+
   class Error < RuntimeError; end
   class Invalid < StandardError; end
 
@@ -146,9 +146,10 @@ module MiniMagick
 
     # You can use multiple commands together using this method
     def combine_options(&block)
-      c = CommandBuilder.new
+      c = CommandBuilder.new('mogrify')
       block.call c
-      run_command("mogrify", *c.args << @path)
+      c << @path
+      run(c)
     end
 
     # Check to see if we are running on win32 -- we need to escape things differently
@@ -162,18 +163,14 @@ module MiniMagick
     end
 
     def run_command(command, *args)
-      args.collect! do |arg|        
-        # args can contain characters like '>' so we must escape them, but don't quote switches
-        if arg !~ /^[\+\-]/
-          "\"#{arg}\""
-        else
-          arg.to_s
-        end
-      end
+      run(CommandBuilder.new(command, *args))
+    end
+    
+    def run(command_builder)
+      command = command_builder.command
 
-      command = "#{MiniMagick.processor} #{command} #{args.join(' ')}".strip
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
-      
+
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
         destroy!
@@ -211,18 +208,44 @@ module MiniMagick
 
   class CommandBuilder
     attr :args
+    attr :command
 
-    def initialize
+    def initialize(command, *options)
+      @command = command
       @args = []
+  
+      options.each { |val| push(val) }
     end
-
+    
+    def command
+      "#{MiniMagick.processor} #{@command} #{@args.join(' ')}".strip
+    end
+    
     def method_missing(symbol, *args)
-      @args << "-#{symbol.to_s.gsub('_','-')}"
-      @args += args
+      guessed_command_name = symbol.to_s.gsub('_','-')
+      if MOGRIFY_COMMANDS.include?(guessed_command_name)
+        # This makes sure we always quote if we are passed a single
+        # arguement with spaces in it
+        if (args.size == 1) && (args.first.to_s.include?(' '))
+          push("-#{guessed_command_name}")
+          push(args.join(" "))
+        else
+          push("-#{guessed_command_name} #{args.join(" ")}")
+        end
+      else
+        super(symbol, *args)
+      end
     end
+    
+    def push(value)
+      # args can contain characters like '>' so we must escape them, but don't quote switches
+      @args << ((value !~ /^[\+\-]/) ? "\"#{value}\"" : value.to_s.strip)
+    end
+    alias :<< :push
 
     def +(value)
-      @args << "+#{value}"
+      puts "MINI_MAGICK: The + command has been deprecated. Please use c << '+#{value}')"
+      push "+#{value}"
     end
   end
 end

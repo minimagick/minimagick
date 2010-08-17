@@ -6,21 +6,39 @@ class CommandBuilderTest < Test::Unit::TestCase
   include MiniMagick
 
   def test_basic
-    c = CommandBuilder.new
+    c = CommandBuilder.new("test")
     c.resize "30x40"
     assert_equal "-resize 30x40", c.args.join(" ")
   end
 
   def test_complicated
-    c = CommandBuilder.new
+    c = CommandBuilder.new("test")
     c.resize "30x40"
-    c.input 1, 3, 4
-    c.lingo "mome fingo"
-    assert_equal "-resize 30x40 -input 1 3 4 -lingo mome fingo", c.args.join(" ")
+    c.alpha 1, 3, 4
+    c.resize "mome fingo"
+    assert_equal "-resize 30x40 -alpha 1 3 4 -resize \"mome fingo\"", c.args.join(" ")
+  end
+  
+  def test_valid_command
+    begin
+      c = CommandBuilder.new("test", "path")
+      c.input 2
+      assert false
+    rescue NoMethodError
+      assert true
+    end
+  end
+  
+  def test_full_command
+    c = CommandBuilder.new("test")
+    c.resize "30x40"
+    c.alpha 1, 3, 4
+    c.resize "mome fingo"
+    assert_equal "test -resize 30x40 -alpha 1 3 4 -resize \"mome fingo\"", c.command
   end
 
   def test_dashed
-    c = CommandBuilder.new
+    c = CommandBuilder.new("test")
     c.auto_orient
     assert_equal "-auto-orient", c.args.join(" ")
   end
