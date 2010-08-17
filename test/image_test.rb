@@ -48,9 +48,15 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_not_an_image
+    image = Image.new(NOT_AN_IMAGE_PATH)
+    assert_equal false, image.valid?
+    image.destroy!
+  end
+  
+  def test_throw_on_openining_not_an_image
     assert_raise(MiniMagick::Invalid) do
-      image = Image.new(NOT_AN_IMAGE_PATH)
-      image.destroy!
+      image = Image.open(NOT_AN_IMAGE_PATH)
+      image.destroy
     end
   end
 

@@ -29,7 +29,11 @@ module MiniMagick
           tempfile.close if tempfile
         end
 
-        return self.new(tempfile.path, tempfile)
+        image = self.new(tempfile.path, tempfile)
+        if !image.valid?
+          raise MiniMagick::Invalid
+        end
+        image
       end
 
       # Use this if you don't want to overwrite the image file
@@ -46,9 +50,13 @@ module MiniMagick
     def initialize(input_path, tempfile=nil)
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
-
-      # Ensure that the file is an image
+    end
+    
+    def valid?
       run_command("identify", @path)
+      true
+    rescue MiniMagick::Invalid
+      false
     end
 
     # For reference see http://www.imagemagick.org/script/command-line-options.php#format
