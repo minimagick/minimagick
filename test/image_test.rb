@@ -141,15 +141,6 @@ class ImageTest < Test::Unit::TestCase
     assert_equal('', image["EXIF:ExifVersion"])
     image.destroy!
   end
-  
-  # The test here isn't really to check to see if 
-  # the auto-orient function of ImageMagick works,
-  # but to make sure we can send dashed commands.
-  def test_auto_rotate
-    image = Image.from_file(EXIF_IMAGE_PATH)
-    image.auto_orient
-    image.destroy!
-  end
 
   def test_original_at
     image = Image.from_file(EXIF_IMAGE_PATH)
