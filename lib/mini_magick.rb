@@ -164,6 +164,24 @@ module MiniMagick
     def windows?
       !(RUBY_PLATFORM =~ /win32/).nil?
     end
+    
+    def composite(other_image, output_extension = 'jpg', &block)
+      begin
+        tempfile = Tempfile.new(output_extension)
+        tempfile.binmode
+      ensure
+        tempfile.close
+      end
+      
+      command = CommandBuilder.new("composite")
+      block.call(command) if block
+      command.push(other_image.path)
+      command.push(self.path)
+      command.push(tempfile.path)
+      
+      run(command)
+      return Image.new(tempfile.path)
+    end
 
     # Outputs a carriage-return delimited format string for Unix and Windows
     def format_option(format)

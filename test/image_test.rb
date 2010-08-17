@@ -187,6 +187,14 @@ class ImageTest < Test::Unit::TestCase
     assert true #we made it this far without error
     image.destroy!
   end
+  
+  def test_simple_composite
+    image = Image.from_file(EXIF_IMAGE_PATH)
+    result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
+      c.gravity "center"
+    end
+    assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
+  end
 
   # def test_mini_magick_error_when_referencing_not_existing_page
   #   image = Image.from_file(ANIMATION_PATH)
