@@ -34,7 +34,8 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.resize "30x40"
     c.alpha 1, 3, 4
     c.resize "mome fingo"
-    assert_equal "test -resize 30x40 -alpha 1 3 4 -resize \"mome fingo\"", c.command
+    c.background "#000000"
+    assert_equal "test -resize 30x40 -alpha 1 3 4 -resize \"mome fingo\" -background \"#000000\"", c.command
   end
 
   def test_dashed

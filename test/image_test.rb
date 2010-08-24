@@ -131,9 +131,11 @@ class ImageTest < Test::Unit::TestCase
   
   def test_image_combine_options_with_filename_with_minusses_in_it
     image = Image.from_file(SIMPLE_IMAGE_PATH)
+    background = "#000000"
     assert_nothing_raised do
       image.combine_options do |c|
         c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
+        c.background background
       end
     end
     image.destroy!
