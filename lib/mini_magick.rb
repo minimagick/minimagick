@@ -36,6 +36,16 @@ module MiniMagick
         image
       end
 
+      def from_uri( uri )
+        image = nil
+        begin
+          image = self.from_blob( uri.read )
+        rescue Exception => e
+          raise e
+        end
+        image
+      end
+
       # Use this if you don't want to overwrite the image file
       def open(image_path)
         File.open(image_path, "rb") do |f|
