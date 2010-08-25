@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'subexec'
+require 'open-uri'
 
 module MiniMagick
   class << self
