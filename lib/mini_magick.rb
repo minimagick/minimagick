@@ -250,14 +250,8 @@ module MiniMagick
     def method_missing(symbol, *args)
       guessed_command_name = symbol.to_s.gsub('_','-')
       if MOGRIFY_COMMANDS.include?(guessed_command_name)
-        # This makes sure we always quote if we are passed a single
-        # arguement with spaces in it
-        if (args.size == 1) && (args.first.to_s.include?(' ') || args.first.to_s.include?('#'))
-          push("-#{guessed_command_name}")
-          push(args.join(" "))
-        else
-          push("-#{guessed_command_name} #{args.join(" ")}")
-        end
+        push("-#{guessed_command_name}")
+        push(args.join(" ")) if args.any?
       else
         super(symbol, *args)
       end

@@ -8,7 +8,7 @@ class CommandBuilderTest < Test::Unit::TestCase
   def test_basic
     c = CommandBuilder.new("test")
     c.resize "30x40"
-    assert_equal "-resize 30x40", c.args.join(" ")
+    assert_equal "-resize \"30x40\"", c.args.join(" ")
   end
 
   def test_complicated
@@ -16,7 +16,7 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.resize "30x40"
     c.alpha 1, 3, 4
     c.resize "mome fingo"
-    assert_equal "-resize 30x40 -alpha 1 3 4 -resize \"mome fingo\"", c.args.join(" ")
+    assert_equal "-resize \"30x40\" -alpha \"1 3 4\" -resize \"mome fingo\"", c.args.join(" ")
   end
   
   def test_valid_command
@@ -27,15 +27,6 @@ class CommandBuilderTest < Test::Unit::TestCase
     rescue NoMethodError
       assert true
     end
-  end
-  
-  def test_full_command
-    c = CommandBuilder.new("test")
-    c.resize "30x40"
-    c.alpha 1, 3, 4
-    c.resize "mome fingo"
-    c.background "#000000"
-    assert_equal "test -resize 30x40 -alpha 1 3 4 -resize \"mome fingo\" -background \"#000000\"", c.command
   end
 
   def test_dashed

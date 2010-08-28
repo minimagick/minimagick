@@ -135,6 +135,7 @@ class ImageTest < Test::Unit::TestCase
     assert_nothing_raised do
       image.combine_options do |c|
         c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
+        c.thumbnail "300x500>"
         c.background background
       end
     end
