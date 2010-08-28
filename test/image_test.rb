@@ -196,4 +196,14 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
+  
+  def test_throw_format_error
+    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    assert_raise MiniMagick::Error do
+      image.combine_options do |c|
+        c.format "png"
+      end
+    end
+    image.destroy!
+  end
 end
