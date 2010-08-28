@@ -141,21 +141,15 @@ module MiniMagick
     # If an unknown method is called then it is sent through the morgrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
-      guessed_command_name = symbol.to_s.gsub('_','-')
-
-      if MOGRIFY_COMMANDS.include?(guessed_command_name)
-        args.push(@path) # push the path onto the end
-        run_command("mogrify", "-#{guessed_command_name}", *args)
-        self
-      else
-        super(symbol, *args)
+      combine_options do |c|
+        c.method_missing(symbol, *args)
       end
     end
 
     # You can use multiple commands together using this method
     def combine_options(&block)
       c = CommandBuilder.new('mogrify')
-      block.call c
+      block.call(c)
       c << @path
       run(c)
     end
@@ -185,7 +179,7 @@ module MiniMagick
 
     # Outputs a carriage-return delimited format string for Unix and Windows
     def format_option(format)
-      windows? ? "#{format}\\n" : "#{format}\\\\n"
+      windows? ? "\"#{format}\\n\"" : "\"#{format}\\\\n\""
     end
 
     def run_command(command, *args)
@@ -207,7 +201,7 @@ module MiniMagick
         else
           # TODO: should we do something different if the command times out ...?
           # its definitely better for logging.. otherwise we dont really know
-          raise Error, "Command (#{command.inspect}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
+          raise Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
         end
       else
         sub.output
@@ -239,27 +233,31 @@ module MiniMagick
     def initialize(command, *options)
       @command = command
       @args = []
-  
-      options.each { |val| push(val) }
+      options.each { |arg| push(arg) }
     end
     
     def command
       "#{MiniMagick.processor} #{@command} #{@args.join(' ')}".strip
     end
     
-    def method_missing(symbol, *args)
+    def method_missing(symbol, *options)
       guessed_command_name = symbol.to_s.gsub('_','-')
       if MOGRIFY_COMMANDS.include?(guessed_command_name)
-        push("-#{guessed_command_name}")
-        push(args.join(" ")) if args.any?
+        add(guessed_command_name, *options)
       else
         super(symbol, *args)
       end
     end
     
-    def push(value)
-      # args can contain characters like '>' so we must escape them, but don't quote switches
-      @args << ((value !~ /^[\+\-]/) ? "\"#{value}\"" : value.to_s.strip)
+    def add(command, *options)
+      push "-#{command}"
+      if options.any?
+        push "\"#{options.join(" ")}\""
+      end
+    end
+    
+    def push(arg)
+      @args << arg.strip
     end
     alias :<< :push
 

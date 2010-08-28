@@ -120,7 +120,7 @@ class ImageTest < Test::Unit::TestCase
     image = Image.from_file(SIMPLE_IMAGE_PATH)
     image.combine_options do |c|
       c.resize "20x30!"
-      c.blur 50
+      c.blur "50"
     end
 
     assert_equal 20, image[:width]
@@ -197,6 +197,17 @@ class ImageTest < Test::Unit::TestCase
       c.gravity "center"
     end
     assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
+  end
+  
+  def test_issue_8
+    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    assert_nothing_raised do
+      image.combine_options do |c|
+        c.sample "50%"
+        c.rotate "-90>"
+      end
+    end
+    image.destroy!
   end
 
   # def test_mini_magick_error_when_referencing_not_existing_page
