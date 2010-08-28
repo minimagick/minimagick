@@ -77,19 +77,6 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
-  # def test_animation_pages
-  #   image = Image.from_file(ANIMATION_PATH)
-  #   image.format "png", 0
-  #   assert_equal "png", image[:format].downcase
-  #   image.destroy!
-  # end
-
-  # def test_animation_size
-  #   image = Image.from_file(ANIMATION_PATH)
-  #   assert_equal image[:size], 76631
-  #   image.destroy!
-  # end
-
   def test_gif_with_jpg_format
     image = Image.new(GIF_WITH_JPG_EXT)
     assert_equal "gif", image[:format].downcase
@@ -209,11 +196,4 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
-
-  # def test_mini_magick_error_when_referencing_not_existing_page
-  #   image = Image.from_file(ANIMATION_PATH)
-  #   image.format('png')
-  #   assert_equal image[:format], 'PNG'
-  #   image.destroy!
-  # end
 end
