@@ -37,10 +37,10 @@ module MiniMagick
         image
       end
 
-      def from_uri( uri )
+      def from_uri( uri, ext = nil )
         image = nil
         begin
-          image = self.from_blob( uri.read )
+          image = self.from_blob( uri.read, ext )
         rescue Exception => e
           raise e
         end
