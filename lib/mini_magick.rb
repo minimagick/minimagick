@@ -15,12 +15,22 @@ module MiniMagick
 
   class Image
     attr :path
-    attr :tempfile
     attr :output
+    # @deprecated Don't explicity use this accessor. This is an internal method!
+    attr :tempfile
+    
 
     # Class Methods
     # -------------
     class << self
+      # This is the primary loading method used by all of the other class methods.
+      # Pass in a string-like object that holds the binary data for a valid image
+      #
+      # Probably easier to use the open method if you want to read something in.
+      #
+      # @param blob [String, String-like] This is a string-like binary object for the image. Must work with File#write(blob).
+      # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues, give this a try.
+      # @return [MiniMagick::Image] The loaded image
       def from_blob(blob, ext = nil)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
@@ -37,32 +47,59 @@ module MiniMagick
         image
       end
 
-      def from_uri( uri, ext = nil )
-        image = nil
-        begin
-          image = self.from_blob( uri.read, ext )
-        rescue Exception => e
-          raise e
+      # Opens a specific image file either on the local file system or at a URI.
+      #
+      # Use this if you don't want to overwrite the image file.
+      #
+      # Extension is either guessed from the path or you can specify it as a second parameter.
+      #
+      # If you pass in what looks like a URL, we will see if Kernel#open exists. If it doesn't
+      # then we require 'open-uri'. That way, if you have a work-alike library, we won't demolish it.
+      # Open-uri never gets required unless you pass in something with "://" in it.
+      #
+      # @param file_or_url [String] Either a local file path or a URL that open-uri can read
+      # @param ext [String] Specify the extension you want to read it as
+      # @return [MiniMagick::Image] The loaded image
+      def open(file_or_url, ext = File.extname(file_or_url))
+        if file_or_url.include?("://")
+          if !Kernel.respond_to?("open")
+            require 'open-uri'
+          end
+          self.from_blob(Kernel::open(file_or_url).read, ext)
+        else
+          File.open(file_or_url, "rb") do |f|
+            self.from_blob(f.read, ext)
+          end
         end
-        image
       end
-
-      # Use this if you don't want to overwrite the image file
-      def open(image_path)
-        File.open(image_path, "rb") do |f|
-          self.from_blob(f.read, File.extname(image_path))
-        end
-      end
+      # @deprecated Please use MiniMagick::Image.open(file_or_url) now
       alias_method :from_file, :open
     end
 
     # Instance Methods
     # ----------------
-    def initialize(input_path, tempfile=nil)
+    
+    
+    # Create a new MiniMagick::Image object
+    #
+    # _DANGER_: The file location passed in here is the *working copy*. That is, it gets *modified*. 
+    # you can either copy it yourself or use the MiniMagick::Image.open(path) method which creates a
+    # temporary file for you and protects your original!
+    #
+    # @param input_path [String] The location of an image file
+    # @todo Allow this to accept a block that can pass off to Image#combine_options
+    def initialize(input_path, tempfile = nil)
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
     end
     
+    # Checks to make sure that MiniMagick can read the file and understand it.
+    #
+    # This uses the 'identify' command line utility to check the file. If you are having
+    # issues with this, then please work directly with the 'identify' command and see if you
+    # can figure out what the issue is.
+    #
+    # @return [Boolean]
     def valid?
       run_command("identify", @path)
       true
@@ -70,7 +107,21 @@ module MiniMagick
       false
     end
 
-    # For reference see http://www.imagemagick.org/script/command-line-options.php#format
+    # A rather low-level way to interact with the "identify" command. No nice API here, just
+    # the crazy stuff you find in ImageMagick. See the examples listed!
+    #
+    # @example
+    #    image["format"]      #=> "TIFF"
+    #    image["height"]      #=> 41 (pixels)
+    #    image["width"]       #=> 50 (pixels)
+    #    image["dimensions"]  #=> [50, 41]
+    #    image["size"]        #=> 2050 (bits)
+    #    image["original_at"] #=> 2005-02-23 23:17:24 +0000 (Read from Exif data)
+    #    image["EXIF:ExifVersion"] #=> "0220" (Can read anything from Exif)
+    #
+    # @param format [String] A format for the "identify" command
+    # @see For reference see http://www.imagemagick.org/script/command-line-options.php#format
+    # @return [String, Numeric, Array, Time, Object] Depends on the method called! Defaults to String for unknown commands
     def [](value)
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
@@ -99,21 +150,35 @@ module MiniMagick
       end
     end
 
-    # Sends raw commands to imagemagick's mogrify command. The image path is automatically appended to the command
+    # Sends raw commands to imagemagick's `mogrify` command. The image path is automatically appended to the command.
+    #
+    # Remember, we are always acting on this instance of the Image when messing with this.
+    #
+    # @return [String] Whatever the result from the command line is. May not be terribly useful.
     def <<(*args)
       run_command("mogrify", *args << @path)
     end
 
-    # This is a 'special' command because it needs to change @path to reflect the new extension
+    # This is used to change the format of the image. That is, from "tiff to jpg" or something like that.
+    # Once you run it, the instance is pointing to a new file with a new extension!
+    #
+    # *DANGER*: This renames the file that the instance is pointing to. So, if you manually opened the
+    # file with Image.new(file_path)... then that file is DELETED! If you used Image.open(file) then
+    # you are ok. The original file will still be there. But, any changes to it might not be...
+    #
     # Formatting an animation into a non-animated type will result in ImageMagick creating multiple
     # pages (starting with 0).  You can choose which page you want to manipulate.  We default to the
     # first page.
-    def format(format, page=0)
+    #
+    # @param format [String] The target format... like 'jpg', 'gif', 'tiff', etc.
+    # @param page [Integer] If this is an animated gif, say which 'page' you want with an integer. Leave as default if you don't care.
+    # @return [nil]
+    def format(format, page = 0)
       run_command("mogrify", "-format", format, @path)
 
       old_path = @path.dup
       @path.sub!(/(\.\w*)?$/, ".#{format}")
-      File.delete(old_path) unless old_path == @path
+      File.delete(old_path) if old_path != @path
 
       unless File.exists?(@path)
         begin
@@ -140,7 +205,8 @@ module MiniMagick
       run_command "identify", output_path # Verify that we have a good image
     end
 
-    # Give you raw data back
+    # Gives you raw image data back
+    # @return [String] binary string
     def to_blob
       f = File.new @path
       f.binmode
@@ -157,7 +223,16 @@ module MiniMagick
       end
     end
 
-    # You can use multiple commands together using this method
+    # You can use multiple commands together using this method. Very easy to use!
+    #
+    # @example 
+    #   image.combine_options do |c|
+    #     c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
+    #     c.thumbnail "300x500>"
+    #     c.background background
+    #   end
+    #
+    # @yieldparam command [CommandBuilder] 
     def combine_options(&block)
       c = CommandBuilder.new('mogrify')
       block.call(c)
@@ -172,20 +247,20 @@ module MiniMagick
     
     def composite(other_image, output_extension = 'jpg', &block)
       begin
-        tempfile = Tempfile.new(output_extension)
-        tempfile.binmode
+        second_tempfile = Tempfile.new(output_extension)
+        second_tempfile.binmode
       ensure
-        tempfile.close
+        second_tempfile.close
       end
       
       command = CommandBuilder.new("composite")
       block.call(command) if block
       command.push(other_image.path)
       command.push(self.path)
-      command.push(tempfile.path)
+      command.push(second_tempfile.path)
       
       run(command)
-      return Image.new(tempfile.path)
+      return Image.new(second_tempfile.path, second_tempfile)
     end
 
     # Outputs a carriage-return delimited format string for Unix and Windows

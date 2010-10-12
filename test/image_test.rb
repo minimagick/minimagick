@@ -10,27 +10,35 @@ class ImageTest < Test::Unit::TestCase
   CURRENT_DIR = File.dirname(File.expand_path(__FILE__)) + "/"
 
   SIMPLE_IMAGE_PATH = CURRENT_DIR + "simple.gif"
-  MINUS_IMAGE_PATH = CURRENT_DIR + "simple-minus.gif"
-  TIFF_IMAGE_PATH = CURRENT_DIR + "leaves.tiff"
+  MINUS_IMAGE_PATH  = CURRENT_DIR + "simple-minus.gif"
+  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves.tiff"
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
-  GIF_WITH_JPG_EXT = CURRENT_DIR + "actually_a_gif.jpg"
-  EXIF_IMAGE_PATH = CURRENT_DIR + "trogdor.jpg"
-  ANIMATION_PATH = CURRENT_DIR + "animation.gif"
+  GIF_WITH_JPG_EXT  = CURRENT_DIR + "actually_a_gif.jpg"
+  EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
+  ANIMATION_PATH    = CURRENT_DIR + "animation.gif"
 
   def test_image_from_blob
     File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
       image = Image.from_blob(f.read)
+      assert image.valid?
       image.destroy!
     end
   end
 
-  def test_image_from_file
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+  def test_image_open
+    image = Image.open(SIMPLE_IMAGE_PATH)
+    assert image.valid?
     image.destroy!
   end
 
   def test_image_new
     image = Image.new(SIMPLE_IMAGE_PATH)
+    image.destroy!
+  end
+  
+  def test_remote_image
+    image = Image.open("http://www.google.com/images/logos/logo.png")
+    image.valid?
     image.destroy!
   end
 
@@ -84,7 +92,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_image_resize
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     image.resize "20x30!"
 
     assert_equal 20, image[:width]
@@ -94,7 +102,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_image_resize_with_minimum
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     original_width, original_height = image[:width], image[:height]
     image.resize "#{original_width + 10}x#{original_height + 10}>"
 
@@ -104,7 +112,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_image_combine_options_resize_blur
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     image.combine_options do |c|
       c.resize "20x30!"
       c.blur "50"
@@ -117,7 +125,7 @@ class ImageTest < Test::Unit::TestCase
   end
   
   def test_image_combine_options_with_filename_with_minusses_in_it
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     background = "#000000"
     assert_nothing_raised do
       image.combine_options do |c|
@@ -130,36 +138,36 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_exif
-    image = Image.from_file(EXIF_IMAGE_PATH)
+    image = Image.open(EXIF_IMAGE_PATH)
     assert_equal('0220', image["exif:ExifVersion"])
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     assert_equal('', image["EXIF:ExifVersion"])
     image.destroy!
   end
 
   def test_original_at
-    image = Image.from_file(EXIF_IMAGE_PATH)
+    image = Image.open(EXIF_IMAGE_PATH)
     assert_equal(Time.local('2005', '2', '23', '23', '17', '24'), image[:original_at])
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     assert_nil(image[:original_at])
     image.destroy!
   end
 
   def test_tempfile_at_path
-    image = Image.from_file(TIFF_IMAGE_PATH)
+    image = Image.open(TIFF_IMAGE_PATH)
     assert_equal image.path, image.tempfile.path
     image.destroy!
   end
 
   def test_tempfile_at_path_after_format
-    image = Image.from_file(TIFF_IMAGE_PATH)
+    image = Image.open(TIFF_IMAGE_PATH)
     image.format('png')
     assert_equal image.path, image.tempfile.path
     image.destroy!
   end
 
   def test_previous_tempfile_deleted_after_format
-    image = Image.from_file(TIFF_IMAGE_PATH)
+    image = Image.open(TIFF_IMAGE_PATH)
     before = image.path.dup
     image.format('png')
     assert !File.exist?(before)
@@ -167,7 +175,7 @@ class ImageTest < Test::Unit::TestCase
   end
   
   def test_bad_method_bug
-    image = Image.from_file(TIFF_IMAGE_PATH)
+    image = Image.open(TIFF_IMAGE_PATH)
     begin
       image.to_blog
     rescue NoMethodError
@@ -179,7 +187,7 @@ class ImageTest < Test::Unit::TestCase
   end
   
   def test_simple_composite
-    image = Image.from_file(EXIF_IMAGE_PATH)
+    image = Image.open(EXIF_IMAGE_PATH)
     result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
       c.gravity "center"
     end
@@ -187,7 +195,7 @@ class ImageTest < Test::Unit::TestCase
   end
   
   def test_issue_8
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     assert_nothing_raised do
       image.combine_options do |c|
         c.sample "50%"
@@ -198,7 +206,7 @@ class ImageTest < Test::Unit::TestCase
   end
   
   def test_throw_format_error
-    image = Image.from_file(SIMPLE_IMAGE_PATH)
+    image = Image.open(SIMPLE_IMAGE_PATH)
     assert_raise MiniMagick::Error do
       image.combine_options do |c|
         c.format "png"
