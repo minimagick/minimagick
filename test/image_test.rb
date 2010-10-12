@@ -19,7 +19,7 @@ class ImageTest < Test::Unit::TestCase
 
   def test_image_from_blob
     File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
-      image = Image.from_blob(f.read)
+      image = Image.read(f.read)
       assert image.valid?
       image.destroy!
     end
