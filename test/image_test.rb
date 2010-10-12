@@ -209,6 +209,7 @@ class ImageTest < Test::Unit::TestCase
     assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
   end
 
+  # http://github.com/probablycorey/mini_magick/issues#issue/8
   def test_issue_8
     image = Image.open(SIMPLE_IMAGE_PATH)
     assert_nothing_raised do

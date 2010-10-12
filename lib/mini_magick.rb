@@ -375,7 +375,7 @@ module MiniMagick
     end
 
     def push(arg)
-      @args << arg.strip
+      @args << arg.to_s.strip
     end
     alias :<< :push
 
