@@ -14,19 +14,21 @@ module MiniMagick
   class Invalid < StandardError; end
 
   class Image
+    # @return [String] The location of the current working file
     attr :path
 
     # Class Methods
     # -------------
     class << self
       # This is the primary loading method used by all of the other class methods.
-      # Pass in a string-like object that holds the binary data for a valid image
       #
-      # Use this to pass in a stream object. Must respond to Object#read #=> String or be a String-like object already
+      # Use this to pass in a stream object. Must respond to Object#read(size) or be a binary string object (BLOBBBB)
       #
-      # Probably easier to use the open method if you want to read something in.
+      # As a change from the old API, please try and use IOStream objects. They are much, much better and more efficient!
       #
-      # @param stream [#read, String-like] Some kind of stream object that needs to be read or is already a String
+      # Probably easier to use the #open method if you want to open a file or a URL.
+      #
+      # @param stream [IOStream, String] Some kind of stream object that needs to be read or is a binary String blob!
       # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues, give this a try.
       # @return [Image]
       def read(stream, ext = nil)
@@ -79,6 +81,14 @@ module MiniMagick
         open(file, ext)
       end
 
+      # Used to create a new Image object data-copy. Not used to "paint" or that kind of thing.
+      #
+      # Takes an extension in a block and can be used to build a new Image object. Used
+      # by both #open and #read to create a new object! Ensures we have a good tempfile!
+      #
+      # @param ext [String] Specify the extension you want to read it as
+      # @yield [IOStream] You can #write bits to this object to create the new Image
+      # @return [Image] The created image
       def create(ext = nil, &block)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
