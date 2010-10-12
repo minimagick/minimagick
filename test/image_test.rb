@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'test/unit'
+require 'stringio'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
 #MiniMagick.processor = :gm
@@ -29,6 +30,19 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_image_from_io
+    buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH))
+    image = Image.from_io(buffer)
+    image.destroy!
+  end
+
+  def test_image_create
+    image = Image.create do |f|
+      f.write(File.read(SIMPLE_IMAGE_PATH))
+    end
+    image.destroy!
+  end
+
   def test_image_new
     image = Image.new(SIMPLE_IMAGE_PATH)
     image.destroy!
@@ -52,7 +66,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal false, image.valid?
     image.destroy!
   end
-  
+
   def test_throw_on_openining_not_an_image
     assert_raise(MiniMagick::Invalid) do
       image = Image.open(NOT_AN_IMAGE_PATH)
@@ -115,7 +129,7 @@ class ImageTest < Test::Unit::TestCase
     assert_match(/^gif$/i, image[:format])
     image.destroy!
   end
-  
+
   def test_image_combine_options_with_filename_with_minusses_in_it
     image = Image.from_file(SIMPLE_IMAGE_PATH)
     background = "#000000"
@@ -165,7 +179,7 @@ class ImageTest < Test::Unit::TestCase
     assert !File.exist?(before)
     image.destroy!
   end
-  
+
   def test_bad_method_bug
     image = Image.from_file(TIFF_IMAGE_PATH)
     begin
@@ -177,7 +191,7 @@ class ImageTest < Test::Unit::TestCase
     assert true #we made it this far without error
     image.destroy!
   end
-  
+
   def test_simple_composite
     image = Image.from_file(EXIF_IMAGE_PATH)
     result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
@@ -185,7 +199,7 @@ class ImageTest < Test::Unit::TestCase
     end
     assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
   end
-  
+
   def test_issue_8
     image = Image.from_file(SIMPLE_IMAGE_PATH)
     assert_nothing_raised do
@@ -196,7 +210,7 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
-  
+
   def test_throw_format_error
     image = Image.from_file(SIMPLE_IMAGE_PATH)
     assert_raise MiniMagick::Error do
