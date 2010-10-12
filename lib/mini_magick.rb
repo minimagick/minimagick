@@ -6,7 +6,7 @@ module MiniMagick
     attr_accessor :processor
     attr_accessor :timeout
   end
-  
+
   MOGRIFY_COMMANDS = %w{adaptive-blur adaptive-resize adaptive-sharpen adjoin affine alpha annotate antialias append authenticate auto-gamma auto-level auto-orient background bench iterations bias black-threshold blue-primary point blue-shift factor blur border bordercolor brightness-contrast caption string cdl filename channel type charcoal radius chop clip clamp clip-mask filename clip-path id clone index clut contrast-stretch coalesce colorize color-matrix colors colorspace type combine comment string compose operator composite compress type contrast convolve coefficients crop cycle amount decipher filename debug events define format:option deconstruct delay delete index density depth despeckle direction type display server dispose method distort type coefficients dither method draw string edge radius emboss radius encipher filename encoding type endian type enhance equalize evaluate operator evaluate-sequence operator extent extract family name fft fill filter type flatten flip floodfill flop font name format string frame function name fuzz distance fx expression gamma gaussian-blur geometry gravity type green-primary point help identify ifft implode amount insert index intent type interlace type interline-spacing interpolate method interword-spacing kerning label string lat layers method level limit type linear-stretch liquid-rescale log format loop iterations mask filename mattecolor median radius modulate monitor monochrome morph morphology method kernel motion-blur negate noise radius normalize opaque ordered-dither NxN orient type page paint radius ping pointsize polaroid angle posterize levels precision preview type print string process image-filter profile filename quality quantizespace quiet radial-blur angle raise random-threshold low,high red-primary point regard-warnings region remap filename render repage resample resize respect-parentheses roll rotate degrees sample sampling-factor scale scene seed segments selective-blur separate sepia-tone threshold set attribute shade degrees shadow sharpen shave shear sigmoidal-contrast size sketch solarize threshold splice spread radius strip stroke strokewidth stretch type style type swap indexes swirl degrees texture filename threshold thumbnail tile filename tile-offset tint transform transparent transparent-color transpose transverse treedepth trim type type undercolor unique-colors units type unsharp verbose version view vignette virtual-pixel method wave weight type white-point point white-threshold write filename}
 
   class Error < RuntimeError; end
@@ -21,13 +21,7 @@ module MiniMagick
     # -------------
     class << self
       def from_blob(blob, ext = nil)
-        begin
-          tempfile = Tempfile.new(['mini_magick', ext.to_s])
-          tempfile.binmode
-          tempfile.write(blob)
-        ensure
-          tempfile.close if tempfile
-        end
+        tempfile = create_tempfile(ext) {|f| f.write(blob) }
 
         image = self.new(tempfile.path, tempfile)
         if !image.valid?
@@ -43,6 +37,19 @@ module MiniMagick
         end
       end
       alias_method :from_file, :open
+
+      private
+      def create_tempfile(ext = nil)
+        begin
+          tempfile = Tempfile.new(['mini_magick', ext.to_s])
+          tempfile.binmode
+          yield tempfile
+        ensure
+          tempfile.close if tempfile
+        end
+
+        tempfile
+      end
     end
 
     # Instance Methods
@@ -51,7 +58,7 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
     end
-    
+
     def valid?
       run_command("identify", @path)
       true
@@ -116,7 +123,7 @@ module MiniMagick
         File.unlink(fname)
       end
     end
-    
+
     # Collapse images with sequences to the first frame (ie. animated gifs) and
     # preserve quality
     def collapse!
@@ -158,7 +165,7 @@ module MiniMagick
     def windows?
       !(RUBY_PLATFORM =~ /win32/).nil?
     end
-    
+
     def composite(other_image, output_extension = 'jpg', &block)
       begin
         tempfile = Tempfile.new(output_extension)
@@ -166,13 +173,13 @@ module MiniMagick
       ensure
         tempfile.close
       end
-      
+
       command = CommandBuilder.new("composite")
       block.call(command) if block
       command.push(other_image.path)
       command.push(self.path)
       command.push(tempfile.path)
-      
+
       run(command)
       return Image.new(tempfile.path)
     end
@@ -185,7 +192,7 @@ module MiniMagick
     def run_command(command, *args)
       run(CommandBuilder.new(command, *args))
     end
-    
+
     def run(command_builder)
       command = command_builder.command
 
@@ -194,7 +201,7 @@ module MiniMagick
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
         destroy!
-        
+
         # Raise the appropriate error
         if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
           raise Invalid, sub.output
@@ -207,13 +214,13 @@ module MiniMagick
         sub.output
       end
     end
-    
+
     def destroy!
       return if tempfile.nil?
       File.unlink(tempfile.path)
       @tempfile = nil
     end
-    
+
     private
       # Sometimes we get back a list of character values
       def read_character_data(list_of_characters)
@@ -235,11 +242,11 @@ module MiniMagick
       @args = []
       options.each { |arg| push(arg) }
     end
-    
+
     def command
       "#{MiniMagick.processor} #{@command} #{@args.join(' ')}".strip
     end
-    
+
     def method_missing(symbol, *options)
       guessed_command_name = symbol.to_s.gsub('_','-')
       if guessed_command_name == "format"
@@ -250,14 +257,14 @@ module MiniMagick
         super(symbol, *args)
       end
     end
-    
+
     def add(command, *options)
       push "-#{command}"
       if options.any?
         push "\"#{options.join(" ")}\""
       end
     end
-    
+
     def push(arg)
       @args << arg.strip
     end
