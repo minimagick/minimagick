@@ -63,6 +63,7 @@ module MiniMagick
       # @param ext [String] Specify the extension you want to read it as
       # @return [Image] The loaded image
       def open(file_or_url, ext = File.extname(file_or_url))
+        file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
         if file_or_url.include?("://")
           if !Kernel.respond_to?("open")
             require 'open-uri'

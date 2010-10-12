@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'stringio'
+require 'pathname'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
 #MiniMagick.processor = :gm
@@ -217,6 +218,15 @@ class ImageTest < Test::Unit::TestCase
       end
     end
     image.destroy!
+  end
+  
+  # http://github.com/probablycorey/mini_magick/issues#issue/15
+  def test_issue_15
+    image = Image.open(Pathname.new(SIMPLE_IMAGE_PATH))
+    output = Pathname.new("test.gif")
+    image.write(output)
+  ensure
+    FileUtils.rm("test.gif")
   end
 
   def test_throw_format_error
