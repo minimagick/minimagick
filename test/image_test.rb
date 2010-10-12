@@ -155,14 +155,14 @@ class ImageTest < Test::Unit::TestCase
 
   def test_tempfile_at_path
     image = Image.open(TIFF_IMAGE_PATH)
-    assert_equal image.path, image.tempfile.path
+    assert_equal image.path, image.instance_eval("@tempfile.path")
     image.destroy!
   end
 
   def test_tempfile_at_path_after_format
     image = Image.open(TIFF_IMAGE_PATH)
     image.format('png')
-    assert_equal image.path, image.tempfile.path
+    assert_equal image.path, image.instance_eval("@tempfile.path")
     image.destroy!
   end
 
