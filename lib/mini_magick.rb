@@ -272,7 +272,7 @@ module MiniMagick
 
     # Check to see if we are running on win32 -- we need to escape things differently
     def windows?
-      !(RUBY_PLATFORM =~ /win32/).nil?
+      !(RUBY_PLATFORM =~ /win32|mswin|mingw/).nil?
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
