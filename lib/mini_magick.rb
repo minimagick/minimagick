@@ -15,10 +15,6 @@ module MiniMagick
 
   class Image
     attr :path
-    attr :output
-    # @deprecated Don't explicity use this accessor. This is an internal method!
-    attr :tempfile
-    
 
     # Class Methods
     # -------------
@@ -26,15 +22,13 @@ module MiniMagick
       # This is the primary loading method used by all of the other class methods.
       # Pass in a string-like object that holds the binary data for a valid image
       #
-      # Use this to pass in a stream object. Must respond to Object#read #=> String
-      # 
-      # @return image [MiniMagick::Image] A copy of the original loaded image
+      # Use this to pass in a stream object. Must respond to Object#read #=> String or be a String-like object already
       #
       # Probably easier to use the open method if you want to read something in.
       #
       # @param stream [#read, String-like] Some kind of stream object that needs to be read or is already a String
       # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues, give this a try.
-      # @return image [MiniMagick::Image] The loaded image
+      # @return [Image]
       def read(stream, ext = nil)
         begin
           if stream.respond_to?("read")
@@ -55,7 +49,7 @@ module MiniMagick
         image
       end
 
-      # @deprecate Please use Image.read instead!
+      # @deprecated Please use Image.read instead!
       def from_blob(blob, ext = nil)
         warn "Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read"
         read(blob, ext)
@@ -73,7 +67,7 @@ module MiniMagick
       #
       # @param file_or_url [String] Either a local file path or a URL that open-uri can read
       # @param ext [String] Specify the extension you want to read it as
-      # @return [MiniMagick::Image] The loaded image
+      # @return [Image] The loaded image
       def open(file_or_url, ext = File.extname(file_or_url))
         if file_or_url.include?("://")
           if !Kernel.respond_to?("open")
@@ -368,8 +362,9 @@ module MiniMagick
     end
     alias :<< :push
 
+    # @deprecated Please don't use the + method its has been deprecated
     def +(value)
-      puts "MINI_MAGICK: The + command has been deprecated. Please use c << '+#{value}')"
+      warn "Warning: The MiniMagick::ComandBuilder#+ command has been deprecated. Please use c << '+#{value}' instead"
       push "+#{value}"
     end
   end
