@@ -26,16 +26,24 @@ module MiniMagick
       # This is the primary loading method used by all of the other class methods.
       # Pass in a string-like object that holds the binary data for a valid image
       #
+      # Use this to pass in a stream object. Must respond to Object#read #=> String
+      # 
+      # @return image [MiniMagick::Image] A copy of the original loaded image
+      #
       # Probably easier to use the open method if you want to read something in.
       #
-      # @param blob [String, String-like] This is a string-like binary object for the image. Must work with File#write(blob).
+      # @param stream [#read, String-like] Some kind of stream object that needs to be read or is already a String
       # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues, give this a try.
-      # @return [MiniMagick::Image] The loaded image
-      def from_blob(blob, ext = nil)
+      # @return image [MiniMagick::Image] The loaded image
+      def read(stream, ext = nil)
         begin
+          if stream.respond_to?("read")
+            stream = stream.read
+          end
+
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
           tempfile.binmode
-          tempfile.write(blob)
+          tempfile.write(stream)
         ensure
           tempfile.close if tempfile
         end
@@ -45,6 +53,12 @@ module MiniMagick
           raise MiniMagick::Invalid
         end
         image
+      end
+
+      # @deprecate Please use Image.read instead!
+      def from_blob(blob, ext = nil)
+        warn "Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read"
+        read(blob, ext)
       end
 
       # Opens a specific image file either on the local file system or at a URI.
@@ -65,15 +79,20 @@ module MiniMagick
           if !Kernel.respond_to?("open")
             require 'open-uri'
           end
-          self.from_blob(Kernel::open(file_or_url).read, ext)
+          self.read(Kernel::open(file_or_url), ext)
         else
           File.open(file_or_url, "rb") do |f|
-            self.from_blob(f.read, ext)
+            self.read(f, ext)
           end
         end
       end
+
       # @deprecated Please use MiniMagick::Image.open(file_or_url) now
-      alias_method :from_file, :open
+      def from_file(file, ext = nil)
+        warn "Warning: MiniMagick::Image.from_file is now deprecated. Please use Image.open"
+        open(file, ext)
+      end
+      
     end
 
     # Instance Methods
