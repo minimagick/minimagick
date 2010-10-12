@@ -1,3 +1,4 @@
+* A new interface!
 * Adding in deprecation warnings
 * October 12, 2010 - Added support for loading images from URIs with the MiniMagick::Image.open method
 * August 28, 2010 - Just quote all arguements now.

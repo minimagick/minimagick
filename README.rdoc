@@ -32,24 +32,35 @@ has (Found here http://www.imagemagick.org/script/mogrify.php)
 
 Want to make a thumbnail from a file...
 
-  image = MiniMagick::Image.from_file("input.jpg")
+  image = MiniMagick::Image.open("input.jpg")
   image.resize "100x100"
-  image.write("output.jpg")
+  image.write  "output.jpg"
 
 Want to make a thumbnail from a blob...
 
-  image = MiniMagick::Image.from_blob(blob)
+  image = MiniMagick::Image.read(blob)
   image.resize "100x100"
-  image.write("output.jpg")
+  image.write  "output.jpg"
+  
+Got an incoming IOStream?
+
+  image = MiniMagick::Image.read(stream)
+
+Want to make a thumbnail of a remote image?
+
+  image = MiniMagick::Image.open("http://www.google.com/images/logos/logo.png")
+  image.resize "5x5"
+  image.format "gif"
+  image.write "localcopy.gif"
 
 Need to combine several options?
 
-  image = MiniMagick::Image.from_file("input.jpg")
+  image = MiniMagick::Image.open("input.jpg")
   image.combine_options do |c|
     c.sample "50%"
     c.rotate "-90>"
   end
-  image.write("output.jpg")
+  image.write "output.jpg"
 
 Want to composite two images? Super easy! (Aka, put a watermark on!)
 
@@ -57,7 +68,7 @@ Want to composite two images? Super easy! (Aka, put a watermark on!)
   result = image.composite(Image.open("watermark.png", "jpg") do |c|
     c.gravity "center"
   end
-  result.write("my_output_file.jpg")
+  result.write "my_output_file.jpg"
 
 Want to manipulate an image at its source (You won't have to write it
 out because the transformations are done on that file)
@@ -67,7 +78,7 @@ out because the transformations are done on that file)
 
 Want to get some meta-information out?
 
-  image = MiniMagick::Image.from_file("input.jpg")
+  image = MiniMagick::Image.open("input.jpg")
   image[:width]               # will get the width (you can also use :height and :format)
   image["EXIF:BitsPerSample"] # It also can get all the EXIF tags
   image["%m:%f %wx%h"]        # Or you can use one of the many options of the format command
