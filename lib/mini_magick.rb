@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'subexec'
+require 'open-uri'
 
 module MiniMagick
   class << self
@@ -32,6 +33,16 @@ module MiniMagick
         image = self.new(tempfile.path, tempfile)
         if !image.valid?
           raise MiniMagick::Invalid
+        end
+        image
+      end
+
+      def from_uri( uri, ext = nil )
+        image = nil
+        begin
+          image = self.from_blob( uri.read, ext )
+        rescue Exception => e
+          raise e
         end
         image
       end

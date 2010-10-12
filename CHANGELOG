@@ -1,3 +1,4 @@
+* October 12, 2010 - Added support for loading images from external sources (HTTP/FTP). [cleon]
 * August 28, 2010 - Just quote all arguements now.
 * August 24, 2010 - Closing an issue with quoting colors... Issue #11 [hcatlin]
 * August 17, 2010 - Added compositing! [hcatlin]
