@@ -21,7 +21,7 @@ module MiniMagick
     # -------------
     class << self
       def from_blob(blob, ext = nil)
-        create_image(ext) {|f| f.write(blob) }
+        create(ext) {|f| f.write(blob) }
       end
 
       # Use this if you don't want to overwrite the image file
@@ -34,15 +34,14 @@ module MiniMagick
 
 
       def from_io(io, ext = nil)
-        create_image(ext) do |f|
+        create(ext) do |f|
           while chunk = io.read(8192)
             f.write(chunk)
           end
         end
       end
 
-      private
-      def create_image(ext = nil, &blk)
+      def create(ext = nil, &blk)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
           tempfile.binmode
