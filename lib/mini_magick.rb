@@ -21,13 +21,7 @@ module MiniMagick
     # -------------
     class << self
       def from_blob(blob, ext = nil)
-        tempfile = create_tempfile(ext) {|f| f.write(blob) }
-
-        image = self.new(tempfile.path, tempfile)
-        if !image.valid?
-          raise MiniMagick::Invalid
-        end
-        image
+        create_image(ext) {|f| f.write(blob) }
       end
 
       # Use this if you don't want to overwrite the image file
@@ -39,16 +33,21 @@ module MiniMagick
       alias_method :from_file, :open
 
       private
-      def create_tempfile(ext = nil)
+      def create_image(ext = nil, &blk)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
           tempfile.binmode
-          yield tempfile
+          blk.call(tempfile)
+          tempfile.close
+
+          image = self.new(tempfile.path, tempfile)
+          if !image.valid?
+            raise MiniMagick::Invalid
+          end
+          return image
         ensure
           tempfile.close if tempfile
         end
-
-        tempfile
       end
     end
 
