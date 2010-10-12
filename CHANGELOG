@@ -1,4 +1,5 @@
-* October 12, 2010 - Added support for loading images from external sources (HTTP/FTP). [cleon]
+* Adding in deprecation warnings
+* October 12, 2010 - Added support for loading images from URIs with the MiniMagick::Image.open method
 * August 28, 2010 - Just quote all arguements now.
 * August 24, 2010 - Closing an issue with quoting colors... Issue #11 [hcatlin]
 * August 17, 2010 - Added compositing! [hcatlin]
