@@ -32,6 +32,15 @@ module MiniMagick
       end
       alias_method :from_file, :open
 
+
+      def from_io(io, ext = nil)
+        create_image(ext) do |f|
+          while chunk = io.read(8192)
+            f.write(chunk)
+          end
+        end
+      end
+
       private
       def create_image(ext = nil, &blk)
         begin
