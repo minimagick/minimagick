@@ -69,6 +69,15 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_image_write_with_stream
+    stream = StringIO.new
+    image = Image.open(SIMPLE_IMAGE_PATH)
+    image.write("/tmp/foo.gif")
+    image.write(stream)
+#    assert Image.read(stream.string).valid?
+    image.destroy!
+  end
+
   def test_not_an_image
     image = Image.new(NOT_AN_IMAGE_PATH)
     assert_equal false, image.valid?
