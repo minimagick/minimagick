@@ -1,6 +1,5 @@
 require 'tempfile'
 require 'subexec'
-require 'open-uri'
 
 module MiniMagick
   class << self
@@ -55,9 +54,7 @@ module MiniMagick
       #
       # Extension is either guessed from the path or you can specify it as a second parameter.
       #
-      # If you pass in what looks like a URL, we will see if Kernel#open exists. If it doesn't
-      # then we require 'open-uri'. That way, if you have a work-alike library, we won't demolish it.
-      # Open-uri never gets required unless you pass in something with "://" in it.
+      # If you pass in what looks like a URL, we require 'open-uri' before opening it.
       #
       # @param file_or_url [String] Either a local file path or a URL that open-uri can read
       # @param ext [String] Specify the extension you want to read it as
@@ -65,9 +62,7 @@ module MiniMagick
       def open(file_or_url, ext = File.extname(file_or_url))
         file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
         if file_or_url.include?("://")
-          if !Kernel.respond_to?("open")
-            require 'open-uri'
-          end
+          require 'open-uri'
           self.read(Kernel::open(file_or_url), ext)
         else
           File.open(file_or_url, "rb") do |f|
