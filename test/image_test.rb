@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'pathname'
+require 'stringio'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
 #MiniMagick.processor = :gm

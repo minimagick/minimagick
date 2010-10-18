@@ -224,19 +224,24 @@ module MiniMagick
       run_command("mogrify", "-quality", "100", "#{path}[0]")
     end
 
+    # Writes the temporary file out to either a file location (by passing in a String) or by  
+    # passing in a Stream that you can #write(chunk) to repeatedly
+    #
+    # @param output_to [IOStream, String] Some kind of stream object that needs to be read or a file path as a String
+    # @return [IOStream, Boolean] If you pass in a file location [String] then you get a success boolean. If its a stream, you get it back.
     # Writes the temporary image that we are using for processing to the output path
-    def write(output)
-      if output.kind_of?(String) || !output.respond_to?(:write)
-        FileUtils.copy_file @path, output
-        run_command "identify", output # Verify that we have a good image
+    def write(output_to)
+      if output_to.kind_of?(String) || !output_to.respond_to?(:write)
+        FileUtils.copy_file @path, output_to
+        run_command "identify", output_to # Verify that we have a good image
       else # stream
         File.open(@path, "rb", ) do |f|
           f.binmode
           while chunk = f.read(8192)
-            output.write(chunk)
+            output_to.write(chunk)
           end
         end
-        output
+        output_to
       end
     end
 
