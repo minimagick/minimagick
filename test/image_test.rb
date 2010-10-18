@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'test/unit'
-require 'stringio'
 require 'pathname'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
@@ -67,6 +66,15 @@ class ImageTest < Test::Unit::TestCase
     ensure
       File.delete output_path
     end
+    image.destroy!
+  end
+
+  def test_image_write_with_stream
+    stream = StringIO.new
+    image = Image.open(SIMPLE_IMAGE_PATH)
+    image.write("/tmp/foo.gif")
+    image.write(stream)
+#    assert Image.read(stream.string).valid?
     image.destroy!
   end
 

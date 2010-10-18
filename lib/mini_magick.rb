@@ -225,9 +225,19 @@ module MiniMagick
     end
 
     # Writes the temporary image that we are using for processing to the output path
-    def write(output_path)
-      FileUtils.copy_file @path, output_path
-      run_command "identify", output_path # Verify that we have a good image
+    def write(output)
+      if output.kind_of?(String) || !output.respond_to?(:write)
+        FileUtils.copy_file @path, output
+        run_command "identify", output # Verify that we have a good image
+      else # stream
+        File.open(@path, "rb", ) do |f|
+          f.binmode
+          while chunk = f.read(8192)
+            output.write(chunk)
+          end
+        end
+        output
+      end
     end
 
     # Gives you raw image data back
@@ -267,7 +277,7 @@ module MiniMagick
 
     # Check to see if we are running on win32 -- we need to escape things differently
     def windows?
-      !(RUBY_PLATFORM =~ /win32/).nil?
+      !(RUBY_PLATFORM =~ /win32|mswin|mingw/).nil?
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
