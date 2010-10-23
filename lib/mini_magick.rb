@@ -235,7 +235,7 @@ module MiniMagick
         FileUtils.copy_file @path, output_to
         run_command "identify", output_to # Verify that we have a good image
       else # stream
-        File.open(@path, "rb", ) do |f|
+        File.open(@path, "rb") do |f|
           f.binmode
           while chunk = f.read(8192)
             output_to.write(chunk)
