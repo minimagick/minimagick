@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'test/unit'
+require 'mocha'
 require 'pathname'
 require 'stringio'
 require File.expand_path('../../lib/mini_magick', __FILE__)
@@ -50,7 +51,7 @@ class ImageTest < Test::Unit::TestCase
     image = Image.new(SIMPLE_IMAGE_PATH)
     image.destroy!
   end
-  
+
   def test_remote_image
     image = Image.open("http://www.google.com/images/logos/logo.png")
     image.valid?
@@ -229,7 +230,7 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
-  
+
   # http://github.com/probablycorey/mini_magick/issues#issue/15
   def test_issue_15
     image = Image.open(Pathname.new(SIMPLE_IMAGE_PATH))
@@ -248,4 +249,16 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
+
+  # testing that if copying files formatted from an animation fails,
+  # it raises an appropriate error
+  def test_throw_animation_copy_after_format_error
+    image = Image.open(ANIMATION_PATH)
+    FileUtils.stubs(:copy_file).raises(Errno::ENOENT)
+    assert_raises MiniMagick::Error do
+      image.format('png')
+    end
+  end
+
+
 end

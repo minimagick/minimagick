@@ -5,8 +5,8 @@ module MiniMagick
   class << self
     attr_accessor :processor
     attr_accessor :timeout
-    
-    
+
+
     # Experimental method for automatically selecting a processor
     # such as gm. Only works on *nix.
     #
@@ -119,7 +119,7 @@ module MiniMagick
 
     # Create a new MiniMagick::Image object
     #
-    # _DANGER_: The file location passed in here is the *working copy*. That is, it gets *modified*. 
+    # _DANGER_: The file location passed in here is the *working copy*. That is, it gets *modified*.
     # you can either copy it yourself or use the MiniMagick::Image.open(path) method which creates a
     # temporary file for you and protects your original!
     #
@@ -222,7 +222,7 @@ module MiniMagick
         begin
           FileUtils.copy_file(@path.sub(".#{format}", "-#{page}.#{format}"), @path)
         rescue => ex
-          raise MiniMagickError, "Unable to format to #{format}; #{ex}" unless File.exist?(@path)
+          raise MiniMagick::Error, "Unable to format to #{format}; #{ex}" unless File.exist?(@path)
         end
       end
     ensure
@@ -237,7 +237,7 @@ module MiniMagick
       run_command("mogrify", "-quality", "100", "#{path}[0]")
     end
 
-    # Writes the temporary file out to either a file location (by passing in a String) or by  
+    # Writes the temporary file out to either a file location (by passing in a String) or by
     # passing in a Stream that you can #write(chunk) to repeatedly
     #
     # @param output_to [IOStream, String] Some kind of stream object that needs to be read or a file path as a String
@@ -278,14 +278,14 @@ module MiniMagick
 
     # You can use multiple commands together using this method. Very easy to use!
     #
-    # @example 
+    # @example
     #   image.combine_options do |c|
     #     c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
     #     c.thumbnail "300x500>"
     #     c.background background
     #   end
     #
-    # @yieldparam command [CommandBuilder] 
+    # @yieldparam command [CommandBuilder]
     def combine_options(&block)
       c = CommandBuilder.new('mogrify')
       block.call(c)
