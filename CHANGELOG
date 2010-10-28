@@ -1,3 +1,4 @@
+* October 28, 2010 - Releasing v3.0. Some small bugfixes. This is 3.0 because of the big interface changes and they are fairly stable from before.
 * A new interface!
 * Adding in deprecation warnings
 * October 12, 2010 - Added support for loading images from URIs with the MiniMagick::Image.open method
