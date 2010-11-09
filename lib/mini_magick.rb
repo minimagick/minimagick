@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'subexec'
+require 'pathname'
 
 module MiniMagick
   class << self
@@ -129,7 +130,10 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
     end
-
+    
+    def escaped_path
+      Pathname.new(@path).to_s.gsub(" ", "\\ ")
+    end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
     #
@@ -164,27 +168,27 @@ module MiniMagick
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
       when "format"
-        run_command("identify", "-format", format_option("%m"), @path).split("\n")[0]
+        run_command("identify", "-format", format_option("%m"), escaped_path).split("\n")[0]
       when "height"
-        run_command("identify", "-format", format_option("%h"), @path).split("\n")[0].to_i
+        run_command("identify", "-format", format_option("%h"), escaped_path).split("\n")[0].to_i
       when "width"
-        run_command("identify", "-format", format_option("%w"), @path).split("\n")[0].to_i
+        run_command("identify", "-format", format_option("%w"), escaped_path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", format_option("%w %h"), @path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-format", format_option("%w %h"), escaped_path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
         File.size(@path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
         # Get the EXIF original capture as a Time object
         Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
-        result = run_command('identify', '-format', "\"%[#{value}]\"", @path).chop
+        result = run_command('identify', '-format', "\"%[#{value}]\"", escaped_path).chop
         if result.include?(",")
           read_character_data(result)
         else
           result
         end
       else
-        run_command('identify', '-format', "\"#{value}\"", @path).split("\n")[0]
+        run_command('identify', '-format', "\"#{value}\"", escaped_path).split("\n")[0]
       end
     end
 
@@ -194,7 +198,7 @@ module MiniMagick
     #
     # @return [String] Whatever the result from the command line is. May not be terribly useful.
     def <<(*args)
-      run_command("mogrify", *args << @path)
+      run_command("mogrify", *args << escaped_path)
     end
 
     # This is used to change the format of the image. That is, from "tiff to jpg" or something like that.

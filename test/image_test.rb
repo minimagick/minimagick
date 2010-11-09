@@ -14,7 +14,7 @@ class ImageTest < Test::Unit::TestCase
 
   SIMPLE_IMAGE_PATH = CURRENT_DIR + "simple.gif"
   MINUS_IMAGE_PATH  = CURRENT_DIR + "simple-minus.gif"
-  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves.tiff"
+  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves spaced.tiff"
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
   GIF_WITH_JPG_EXT  = CURRENT_DIR + "actually_a_gif.jpg"
   EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
