@@ -98,6 +98,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal 150, image[:width]
     assert_equal 55, image[:height]
     assert_equal [150, 55], image[:dimensions]
+    assert_equal 'PseudoClassRGB', image[:colorspace]
     assert_match(/^gif$/i, image[:format])
     image.destroy!
   end
