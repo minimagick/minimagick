@@ -156,6 +156,7 @@ module MiniMagick
     #    image["format"]      #=> "TIFF"
     #    image["height"]      #=> 41 (pixels)
     #    image["width"]       #=> 50 (pixels)
+    #    image["colorspace"]  #=> "DirectClassRGB"
     #    image["dimensions"]  #=> [50, 41]
     #    image["size"]        #=> 2050 (bits)
     #    image["original_at"] #=> 2005-02-23 23:17:24 +0000 (Read from Exif data)
