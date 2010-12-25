@@ -14,7 +14,7 @@ class CommandBuilderTest < Test::Unit::TestCase
   def test_complicated
     c = CommandBuilder.new("test")
     c.resize "30x40"
-    c.alpha 1, 3, 4
+    c.alpha "1 3 4"
     c.resize "mome fingo"
     assert_equal "-resize \"30x40\" -alpha \"1 3 4\" -resize \"mome fingo\"", c.args.join(" ")
   end

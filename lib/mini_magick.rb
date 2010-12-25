@@ -402,7 +402,9 @@ module MiniMagick
     def add(command, *options)
       push "-#{command}"
       if options.any?
-        push "\"#{options.join(" ")}\""
+        options.each do |o|
+          push "\"#{ o }\""
+        end
       end
     end
 
