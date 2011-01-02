@@ -71,6 +71,19 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_image_write_with_space_in_output_path
+    output_path = "test output.gif"
+    begin
+      image = Image.new(SIMPLE_IMAGE_PATH)
+      image.write output_path
+
+      assert File.exists?(output_path)
+    ensure
+      File.delete output_path
+    end
+    image.destroy!
+  end
+
   def test_image_write_with_stream
     stream = StringIO.new
     image = Image.open(SIMPLE_IMAGE_PATH)

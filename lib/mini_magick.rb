@@ -250,7 +250,9 @@ module MiniMagick
     def write(output_to)
       if output_to.kind_of?(String) || !output_to.respond_to?(:write)
         FileUtils.copy_file @path, output_to
-        run_command "identify", output_to # Verify that we have a good image
+        # We need to escape the output path if it contains a space
+        escaped_output_to = output_to.to_s.gsub(' ', '\\ ')
+        run_command "identify", escaped_output_to # Verify that we have a good image
       else # stream
         File.open(@path, "rb") do |f|
           f.binmode
