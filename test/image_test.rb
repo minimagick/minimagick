@@ -229,7 +229,11 @@ class ImageTest < Test::Unit::TestCase
     result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
       c.gravity "center"
     end
+    # Set LANG to have a consistent output
+    saved_lang = ENV['LANG']
+    ENV['LANG'] = 'C'
     assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
+    ENV['LANG'] = saved_lang
   end
 
   # http://github.com/probablycorey/mini_magick/issues#issue/8

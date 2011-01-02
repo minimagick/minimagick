@@ -338,8 +338,14 @@ module MiniMagick
 
     def run(command_builder)
       command = command_builder.command
-
+      
+      # Change LANG to C to have a consistent command output
+      saved_lang = ENV['LANG']
+      ENV['LANG'] = 'C'
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+
+      # Restore the LANG env variable
+      ENV['LANG'] = saved_lang
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
