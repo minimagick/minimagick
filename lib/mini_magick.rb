@@ -156,6 +156,7 @@ module MiniMagick
     #    image["format"]      #=> "TIFF"
     #    image["height"]      #=> 41 (pixels)
     #    image["width"]       #=> 50 (pixels)
+    #    image["colorspace"]  #=> "DirectClassRGB"
     #    image["dimensions"]  #=> [50, 41]
     #    image["size"]        #=> 2050 (bits)
     #    image["original_at"] #=> 2005-02-23 23:17:24 +0000 (Read from Exif data)
@@ -167,6 +168,8 @@ module MiniMagick
     def [](value)
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
+      when "colorspace"
+        run_command("identify", "-format", format_option("%r"), escaped_path).split("\n")[0]
       when "format"
         run_command("identify", "-format", format_option("%m"), escaped_path).split("\n")[0]
       when "height"
