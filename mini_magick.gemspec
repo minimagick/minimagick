@@ -16,5 +16,4 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.add_runtime_dependency('subexec', ['~> 0.0.4'])
-  s.add_development_dependency('mocha', ['~> 0.9.9'])
 end

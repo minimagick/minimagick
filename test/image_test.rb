@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'test/unit'
-require 'mocha'
 require 'pathname'
 require 'stringio'
 require File.expand_path('../../lib/mini_magick', __FILE__)
@@ -268,7 +267,9 @@ class ImageTest < Test::Unit::TestCase
   # it raises an appropriate error
   def test_throw_animation_copy_after_format_error
     image = Image.open(ANIMATION_PATH)
-    FileUtils.stubs(:copy_file).raises(Errno::ENOENT)
+    def FileUtils.copy_file
+      raise Errno::ENOENT
+    end
     assert_raises MiniMagick::Error do
       image.format('png')
     end
