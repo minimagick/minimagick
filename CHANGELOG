@@ -1,8 +1,9 @@
-* October 28, 2010 - Releasing v3.0. Some small bugfixes. This is 3.0 because of the big interface changes and they are fairly stable from before.
-* A new interface!
-* Adding in deprecation warnings
-* October 12, 2010 - Added support for loading images from URIs with the MiniMagick::Image.open method
-* August 28, 2010 - Just quote all arguements now.
+* Jan 11, 2011 - Releasing v3.2 - Bugfix release. Some small changes to the API in very rare circumstances. Mostly having to do with passing multiple arguments to format options. Also, you can now query an image's "colorspace". [hcatlin]
+* October 28, 2010 - Releasing v3.0. Some small bugfixes. This is 3.0 because of the big interface changes and they are fairly stable from before. [hcatlin]
+* A new interface! [hcatlin]
+* Adding in deprecation warnings [hcatlin]
+* October 12, 2010 - Added support for loading images from URIs with the MiniMagick::Image.open method [hcatlin]
+* August 28, 2010 - Just quote all arguements now. [hcatlin]
 * August 24, 2010 - Closing an issue with quoting colors... Issue #11 [hcatlin]
 * August 17, 2010 - Added compositing! [hcatlin]
 * August 17, 2010 - Moved a lot of the command logic into the CommandBuilder. This way, we don't have to repeat things like checking to see if a MOGRIFY_COMMAND is valid or not. Also added some new tests for some behaviour I noticed that wasn't specifically being tested for. Depricated the "+" method as the API was clunky. Moved to "<<" with slightly different behaviour. Image.new(path) no longer throws an error if the 'path' isn't valid. Allows us to create new images (copies, etc), however Image.open(path) will throw an Invalid error if the file stinks. Please use valid? if you want to find out if an image is recognized. [hcatlin]
