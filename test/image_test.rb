@@ -262,18 +262,4 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
-
-  # testing that if copying files formatted from an animation fails,
-  # it raises an appropriate error
-  def test_throw_animation_copy_after_format_error
-    image = Image.open(ANIMATION_PATH)
-    def FileUtils.copy_file
-      raise Errno::ENOENT
-    end
-    assert_raises MiniMagick::Error do
-      image.format('png')
-    end
-  end
-
-
 end
