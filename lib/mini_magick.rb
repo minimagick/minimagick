@@ -219,7 +219,10 @@ module MiniMagick
     # @param page [Integer] If this is an animated gif, say which 'page' you want with an integer. Leave as default if you don't care.
     # @return [nil]
     def format(format, page = 0)
-      run_command("mogrify", "-format", format, @path)
+      c = CommandBuilder.new('mogrify', '-format', format)
+      yield c if block_given?
+      c << @path
+      run(c)
 
       old_path = @path.dup
       @path.sub!(/(\.\w*)?$/, ".#{format}")
