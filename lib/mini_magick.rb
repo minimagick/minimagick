@@ -396,15 +396,27 @@ module MiniMagick
         raise Error, "You must call 'format' on the image object directly!"
       elsif MOGRIFY_COMMANDS.include?(guessed_command_name)
         add(guessed_command_name, *options)
+        self
       else
         super(symbol, *args)
+      end
+    end
+
+    def +(*options)
+      push(@args.pop.gsub /^-/, '+')
+      if options.any?
+        options.each do |o|
+          push "\"#{ o }\""
+        end
       end
     end
 
     def add(command, *options)
       push "-#{command}"
       if options.any?
-        push "\"#{options.join(" ")}\""
+        options.each do |o|
+          push "\"#{ o }\""
+        end
       end
     end
 
@@ -412,11 +424,5 @@ module MiniMagick
       @args << arg.to_s.strip
     end
     alias :<< :push
-
-    # @deprecated Please don't use the + method its has been deprecated
-    def +(value)
-      warn "Warning: The MiniMagick::ComandBuilder#+ command has been deprecated. Please use c << '+#{value}' instead"
-      push "+#{value}"
-    end
   end
 end
