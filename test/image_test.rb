@@ -57,6 +57,12 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_remote_image_with_complex_url
+    image = Image.open("http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar")
+    image.valid?
+    image.destroy!
+  end
+
   def test_image_write
     output_path = "output.gif"
     begin

@@ -77,6 +77,7 @@ module MiniMagick
         file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
         if file_or_url.include?("://")
           require 'open-uri'
+          ext = nil unless ext and ext =~ /^\.\w{2,8}$/
           self.read(Kernel::open(file_or_url), ext)
         else
           File.open(file_or_url, "rb") do |f|
