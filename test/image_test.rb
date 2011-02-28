@@ -259,6 +259,17 @@ class ImageTest < Test::Unit::TestCase
   ensure
     FileUtils.rm("test.gif")
   end
+  
+  # https://github.com/probablycorey/mini_magick/issues/37
+  def test_nonstandard_locale
+    original_lang = ENV["LANG"]
+    ENV["LANG"] = "fr_FR.UTF-8"
+    
+    # This test should break
+    test_throw_on_openining_not_an_image
+  ensure
+    ENV["LANG"] = original_lang
+  end
 
   def test_throw_format_error
     image = Image.open(SIMPLE_IMAGE_PATH)
