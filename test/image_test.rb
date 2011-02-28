@@ -36,6 +36,7 @@ class ImageTest < Test::Unit::TestCase
   def test_image_io_reading
     buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH))
     image = Image.read(buffer)
+    assert image.valid?
     image.destroy!
   end
 
