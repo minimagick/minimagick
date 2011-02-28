@@ -87,6 +87,14 @@ For more on the format command see
 http://www.imagemagick.org/script/command-line-options.php#format
 
 
+== Using GraphicsMagick
+
+Simply set 
+
+  MiniMagick.processor = :gm
+  
+And you are sorted.
+
 == Requirements
 
 You must have ImageMagick or GraphicsMagick installed.
