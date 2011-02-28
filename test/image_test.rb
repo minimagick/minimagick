@@ -12,7 +12,7 @@ class ImageTest < Test::Unit::TestCase
 
   SIMPLE_IMAGE_PATH = CURRENT_DIR + "simple.gif"
   MINUS_IMAGE_PATH  = CURRENT_DIR + "simple-minus.gif"
-  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves spaced.tiff"
+  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves (spaced).tiff"
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
   GIF_WITH_JPG_EXT  = CURRENT_DIR + "actually_a_gif.jpg"
   EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
@@ -268,6 +268,14 @@ class ImageTest < Test::Unit::TestCase
     test_throw_on_openining_not_an_image
   ensure
     ENV["LANG"] = original_lang
+  end
+  
+  def test_poop
+    img = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+    img.gravity "Center"
+    img.crop "480x480"
+    img.resize "250x250"
+    img.write CURRENT_DIR + "output.png"
   end
 
   def test_throw_format_error

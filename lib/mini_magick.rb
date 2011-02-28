@@ -135,7 +135,7 @@ module MiniMagick
     end
     
     def escaped_path
-      Pathname.new(@path).to_s.gsub(" ", "\\ ")
+      "\"#{Pathname.new(@path).to_s}\""
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
