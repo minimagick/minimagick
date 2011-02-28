@@ -53,13 +53,13 @@ class ImageTest < Test::Unit::TestCase
 
   def test_remote_image
     image = Image.open("http://www.google.com/images/logos/logo.png")
-    image.valid?
+    assert image.valid?
     image.destroy!
   end
 
   def test_remote_image_with_complex_url
     image = Image.open("http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar")
-    image.valid?
+    assert image.valid?
     image.destroy!
   end
 

@@ -73,13 +73,14 @@ module MiniMagick
       # @param file_or_url [String] Either a local file path or a URL that open-uri can read
       # @param ext [String] Specify the extension you want to read it as
       # @return [Image] The loaded image
-      def open(file_or_url, ext = File.extname(file_or_url))
+      def open(file_or_url, ext = nil)
         file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
         if file_or_url.include?("://")
           require 'open-uri'
-          ext = nil unless ext and ext =~ /^\.\w{2,8}$/
+          ext ||= File.extname(URI.parse(file_or_url).path)
           self.read(Kernel::open(file_or_url), ext)
         else
+          ext ||= File.extname(file_or_url)
           File.open(file_or_url, "rb") do |f|
             self.read(f, ext)
           end
