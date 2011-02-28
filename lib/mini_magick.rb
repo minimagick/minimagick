@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'subexec'
+require 'stringio'
 require 'pathname'
 
 module MiniMagick
