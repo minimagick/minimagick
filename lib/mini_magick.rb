@@ -412,7 +412,7 @@ module MiniMagick
     end
 
     def +(*options)
-      push(@args.pop.gsub /^-/, '+')
+      push(@args.pop.gsub(/^-/, '+'))
       if options.any?
         options.each do |o|
           push "\"#{ o }\""
