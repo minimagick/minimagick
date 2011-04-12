@@ -258,18 +258,18 @@ class ImageTest < Test::Unit::TestCase
   ensure
     FileUtils.rm("test.gif")
   end
-  
+
   # https://github.com/probablycorey/mini_magick/issues/37
   def test_nonstandard_locale
     original_lang = ENV["LANG"]
     ENV["LANG"] = "fr_FR.UTF-8"
-    
+
     # This test should break
     test_throw_on_openining_not_an_image
   ensure
     ENV["LANG"] = original_lang
   end
-  
+
   def test_poop
     img = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
     img.gravity "Center"
@@ -287,4 +287,36 @@ class ImageTest < Test::Unit::TestCase
     end
     image.destroy!
   end
+
+  def test_import_pixels_default_format
+    columns = 325
+    rows = 200
+    depth = 16 # 16 bits (2 bytes) per pixel
+    map = 'gray'
+    pixels = Array.new(columns*rows) {|i| i}
+    blob = pixels.pack("S*") # unsigned short, native byte order
+    image = Image.import_pixels(blob, columns, rows, depth, map)
+    assert image.valid?
+    assert_equal "png", image[:format].downcase
+    assert_equal columns, image[:width]
+    assert_equal rows, image[:height]
+    image.write(CURRENT_DIR + "imported_pixels_image.png")
+  end
+
+  def test_import_pixels_custom_format
+    columns = 325
+    rows = 200
+    depth = 16 # 16 bits (2 bytes) per pixel
+    map = 'gray'
+    format = 'jpeg'
+    pixels = Array.new(columns*rows) {|i| i}
+    blob = pixels.pack("S*") # unsigned short, native byte order
+    image = Image.import_pixels(blob, columns, rows, depth, map, format)
+    assert image.valid?
+    assert_equal format, image[:format].downcase
+    assert_equal columns, image[:width]
+    assert_equal rows, image[:height]
+    image.write(CURRENT_DIR + "imported_pixels_image." + format)
+  end
+
 end
