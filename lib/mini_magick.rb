@@ -29,7 +29,7 @@ module MiniMagick
 
   class Image
     # @return [String] The location of the current working file
-    attr :path
+    attr_accessor :path
 
     # Class Methods
     # -------------
@@ -61,6 +61,34 @@ module MiniMagick
       def from_blob(blob, ext = nil)
         warn "Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read"
         create(ext) { |f| f.write(blob) }
+      end
+
+      # Creates an image object from a binary string blob which contains raw pixel data (i.e. no header data).
+      #
+      # === Returns
+      #
+      # * [Image] The loaded image.
+      #
+      # === Parameters
+      #
+      # * [blob] <tt>String</tt> -- Binary string blob containing raw pixel data.
+      # * [columns] <tt>Integer</tt> -- Number of columns.
+      # * [rows] <tt>Integer</tt> -- Number of rows.
+      # * [depth] <tt>Integer</tt> -- Bit depth of the encoded pixel data.
+      # * [map] <tt>String</tt> -- A code for the mapping of the pixel data. Example: 'gray' or 'rgb'.
+      # * [format] <tt>String</tt> -- The file extension of the image format to be used when creating the image object. Defaults to 'png'.
+      #
+      def import_pixels(blob, columns, rows, depth, map, format="png")
+        # Create an image object with the raw pixel data string:
+        image = create(".dat", validate = false) { |f| f.write(blob) }
+        # Use ImageMagick to convert the raw data file to an image file of the desired format:
+        converted_image_path = image.path[0..-4] + format
+        argument = "-size #{columns}x#{rows} -depth #{depth} #{map}:#{image.path} #{converted_image_path}"
+        cmd = CommandBuilder.new("convert", argument) #Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
+        image.run(cmd)
+        # Update the image instance with the path of the properly formatted image, and return:
+        image.path = converted_image_path
+        image
       end
 
       # Opens a specific image file either on the local file system or at a URI.
@@ -100,9 +128,10 @@ module MiniMagick
       # by both #open and #read to create a new object! Ensures we have a good tempfile!
       #
       # @param ext [String] Specify the extension you want to read it as
+      # @param validate [Boolean] If false, skips validation of the created image. Defaults to true.
       # @yield [IOStream] You can #write bits to this object to create the new Image
       # @return [Image] The created image
-      def create(ext = nil, &block)
+      def create(ext = nil, validate = true, &block)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s])
           tempfile.binmode
@@ -111,7 +140,7 @@ module MiniMagick
 
           image = self.new(tempfile.path, tempfile)
 
-          if !image.valid?
+          if validate and !image.valid?
             raise MiniMagick::Invalid
           end
           return image
@@ -133,7 +162,7 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
     end
-    
+
     def escaped_path
       "\"#{Pathname.new(@path).to_s}\""
     end
