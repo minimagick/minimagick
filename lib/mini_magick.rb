@@ -282,6 +282,11 @@ module MiniMagick
     ensure
       f.close if f
     end
+    
+    def mime_type
+      format = self[:format]
+      "image/"+format.downcase
+    end
 
     # If an unknown method is called then it is sent through the morgrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
