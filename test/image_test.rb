@@ -16,6 +16,7 @@ class ImageTest < Test::Unit::TestCase
   NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
   GIF_WITH_JPG_EXT  = CURRENT_DIR + "actually_a_gif.jpg"
   EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
+  CAP_EXT_PATH      = CURRENT_DIR + "trogdor_capitalized.JPG"
   ANIMATION_PATH    = CURRENT_DIR + "animation.gif"
 
   def test_image_from_blob
@@ -61,6 +62,11 @@ class ImageTest < Test::Unit::TestCase
     image = Image.open("http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar")
     assert image.valid?
     image.destroy!
+  end
+  
+  def test_reformat_with_capitalized_extension
+    image = Image.open(CAP_EXT_PATH)
+    image.format "jpg"
   end
 
   def test_image_write
