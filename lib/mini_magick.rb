@@ -164,7 +164,7 @@ module MiniMagick
     end
 
     def escaped_path
-      "\"#{Pathname.new(@path).to_s}\""
+      Pathname.new(@path).to_s.inspect
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -288,9 +288,7 @@ module MiniMagick
     def write(output_to)
       if output_to.kind_of?(String) || !output_to.respond_to?(:write)
         FileUtils.copy_file @path, output_to
-        # We need to escape the output path if it contains a space
-        escaped_output_to = output_to.to_s.gsub(' ', '\\ ')
-        run_command "identify", escaped_output_to # Verify that we have a good image
+        run_command "identify", output_to.to_s.inspect # Verify that we have a good image
       else # stream
         File.open(@path, "rb") do |f|
           f.binmode
@@ -310,6 +308,11 @@ module MiniMagick
       f.read
     ensure
       f.close if f
+    end
+    
+    def mime_type
+      format = self[:format]
+      "image/"+format.downcase
     end
 
     # If an unknown method is called then it is sent through the morgrify program
