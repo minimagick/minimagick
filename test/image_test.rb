@@ -282,7 +282,7 @@ class ImageTest < Test::Unit::TestCase
     img.gravity "Center"
     img.crop "480x480"
     img.resize "250x250"
-    img.write CURRENT_DIR + "output.png"
+    img.write "/tmp/output.png"
   end
 
   def test_throw_format_error
@@ -307,7 +307,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal "png", image[:format].downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write(CURRENT_DIR + "imported_pixels_image.png")
+    image.write("/tmp/imported_pixels_image.png")
   end
 
   def test_import_pixels_custom_format
@@ -323,7 +323,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal format, image[:format].downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write(CURRENT_DIR + "imported_pixels_image." + format)
+    image.write("/tmp/imported_pixels_image." + format)
   end
 
   def test_mime_type
