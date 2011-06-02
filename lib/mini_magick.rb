@@ -133,7 +133,7 @@ module MiniMagick
       # @return [Image] The created image
       def create(ext = nil, validate = true, &block)
         begin
-          tempfile = Tempfile.new(['mini_magick', ext.to_s])
+          tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
           tempfile.binmode
           block.call(tempfile)
           tempfile.close
