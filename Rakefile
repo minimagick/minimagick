@@ -1,7 +1,7 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
+require 'rdoc/task'
+require 'rubygems/package_task'
 
 $:.unshift(File.dirname(__FILE__) + "/lib")
 require 'mini_magick'
@@ -27,6 +27,8 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
 end
 
 spec = eval(File.read('mini_magick.gemspec'))
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
+  pkg.need_zip = true
+  pkg.need_tar = true
 end
