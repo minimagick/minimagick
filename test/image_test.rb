@@ -18,6 +18,7 @@ class ImageTest < Test::Unit::TestCase
   EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
   CAP_EXT_PATH      = CURRENT_DIR + "trogdor_capitalized.JPG"
   ANIMATION_PATH    = CURRENT_DIR + "animation.gif"
+  PNG_PATH          = CURRENT_DIR + "png.png"
 
   def test_image_from_blob
     File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
@@ -292,5 +293,19 @@ class ImageTest < Test::Unit::TestCase
       end
     end
     image.destroy!
+  end
+  
+  def test_mime_type
+    gif =         Image.open(SIMPLE_IMAGE_PATH)
+    jpeg =        Image.open(EXIF_IMAGE_PATH)
+    png =         Image.open(PNG_PATH)
+    tiff =        Image.open(TIFF_IMAGE_PATH)
+    hidden_gif =  Image.open(GIF_WITH_JPG_EXT)
+    
+    assert_equal "image/gif",   gif.mime_type
+    assert_equal "image/jpeg",  jpeg.mime_type
+    assert_equal "image/png",   png.mime_type
+    assert_equal "image/tiff",  tiff.mime_type
+    assert_equal "image/gif",   hidden_gif.mime_type
   end
 end
