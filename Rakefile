@@ -1,6 +1,12 @@
 require 'rake'
 require 'rake/testtask'
-require 'rdoc/task'
+begin
+  # in 1.9
+  require 'rdoc/task'
+rescue LoadError
+  # for 1.8 compat
+  require 'rake/rdoctask'
+end
 require 'rubygems/package_task'
 
 $:.unshift(File.dirname(__FILE__) + "/lib")
