@@ -5,6 +5,7 @@ PATH
       subexec (~> 0.1.0)
 
 GEM
+  remote: http://rubygems.org/
   specs:
     subexec (0.1.0)
 
