@@ -1,0 +1,15 @@
+PATH
+  remote: .
+  specs:
+    mini_magick (3.3)
+      subexec (~> 0.1.0)
+
+GEM
+  specs:
+    subexec (0.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mini_magick!
