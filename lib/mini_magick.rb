@@ -413,7 +413,7 @@ module MiniMagick
 
     def destroy!
       return if @tempfile.nil?
-      File.unlink(@tempfile.path)
+      File.unlink(@tempfile.path) if File.exists?(@tempfile.path)
       @tempfile = nil
     end
 
