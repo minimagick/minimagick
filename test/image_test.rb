@@ -54,7 +54,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_remote_image
-    image = Image.open("http://www.google.com/images/logos/logo.png")
+    image = Image.open("http://upload.wikimedia.org/wikipedia/en/b/bc/Wiki.png")
     assert image.valid?
     image.destroy!
   end
