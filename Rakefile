@@ -13,7 +13,9 @@ $:.unshift(File.dirname(__FILE__) + "/lib")
 require 'mini_magick'
 
 desc 'Default: run unit tests.'
-task :default => :test do 
+task :default => [:print_version, :test]
+
+task :print_version do 
   puts `mogrify --version`
 end
 
