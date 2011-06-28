@@ -20,6 +20,18 @@ module MiniMagick
         self.processor = "gm"
       end
     end
+    
+    def image_magick_version
+      @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
+    end
+    
+    def minimum_image_magick_version
+      @@minimum_version ||= Gem::Version.create("6.6.3")
+    end
+    
+    def valid_version_installed?
+      image_magick_version >= minimum_image_magick_version
+    end
   end
 
   MOGRIFY_COMMANDS = %w{adaptive-blur adaptive-resize adaptive-sharpen adjoin affine alpha annotate antialias append authenticate auto-gamma auto-level auto-orient background bench iterations bias black-threshold blue-primary point blue-shift factor blur border bordercolor brightness-contrast caption string cdl filename channel type charcoal radius chop clip clamp clip-mask filename clip-path id clone index clut contrast-stretch coalesce colorize color-matrix colors colorspace type combine comment string compose operator composite compress type contrast convolve coefficients crop cycle amount decipher filename debug events define format:option deconstruct delay delete index density depth despeckle direction type display server dispose method distort type coefficients dither method draw string edge radius emboss radius encipher filename encoding type endian type enhance equalize evaluate operator evaluate-sequence operator extent extract family name fft fill filter type flatten flip floodfill flop font name format string frame function name fuzz distance fx expression gamma gaussian-blur geometry gravity type green-primary point help identify ifft implode amount insert index intent type interlace type interline-spacing interpolate method interword-spacing kerning label string lat layers method level limit type linear-stretch liquid-rescale log format loop iterations mask filename mattecolor median radius modulate monitor monochrome morph morphology method kernel motion-blur negate noise radius normalize opaque ordered-dither NxN orient type page paint radius ping pointsize polaroid angle posterize levels precision preview type print string process image-filter profile filename quality quantize quiet radial-blur angle raise random-threshold low,high red-primary point regard-warnings region remap filename render repage resample resize respect-parentheses roll rotate degrees sample sampling-factor scale scene seed segments selective-blur separate sepia-tone threshold set attribute shade degrees shadow sharpen shave shear sigmoidal-contrast size sketch solarize threshold splice spread radius strip stroke strokewidth stretch type style type swap indexes swirl degrees texture filename threshold thumbnail tile filename tile-offset tint transform transparent transparent-color transpose transverse treedepth trim type type undercolor unique-colors units type unsharp verbose version view vignette virtual-pixel method wave weight type white-point point white-threshold write filename}

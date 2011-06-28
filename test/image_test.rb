@@ -238,11 +238,15 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_simple_composite
-    image = Image.open(EXIF_IMAGE_PATH)
-    result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
-      c.gravity "center"
+    if MiniMagick.valid_version_installed?
+      image = Image.open(EXIF_IMAGE_PATH)
+      result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
+        c.gravity "center"
+      end
+      assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
+    else
+      puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
     end
-    assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
   end
 
   # http://github.com/probablycorey/mini_magick/issues#issue/8
