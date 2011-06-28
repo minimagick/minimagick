@@ -11,6 +11,7 @@ GEM
     subexec (0.1.0)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
