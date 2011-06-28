@@ -13,7 +13,9 @@ $:.unshift(File.dirname(__FILE__) + "/lib")
 require 'mini_magick'
 
 desc 'Default: run unit tests.'
-task :default => :test
+task :default => :test do 
+  puts `mogrify --version`
+end
 
 desc 'Test the mini_magick plugin.'
 Rake::TestTask.new(:test) do |t|
