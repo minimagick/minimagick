@@ -309,7 +309,7 @@ module MiniMagick
     ensure
       f.close if f
     end
-    
+
     def mime_type
       format = self[:format]
       "image/"+format.downcase
@@ -333,8 +333,8 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(&block)
-      c = CommandBuilder.new('mogrify')
+    def combine_options(tool, &block)
+      c = CommandBuilder.new(tool || :mogrify)
       block.call(c)
       c << @path
       run(c)
