@@ -1,3 +1,4 @@
 /pkg
 coverage
 .yardoc
+.rvmrc
