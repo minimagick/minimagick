@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require 'pathname'
+require 'tempfile'
 require File.expand_path('../../lib/mini_magick', __FILE__)
 
 #MiniMagick.processor = :gm
@@ -99,7 +100,7 @@ class ImageTest < Test::Unit::TestCase
   def test_image_write_with_stream
     stream = StringIO.new
     image = Image.open(SIMPLE_IMAGE_PATH)
-    image.write("/tmp/foo.gif")
+    image.write("#{Dir.tmpdir}/foo.gif")
     image.write(stream)
 #    assert Image.read(stream.string).valid?
     image.destroy!
@@ -282,7 +283,7 @@ class ImageTest < Test::Unit::TestCase
     img.gravity "Center"
     img.crop "480x480"
     img.resize "250x250"
-    img.write "/tmp/output.png"
+    img.write "#{Dir.tmpdir}/output.png"
   end
 
   def test_throw_format_error
@@ -307,7 +308,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal "png", image[:format].downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write("/tmp/imported_pixels_image.png")
+    image.write("#{Dir.tmpdir}/imported_pixels_image.png")
   end
 
   def test_import_pixels_custom_format
@@ -323,7 +324,7 @@ class ImageTest < Test::Unit::TestCase
     assert_equal format, image[:format].downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write("/tmp/imported_pixels_image." + format)
+    image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
   end
 
   def test_mime_type
