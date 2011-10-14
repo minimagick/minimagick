@@ -203,29 +203,29 @@ module MiniMagick
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
       when "colorspace"
-        run_command("identify", "-format", format_option("%r"), escaped_path).split("\n")[0]
+        run_command("identify", "-quiet", "-format", format_option("%r"), escaped_path).split("\n")[0]
       when "format"
-        run_command("identify", "-format", format_option("%m"), escaped_path).split("\n")[0]
+        run_command("identify", "-quiet", "-format", format_option("%m"), escaped_path).split("\n")[0]
       when "height"
-        run_command("identify", "-format", format_option("%h"), escaped_path).split("\n")[0].to_i
+        run_command("identify", "-quiet", "-format", format_option("%h"), escaped_path).split("\n")[0].to_i
       when "width"
-        run_command("identify", "-format", format_option("%w"), escaped_path).split("\n")[0].to_i
+        run_command("identify", "-quiet", "-format", format_option("%w"), escaped_path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", format_option("%w %h"), escaped_path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-quiet", "-format", format_option("%w %h"), escaped_path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
         File.size(@path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
         # Get the EXIF original capture as a Time object
         Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
-        result = run_command('identify', '-format', "\"%[#{value}]\"", escaped_path).chop
+        result = run_command('identify', '-quiet', '-format', "\"%[#{value}]\"", escaped_path).chop
         if result.include?(",")
           read_character_data(result)
         else
           result
         end
       else
-        run_command('identify', '-format', "\"#{value}\"", escaped_path).split("\n")[0]
+        run_command('identify', '-quiet', '-format', "\"#{value}\"", escaped_path).split("\n")[0]
       end
     end
 
