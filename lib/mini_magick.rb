@@ -1,6 +1,5 @@
 require 'tempfile'
 require 'subexec'
-#require File.expand_path(File.dirname(__FILE__) + "/../../subexec/lib/subexec")
 require 'stringio'
 require 'pathname'
 
