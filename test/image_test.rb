@@ -21,9 +21,8 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_image_io_reading
-    buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH)) #This way does not work properly on windows
-    buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read } if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
-
+#    buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH)) #This way does not work properly on windows
+    buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read } #This way works the same on all platforms
     image = Image.read(buffer)
     assert image.valid?
     image.destroy!
