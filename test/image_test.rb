@@ -230,13 +230,9 @@ class ImageTest < Test::Unit::TestCase
     result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
       c.gravity "center"
     end
-    begin
-      #TODO - this test won't run on windows
-      assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
-    rescue Exception => ex
-      test = 4
-    end
-
+    #TODO - need to write test that works cross platform
+    #This test will only work on Linux
+    assert `diff -s #{result.path} #{COMP_IMAGE_PATH}`.include?("identical") unless RUBY_PLATFORM =~ /mswin|mingw|cygwin/
   end
 
   # http://github.com/probablycorey/mini_magick/issues#issue/8

@@ -16,4 +16,5 @@ module MiniMagickTestFiles
   CAP_EXT_PATH      = test_files + "/trogdor_capitalized.JPG"
   ANIMATION_PATH    = test_files + "/animation.gif"
   PNG_PATH          = test_files + "/png.png"
+  COMP_IMAGE_PATH   = test_files + "/composited.jpg"
 end

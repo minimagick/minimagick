@@ -16,5 +16,5 @@ Gem::Specification.new do |s|
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.test_files   = Dir['test/**/*']
   s.require_paths = ["lib"]
-  s.add_runtime_dependency('subexec', ['~> 0.2.1'])
+  s.add_runtime_dependency('subexec', ['~> 0.2.0'])
 end
