@@ -65,7 +65,7 @@ class ImageTest < Test::Unit::TestCase
     assert image.valid?
     image.destroy!
   end
-  
+
   def test_reformat_with_capitalized_extension
     image = Image.open(CAP_EXT_PATH)
     image.format "jpg"
@@ -333,7 +333,7 @@ class ImageTest < Test::Unit::TestCase
     png =         Image.open(PNG_PATH)
     tiff =        Image.open(TIFF_IMAGE_PATH)
     hidden_gif =  Image.open(GIF_WITH_JPG_EXT)
-    
+
     assert_equal "image/gif",   gif.mime_type
     assert_equal "image/jpeg",  jpeg.mime_type
     assert_equal "image/png",   png.mime_type

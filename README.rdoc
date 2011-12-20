@@ -41,7 +41,7 @@ Want to make a thumbnail from a blob...
   image = MiniMagick::Image.read(blob)
   image.resize "100x100"
   image.write  "output.jpg"
-  
+
 Got an incoming IOStream?
 
   image = MiniMagick::Image.read(stream)
@@ -96,10 +96,10 @@ http://www.imagemagick.org/script/command-line-options.php#format
 
 == Using GraphicsMagick
 
-Simply set 
+Simply set
 
   MiniMagick.processor = :gm
-  
+
 And you are sorted.
 
 == Requirements
