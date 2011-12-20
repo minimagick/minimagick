@@ -16,4 +16,5 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
 
   s.add_runtime_dependency('subexec', ['~> 0.2.0'])
+  s.add_development_dependency("bundler", "> 1.0")
 end
