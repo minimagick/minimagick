@@ -231,7 +231,10 @@ class ImageTest < Test::Unit::TestCase
       c.gravity "center"
     end
     #TODO - need to write test that works cross platform
-    #This test will only work on Linux
+    #I thought the following would work but there is a 4 byte difference between the files.
+    #Not sure if it's caused from this test breaking for the right reason though..
+    #assert File.identical?(result.path, COMP_IMAGE_PATH)
+    #This following test will only work on Linux
     assert `diff -s #{result.path} #{COMP_IMAGE_PATH}`.include?("identical") unless RUBY_PLATFORM =~ /mswin|mingw|cygwin/
   end
 
