@@ -94,6 +94,18 @@ For more on the format command see
 http://www.imagemagick.org/script/command-line-options.php#format
 
 
+== Windows Users
+
+When passing in a blob or IOStream, Windows users need to make sure they read the file in as binary.
+
+  #This way works on Windows
+  buffer = StringIO.new(File.open(IMAGE_PATH,"rb") { |f| f.read })
+  MiniMagick::Image.read(buffer)
+
+  #You may run into problems doing it this way
+  buffer = StringIO.new(File.read(IMAGE_PATH))
+
+
 == Using GraphicsMagick
 
 Simply set 
