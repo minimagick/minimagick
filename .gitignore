@@ -2,3 +2,6 @@
 coverage
 .yardoc
 .rvmrc
+Gemfile.lock
+/.bundle/*
+/vendor/*
