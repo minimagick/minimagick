@@ -2,9 +2,11 @@
 $:.push File.expand_path("../lib", __FILE__)
 require "mini_magick/version"
 
+version = File.read("VERSION").strip
+
 Gem::Specification.new do |s|
   s.name        = "mini_magick"
-  s.version     = MiniMagick::VERSION::STRING
+  s.version     = version
   s.platform    = Gem::Platform::RUBY
   s.summary     = "Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick"
   s.description = ""
