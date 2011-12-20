@@ -50,6 +50,12 @@ module MiniMagick
       def read(stream, ext = nil)
         if stream.is_a?(String)
           stream = StringIO.new(stream)
+        elsif stream.is_a?(File)
+          if File.respond_to?(:binread)
+            stream = StringIO.new File.binread(stream.path.to_s)
+          else
+            stream = StringIO.new File.open(stream.path.to_s,"rb") { |f| f.read }
+          end
         end
 
         create(ext) do |f|
@@ -314,10 +320,10 @@ module MiniMagick
 
     def mime_type
       format = self[:format]
-      "image/"+format.downcase
+      "image/" + format.to_s.downcase
     end
 
-    # If an unknown method is called then it is sent through the morgrify program
+    # If an unknown method is called then it is sent through the mogrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
       combine_options do |c|
@@ -335,7 +341,7 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(tool, &block)
+    def combine_options(tool = :mogrify, &block)
       c = CommandBuilder.new(tool || :mogrify)
 
       c << @path if tool == :convert
@@ -346,7 +352,7 @@ module MiniMagick
 
     # Check to see if we are running on win32 -- we need to escape things differently
     def windows?
-      !(RUBY_PLATFORM =~ /win32|mswin|mingw/).nil?
+      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
