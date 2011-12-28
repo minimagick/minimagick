@@ -20,6 +20,18 @@ module MiniMagick
         self.processor = "gm"
       end
     end
+    
+    def image_magick_version
+      @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
+    end
+    
+    def minimum_image_magick_version
+      @@minimum_version ||= Gem::Version.create("6.6.3")
+    end
+    
+    def valid_version_installed?
+      image_magick_version >= minimum_image_magick_version
+    end
   end
 
   MOGRIFY_COMMANDS = %w{adaptive-blur adaptive-resize adaptive-sharpen adjoin affine alpha annotate antialias append authenticate auto-gamma auto-level auto-orient background bench iterations bias black-threshold blue-primary point blue-shift factor blur border bordercolor brightness-contrast caption string cdl filename channel type charcoal radius chop clip clamp clip-mask filename clip-path id clone index clut contrast-stretch coalesce colorize color-matrix colors colorspace type combine comment string compose operator composite compress type contrast convolve coefficients crop cycle amount decipher filename debug events define format:option deconstruct delay delete index density depth despeckle direction type dissolve display server dispose method distort type coefficients dither method draw string edge radius emboss radius encipher filename encoding type endian type enhance equalize evaluate operator evaluate-sequence operator extent extract family name fft fill filter type flatten flip floodfill flop font name format string frame function name fuzz distance fx expression gamma gaussian-blur geometry gravity type green-primary point help identify ifft implode amount insert index intent type interlace type interline-spacing interpolate method interword-spacing kerning label string lat layers method level limit type linear-stretch liquid-rescale log format loop iterations mask filename mattecolor median radius modulate monitor monochrome morph morphology method kernel motion-blur negate noise radius normalize opaque ordered-dither NxN orient type page paint radius ping pointsize polaroid angle posterize levels precision preview type print string process image-filter profile filename quality quantize quiet radial-blur angle raise random-threshold low,high red-primary point regard-warnings region remap filename render repage resample resize respect-parentheses roll rotate degrees sample sampling-factor scale scene seed segments selective-blur separate sepia-tone threshold set attribute shade degrees shadow sharpen shave shear sigmoidal-contrast size sketch solarize threshold splice spread radius strip stroke strokewidth stretch type style type swap indexes swirl degrees texture filename threshold thumbnail tile filename tile-offset tint transform transparent transparent-color transpose transverse treedepth trim type type undercolor unique-colors units type unsharp verbose version view vignette virtual-pixel method wave weight type white-point point white-threshold write filename}
@@ -50,6 +62,12 @@ module MiniMagick
       def read(stream, ext = nil)
         if stream.is_a?(String)
           stream = StringIO.new(stream)
+        elsif stream.is_a?(File)
+          if File.respond_to?(:binread)
+            stream = StringIO.new File.binread(stream.path.to_s)
+          else
+            stream = StringIO.new File.open(stream.path.to_s,"rb") { |f| f.read }
+          end
         end
 
         create(ext) do |f|
@@ -311,13 +329,13 @@ module MiniMagick
     ensure
       f.close if f
     end
-    
+
     def mime_type
       format = self[:format]
-      "image/"+format.downcase
+      "image/" + format.to_s.downcase
     end
 
-    # If an unknown method is called then it is sent through the morgrify program
+    # If an unknown method is called then it is sent through the mogrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
       combine_options do |c|
@@ -335,8 +353,14 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(&block)
-      c = CommandBuilder.new('mogrify')
+    def combine_options(tool = :mogrify, &block)
+<<<<<<< HEAD
+      c = CommandBuilder.new(tool)
+=======
+      c = CommandBuilder.new(tool || :mogrify)
+>>>>>>> 2d1cdee6168cd92e6540d051cc1c46f33580a76f
+
+      c << @path if tool == :convert
       block.call(c)
       c << @path
       run(c)
@@ -344,7 +368,7 @@ module MiniMagick
 
     # Check to see if we are running on win32 -- we need to escape things differently
     def windows?
-      !(RUBY_PLATFORM =~ /win32|mswin|mingw/).nil?
+      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
@@ -403,7 +427,7 @@ module MiniMagick
 
     def destroy!
       return if @tempfile.nil?
-      File.unlink(@tempfile.path)
+      File.unlink(@tempfile.path) if File.exists?(@tempfile.path)
       @tempfile = nil
     end
 
@@ -452,7 +476,7 @@ module MiniMagick
       push(@args.pop.gsub(/^-/, '+'))
       if options.any?
         options.each do |o|
-          push "\"#{ o }\""
+          push escape_string(o)
         end
       end
     end
@@ -461,9 +485,13 @@ module MiniMagick
       push "-#{command}"
       if options.any?
         options.each do |o|
-          push "\"#{ o }\""
+          push escape_string(o)
         end
       end
+    end
+    
+    def escape_string(value)
+      '"' + value + '"'
     end
 
     def add_creation_operator(command, *options)
