@@ -83,8 +83,27 @@ Want to get some meta-information out?
   image["EXIF:BitsPerSample"] # It also can get all the EXIF tags
   image["%m:%f %wx%h"]        # Or you can use one of the many options of the format command
 
+Want to use an internal image creation to create a big black square?
+
+  image = MiniMagick::Image.create 'jpg', false do |c|
+    c.size '1024x1024' # creates image option '-size 1024x1024'
+    c.canvas 'black'   # creates image creation operator 'canvas:black'
+  end
+
 For more on the format command see
 http://www.imagemagick.org/script/command-line-options.php#format
+
+
+== Windows Users
+
+When passing in a blob or IOStream, Windows users need to make sure they read the file in as binary.
+
+  #This way works on Windows
+  buffer = StringIO.new(File.open(IMAGE_PATH,"rb") { |f| f.read })
+  MiniMagick::Image.read(buffer)
+
+  #You may run into problems doing it this way
+  buffer = StringIO.new(File.read(IMAGE_PATH))
 
 
 == Using GraphicsMagick

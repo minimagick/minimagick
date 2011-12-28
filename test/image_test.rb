@@ -1,24 +1,10 @@
-require 'rubygems'
-require 'test/unit'
-require 'pathname'
-require File.expand_path('../../lib/mini_magick', __FILE__)
+require 'test_helper'
 
 #MiniMagick.processor = :gm
 
 class ImageTest < Test::Unit::TestCase
   include MiniMagick
-
-  CURRENT_DIR = File.dirname(File.expand_path(__FILE__)) + "/"
-
-  SIMPLE_IMAGE_PATH = CURRENT_DIR + "simple.gif"
-  MINUS_IMAGE_PATH  = CURRENT_DIR + "simple-minus.gif"
-  TIFF_IMAGE_PATH   = CURRENT_DIR + "leaves (spaced).tiff"
-  NOT_AN_IMAGE_PATH = CURRENT_DIR + "not_an_image.php"
-  GIF_WITH_JPG_EXT  = CURRENT_DIR + "actually_a_gif.jpg"
-  EXIF_IMAGE_PATH   = CURRENT_DIR + "trogdor.jpg"
-  CAP_EXT_PATH      = CURRENT_DIR + "trogdor_capitalized.JPG"
-  ANIMATION_PATH    = CURRENT_DIR + "animation.gif"
-  PNG_PATH          = CURRENT_DIR + "png.png"
+  include MiniMagickTestFiles
 
   def test_image_from_blob
     File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
@@ -35,7 +21,8 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_image_io_reading
-    buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH))
+#    buffer = StringIO.new(File.read(SIMPLE_IMAGE_PATH)) #This way does not work properly on windows
+    buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read } #This way works the same on all platforms
     image = Image.read(buffer)
     assert image.valid?
     image.destroy!
@@ -43,7 +30,8 @@ class ImageTest < Test::Unit::TestCase
 
   def test_image_create
     image = Image.create do |f|
-      f.write(File.read(SIMPLE_IMAGE_PATH))
+      #Had to replace the old File.read with the following to work across all platforms
+      f.write(File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read })
     end
     image.destroy!
   end
@@ -99,7 +87,7 @@ class ImageTest < Test::Unit::TestCase
   def test_image_write_with_stream
     stream = StringIO.new
     image = Image.open(SIMPLE_IMAGE_PATH)
-    image.write("/tmp/foo.gif")
+    image.write("#{Dir.tmpdir}/foo.gif")
     image.write(stream)
 #    assert Image.read(stream.string).valid?
     image.destroy!
@@ -111,7 +99,7 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
-  def test_throw_on_openining_not_an_image
+  def test_throw_on_opening_not_an_image
     assert_raise(MiniMagick::Invalid) do
       image = Image.open(NOT_AN_IMAGE_PATH)
       image.destroy
@@ -130,7 +118,7 @@ class ImageTest < Test::Unit::TestCase
 
   def test_tiff
     image = Image.new(TIFF_IMAGE_PATH)
-    assert_equal "tiff", image[:format].downcase
+    assert_equal "tiff", image[:format].to_s.downcase
     assert_equal 50, image[:width]
     assert_equal 41, image[:height]
     image.destroy!
@@ -138,7 +126,7 @@ class ImageTest < Test::Unit::TestCase
 
   def test_gif_with_jpg_format
     image = Image.new(GIF_WITH_JPG_EXT)
-    assert_equal "gif", image[:format].downcase
+    assert_equal "gif", image[:format].to_s.downcase
     image.destroy!
   end
 
@@ -247,6 +235,12 @@ class ImageTest < Test::Unit::TestCase
     else
       puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
     end
+    #TODO - need to write test that works cross platform
+    #I thought the following would work but there is a 4 byte difference between the files.
+    #Not sure if it's caused from this test breaking for the right reason though..
+    #assert File.identical?(result.path, COMP_IMAGE_PATH)
+    #This following test will only work on Linux
+    assert `diff -s #{result.path} #{COMP_IMAGE_PATH}`.include?("identical") unless RUBY_PLATFORM =~ /mswin|mingw|cygwin/
   end
 
   # http://github.com/probablycorey/mini_magick/issues#issue/8
@@ -276,7 +270,7 @@ class ImageTest < Test::Unit::TestCase
     ENV["LANG"] = "fr_FR.UTF-8"
 
     # This test should break
-    test_throw_on_openining_not_an_image
+    test_throw_on_opening_not_an_image
   ensure
     ENV["LANG"] = original_lang
   end
@@ -286,7 +280,7 @@ class ImageTest < Test::Unit::TestCase
     img.gravity "Center"
     img.crop "480x480"
     img.resize "250x250"
-    img.write "/tmp/output.png"
+    img.write "#{Dir.tmpdir}/output.png"
   end
 
   def test_throw_format_error
@@ -308,10 +302,10 @@ class ImageTest < Test::Unit::TestCase
     blob = pixels.pack("S*") # unsigned short, native byte order
     image = Image.import_pixels(blob, columns, rows, depth, map)
     assert image.valid?
-    assert_equal "png", image[:format].downcase
+    assert_equal "png", image[:format].to_s.downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write("/tmp/imported_pixels_image.png")
+    image.write("#{Dir.tmpdir}/imported_pixels_image.png")
   end
 
   def test_import_pixels_custom_format
@@ -324,10 +318,10 @@ class ImageTest < Test::Unit::TestCase
     blob = pixels.pack("S*") # unsigned short, native byte order
     image = Image.import_pixels(blob, columns, rows, depth, map, format)
     assert image.valid?
-    assert_equal format, image[:format].downcase
+    assert_equal format, image[:format].to_s.downcase
     assert_equal columns, image[:width]
     assert_equal rows, image[:height]
-    image.write("/tmp/imported_pixels_image." + format)
+    image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
   end
 
   def test_mime_type

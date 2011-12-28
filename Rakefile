@@ -9,8 +9,7 @@ rescue LoadError
 end
 require 'rubygems/package_task'
 
-$:.unshift(File.dirname(__FILE__) + "/lib")
-require 'mini_magick'
+$:.unshift 'lib'
 
 desc 'Default: run unit tests.'
 task :default => [:print_version, :test]

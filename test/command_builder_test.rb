@@ -1,6 +1,4 @@
-require 'rubygems'
-require 'test/unit'
-require File.expand_path('../../lib/mini_magick', __FILE__)
+require 'test_helper'
 
 class CommandBuilderTest < Test::Unit::TestCase
   include MiniMagick
@@ -39,5 +37,11 @@ class CommandBuilderTest < Test::Unit::TestCase
     c = CommandBuilder.new("test")
     c.auto_orient
     assert_equal "-auto-orient", c.args.join(" ")
+  end
+  
+  def test_canvas
+    c = CommandBuilder.new('test')
+    c.canvas 'black'
+    assert_equal "canvas:black", c.args.join
   end
 end

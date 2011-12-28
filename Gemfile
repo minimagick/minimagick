@@ -1,3 +1,3 @@
 source :rubygems
-gemspec
 gem "rake"
+gemspec
