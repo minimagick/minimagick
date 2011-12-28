@@ -231,7 +231,7 @@ class ImageTest < Test::Unit::TestCase
       result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
         c.gravity "center"
       end
-      assert `diff -s #{result.path} test/composited.jpg`.include?("identical")
+      assert `diff -s #{result.path} test/files/composited.jpg`.include?("identical")
     else
       puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
     end

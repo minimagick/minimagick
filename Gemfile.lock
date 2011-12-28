@@ -9,6 +9,7 @@ GEM
   specs:
     rake (0.9.2)
     subexec (0.2.1)
+    test-unit (2.4.3)
 
 PLATFORMS
   java
@@ -17,3 +18,4 @@ PLATFORMS
 DEPENDENCIES
   mini_magick!
   rake
+  test-unit
