@@ -1,4 +1,6 @@
 /pkg
 coverage
+*.lock
+.idea
 .yardoc
 .rvmrc

@@ -1,6 +1,4 @@
-require 'rubygems'
-require 'test/unit'
-require File.expand_path('../../lib/mini_magick', __FILE__)
+require 'test_helper'
 
 class CommandBuilderTest < Test::Unit::TestCase
   include MiniMagick
