@@ -1,18 +1,27 @@
 require 'rake'
 require 'rake/testtask'
-require 'rdoc/task'
+begin
+  # in 1.9
+  require 'rdoc/task'
+rescue LoadError
+  # for 1.8 compat
+  require 'rake/rdoctask'
+end
 require 'rubygems/package_task'
 
-$:.unshift(File.dirname(__FILE__) + "/lib")
-require 'mini_magick'
+$:.unshift 'lib'
 
 desc 'Default: run unit tests.'
-task :default => :test
+task :default => [:print_version, :test]
+
+task :print_version do 
+  puts `mogrify --version`
+end
 
 desc 'Test the mini_magick plugin.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
+  t.test_files = Dir.glob("test/**/*_test.rb")
   t.verbose = true
 end
 
