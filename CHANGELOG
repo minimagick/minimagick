@@ -1,4 +1,4 @@
-* Dec 28, 2011 - Releasing v3.4 - New subexec version requirement and included previous fixes
+* Dec 28, 2011 - Releasing v3.4 - Better windows support. Fixed problem with combine_options. Fixed up readme. [hcatlin]
 * Dec 21, 2011 - Refactored gem structure a little and added a few bug fixes to better support Windows users - No changes to API though [2potatocakes]
 * June 2, 2011 - Releasing v3.3 - A lot more bugfixes, plus a few new features (like better mime_type accessing) [hcatlin]
 * Jan 11, 2011 - Releasing v3.2 - Bugfix release. Some small changes to the API in very rare circumstances. Mostly having to do with passing multiple arguments to format options. Also, you can now query an image's "colorspace". [hcatlin]
