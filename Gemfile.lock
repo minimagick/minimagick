@@ -2,13 +2,13 @@ PATH
   remote: .
   specs:
     mini_magick (3.3)
-      subexec (~> 0.1.0)
+      subexec (~> 0.2.1)
 
 GEM
   remote: http://rubygems.org/
   specs:
     rake (0.9.2)
-    subexec (0.1.0)
+    subexec (0.2.1)
 
 PLATFORMS
   java
