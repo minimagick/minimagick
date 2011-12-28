@@ -459,7 +459,7 @@ module MiniMagick
       push(@args.pop.gsub(/^-/, '+'))
       if options.any?
         options.each do |o|
-          push "\"#{ o }\""
+          push escape_string(o)
         end
       end
     end
@@ -468,9 +468,13 @@ module MiniMagick
       push "-#{command}"
       if options.any?
         options.each do |o|
-          push "\"#{ o }\""
+          push escape_string(o)
         end
       end
+    end
+    
+    def escape_string(value)
+      '"' + value + '"'
     end
 
     def push(arg)
