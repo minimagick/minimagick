@@ -65,7 +65,7 @@ class ImageTest < Test::Unit::TestCase
     assert image.valid?
     image.destroy!
   end
-  
+
   def test_reformat_with_capitalized_extension
     image = Image.open(CAP_EXT_PATH)
     image.format "jpg"
@@ -126,6 +126,15 @@ class ImageTest < Test::Unit::TestCase
     assert_equal [150, 55], image[:dimensions]
     assert_equal 'PseudoClassRGB', image[:colorspace]
     assert_match(/^gif$/i, image[:format])
+    image.destroy!
+  end
+
+  def test_erroneous_image_meta_info
+    image = Image.new(ERRONEOUS_IMAGE_PATH)
+    assert_equal 10, image[:width]
+    assert_equal 10, image[:height]
+    assert_equal [10, 10], image[:dimensions]
+    assert_equal('JPEG', image[:format])
     image.destroy!
   end
 
@@ -343,7 +352,7 @@ class ImageTest < Test::Unit::TestCase
     png =         Image.open(PNG_PATH)
     tiff =        Image.open(TIFF_IMAGE_PATH)
     hidden_gif =  Image.open(GIF_WITH_JPG_EXT)
-    
+
     assert_equal "image/gif",   gif.mime_type
     assert_equal "image/jpeg",  jpeg.mime_type
     assert_equal "image/png",   png.mime_type
