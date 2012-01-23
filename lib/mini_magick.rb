@@ -4,10 +4,18 @@ require 'stringio'
 require 'pathname'
 
 module MiniMagick
+  @system_method = lambda do |command, timeout|
+    Subexec.run command, :timeout => timeout
+  end
+
   class << self
     attr_accessor :processor
     attr_accessor :timeout
+    attr_accessor :system_method
 
+    def system(command, timeout)
+      @system_method.call command, timeout
+    end
 
     # Experimental method for automatically selecting a processor
     # such as gm. Only works on *nix.
@@ -401,8 +409,7 @@ module MiniMagick
 
     def run(command_builder)
       command = command_builder.command
-
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      sub     = MiniMagick.system(command, MiniMagick.timeout)
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
