@@ -267,13 +267,22 @@ module MiniMagick
     # pages (starting with 0).  You can choose which page you want to manipulate.  We default to the
     # first page.
     #
+    # If you would like to convert between animated formats, pass nil as your
+    # page and ImageMagick will copy all of the pages.
+    #
     # @param format [String] The target format... like 'jpg', 'gif', 'tiff', etc.
-    # @param page [Integer] If this is an animated gif, say which 'page' you want with an integer. Leave as default if you don't care.
+    # @param page [Integer] If this is an animated gif, say which 'page' you want
+    # with an integer. Default 0 will convert only the first page; 'nil' will
+    # convert all pages.
     # @return [nil]
     def format(format, page = 0)
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
-      c << @path
+      if page
+        c << @path + "[#{page}]"
+      else
+        c << @path
+      end
       run(c)
 
       old_path = @path.dup
@@ -281,15 +290,7 @@ module MiniMagick
       File.delete(old_path) if old_path != @path
 
       unless File.exists?(@path)
-        begin
-          FileUtils.copy_file(@path.sub(".#{format}", "-#{page}.#{format}"), @path)
-        rescue => ex
-          raise MiniMagick::Error, "Unable to format to #{format}; #{ex}" unless File.exist?(@path)
-        end
-      end
-    ensure
-      Dir[@path.sub(/(\.\w+)?$/, "-[0-9]*.#{format}")].each do |fname|
-        File.unlink(fname)
+        raise MiniMagick::Error, "Unable to format to #{format}"
       end
     end
 
