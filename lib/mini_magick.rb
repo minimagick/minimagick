@@ -142,14 +142,13 @@ module MiniMagick
         open(file, ext)
       end
 
-            # Used to create a new Image object from scratch.
+      # Used to create a new Image object from scratch.
       #
       # Takes an extension in a block and can be used to build a new Image object.
       #
       # @param ext [String] Specify the extension you want to read it as
       # @param validate [Boolean] If false, skips validation of the created image. Defaults to true.
       # @return [Image] The created image
-
 
       def build(ext = nil, validate = true, &block)
         begin
@@ -164,7 +163,6 @@ module MiniMagick
           b = block.call(c)
           b << tempfile.path
           image.run(b)
-
 
           if validate and !image.valid?
             raise MiniMagick::Invalid
