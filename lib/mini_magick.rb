@@ -142,6 +142,39 @@ module MiniMagick
         open(file, ext)
       end
 
+            # Used to create a new Image object from scratch.
+      #
+      # Takes an extension in a block and can be used to build a new Image object.
+      #
+      # @param ext [String] Specify the extension you want to read it as
+      # @param validate [Boolean] If false, skips validation of the created image. Defaults to true.
+      # @return [Image] The created image
+
+
+      def build(ext = nil, validate = true, &block)
+        begin
+          # Extension must begin with a '.' so Tempfile and Mogrify play nice
+          tempfile = Tempfile.new(['mini_magick', ".#{ext.to_s.downcase}"])
+          tempfile.binmode
+          tempfile.close
+
+          image = self.new(tempfile.path, tempfile)
+
+          c = CommandBuilder.new(:convert)
+          b = block.call(c)
+          b << tempfile.path
+          image.run(b)
+
+
+          if validate and !image.valid?
+            raise MiniMagick::Invalid
+          end
+          return image
+        ensure
+          tempfile.close if tempfile
+        end
+      end
+
       # Used to create a new Image object data-copy. Not used to "paint" or that kind of thing.
       #
       # Takes an extension in a block and can be used to build a new Image object. Used

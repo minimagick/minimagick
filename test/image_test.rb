@@ -28,6 +28,14 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_image_build
+    image = Image.build 'jpg', false do |c|
+      c.size '1024x1024' # creates image option '-size 1024x1024'
+      c.canvas 'black'   # creates image creation operator 'canvas:black'
+    end
+    image.destroy!
+  end
+
   def test_image_create
     image = Image.create do |f|
       #Had to replace the old File.read with the following to work across all platforms
