@@ -65,7 +65,7 @@ Need to combine several options?
 Want to composite two images? Super easy! (Aka, put a watermark on!)
 
   image = Image.open("original.png")
-  result = image.composite(Image.open("watermark.png", "jpg") do |c|
+  result = image.composite(Image.open("watermark.png", "jpg")) do |c|
     c.gravity "center"
   end
   result.write "my_output_file.jpg"
