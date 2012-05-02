@@ -487,7 +487,7 @@ module MiniMagick
     end
     
     def escape_string(value)
-      '"' + value + '"'
+      "\"#{value}\""
     end
 
     def add_creation_operator(command, *options)
