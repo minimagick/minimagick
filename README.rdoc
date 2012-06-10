@@ -4,6 +4,12 @@ A ruby wrapper for ImageMagick or GraphicsMagick command line.
 
 Tested on both Ruby 1.9.2 and Ruby 1.8.7.
 
+== Installation
+
+Add
+    gem "mini_magick"
+to your Gemfile.
+
 == Why?
 
 I was using RMagick and loving it, but it was eating up huge amounts
