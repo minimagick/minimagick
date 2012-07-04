@@ -2,6 +2,7 @@ require 'tempfile'
 require 'subexec'
 require 'stringio'
 require 'pathname'
+require 'shellwords'
 
 module MiniMagick
   class << self
@@ -487,7 +488,7 @@ module MiniMagick
     end
     
     def escape_string(value)
-      '"' + value + '"'
+      Shellwords.escape(value.to_s)
     end
 
     def add_creation_operator(command, *options)
