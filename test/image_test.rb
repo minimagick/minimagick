@@ -116,6 +116,16 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_erroneous_image_meta_info
+    image = Image.new(ERRONEOUS_IMAGE_PATH)
+    assert_equal 10, image[:width]
+    assert_equal 10, image[:height]
+    assert_equal [10, 10], image[:dimensions]
+    assert_equal 'DirectClassGray', image[:colorspace]
+    assert_equal('JPEG', image[:format])
+    image.destroy!
+  end
+
   def test_tiff
     image = Image.new(TIFF_IMAGE_PATH)
     assert_equal "tiff", image[:format].to_s.downcase
