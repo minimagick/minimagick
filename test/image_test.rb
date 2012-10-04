@@ -14,6 +14,19 @@ class ImageTest < Test::Unit::TestCase
     end
   end
 
+  def test_image_from_tempfile
+    tempfile = Tempfile.new('magick')
+
+    File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
+      tempfile.write(f.read)
+      tempfile.rewind
+    end
+
+    image = Image.read(tempfile)
+    assert image.valid?
+    image.destroy!
+  end
+
   def test_image_open
     image = Image.open(SIMPLE_IMAGE_PATH)
     assert image.valid?
