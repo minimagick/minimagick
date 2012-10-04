@@ -63,7 +63,7 @@ module MiniMagick
       def read(stream, ext = nil)
         if stream.is_a?(String)
           stream = StringIO.new(stream)
-        elsif stream.is_a?(File)
+        elsif stream.respond_to? :path
           if File.respond_to?(:binread)
             stream = StringIO.new File.binread(stream.path.to_s)
           else
