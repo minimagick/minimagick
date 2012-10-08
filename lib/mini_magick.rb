@@ -21,15 +21,15 @@ module MiniMagick
         self.processor = "gm"
       end
     end
-    
+
     def image_magick_version
       @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
     end
-    
+
     def minimum_image_magick_version
       @@minimum_version ||= Gem::Version.create("6.6.3")
     end
-    
+
     def valid_version_installed?
       image_magick_version >= minimum_image_magick_version
     end
@@ -395,6 +395,11 @@ module MiniMagick
       # -ping "efficiently determine image characteristics."
       if command == 'identify'
         args.unshift '-ping'
+
+        # GraphicsMagick's identify has no -quiet option
+        if MiniMagick.processor.to_s == 'gm'
+          args.delete('-quiet')
+        end
       end
 
       run(CommandBuilder.new(command, *args))
@@ -486,7 +491,7 @@ module MiniMagick
         end
       end
     end
-    
+
     def escape_string(value)
       Shellwords.escape(value.to_s)
     end
