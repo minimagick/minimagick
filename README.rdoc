@@ -47,7 +47,7 @@ Want to make a thumbnail from a blob...
   image = MiniMagick::Image.read(blob)
   image.resize "100x100"
   image.write  "output.jpg"
-  
+
 Got an incoming IOStream?
 
   image = MiniMagick::Image.read(stream)
@@ -108,10 +108,10 @@ When passing in a blob or IOStream, Windows users need to make sure they read th
 
 == Using GraphicsMagick
 
-Simply set 
+Simply set
 
   MiniMagick.processor = :gm
-  
+
 And you are sorted.
 
 == Requirements
