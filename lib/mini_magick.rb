@@ -452,7 +452,7 @@ module MiniMagick
     end
 
     def command
-      "#{MiniMagick.processor} #{@command} #{@args.join(' ')}".strip
+      "#{MiniMagick.processor} #{@command} #{@args.join(' ')}"
     end
 
     def method_missing(symbol, *options)
@@ -503,7 +503,7 @@ module MiniMagick
     end
 
     def push(arg)
-      @args << arg.to_s.strip
+      @args << arg.to_s
     end
     alias :<< :push
   end
