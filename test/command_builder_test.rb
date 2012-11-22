@@ -9,6 +9,12 @@ class CommandBuilderTest < Test::Unit::TestCase
     assert_equal '-resize 30x40', c.args.join(" ")
   end
 
+  def test_full_command
+    c = CommandBuilder.new("test")
+    c.resize "30x40"
+    assert_equal "test -resize 30x40", c.command
+  end
+
   def test_complicated
     c = CommandBuilder.new("test")
     c.resize "30x40"
@@ -22,7 +28,7 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.distort.+ 'srt', '0.6 20'
     assert_equal '+distort srt 0.6\ 20', c.args.join(" ")
   end
-  
+
   def test_valid_command
     begin
       c = CommandBuilder.new("test", "path")
@@ -38,7 +44,7 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.auto_orient
     assert_equal "-auto-orient", c.args.join(" ")
   end
-  
+
   def test_canvas
     c = CommandBuilder.new('test')
     c.canvas 'black'
