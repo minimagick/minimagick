@@ -45,9 +45,22 @@ class CommandBuilderTest < Test::Unit::TestCase
     assert_equal "-auto-orient", c.args.join(" ")
   end
 
+  def test_dashed_via_send
+    c = CommandBuilder.new("test")
+    c.send("auto-orient")
+    assert_equal "-auto-orient", c.args.join(" ")
+  end
+
   def test_canvas
     c = CommandBuilder.new('test')
     c.canvas 'black'
     assert_equal "canvas:black", c.args.join
   end
+
+  def test_set
+    c = CommandBuilder.new("test")
+    c.set "colorspace RGB"
+    assert_equal 'test -set colorspace\ RGB', c.command
+  end
+
 end
