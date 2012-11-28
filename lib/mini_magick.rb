@@ -340,7 +340,7 @@ module MiniMagick
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
       combine_options do |c|
-        c.method_missing(symbol, *args)
+        c.send(symbol, *args)
       end
     end
 
@@ -454,18 +454,35 @@ module MiniMagick
       "#{MiniMagick.processor} #{@tool} #{@args.join(' ')}".strip
     end
 
-    def method_missing(symbol, *options)
-      guessed_command_name = symbol.to_s.gsub('_','-')
-      if guessed_command_name == "format"
-        raise Error, "You must call 'format' on the image object directly!"
-      elsif MOGRIFY_COMMANDS.include?(guessed_command_name)
-        add_command(guessed_command_name, *options)
+    # Add each mogrify command in both underscore and dash format
+    MOGRIFY_COMMANDS.each do |mogrify_command|
+
+      # Example of what is generated here:
+      #
+      # def auto_orient(*options)
+      #   add_command("auto-orient", *options)
+      #   self
+      # end
+      # alias_method :"auto-orient", :auto_orient
+
+      dashed_command      = mogrify_command.to_s.gsub("_","-")
+      underscored_command = mogrify_command.to_s.gsub("-","_")
+
+      define_method(underscored_command) do |*options|
+        add_command(__method__.to_s.gsub("_","-"), *options)
         self
-      elsif IMAGE_CREATION_OPERATORS.include?(guessed_command_name)
-        add_creation_operator(guessed_command_name, *options)
+      end
+      alias_method dashed_command, underscored_command
+    end
+
+    def format(*options)
+      raise Error, "You must call 'format' on the image object directly!"
+    end
+
+    IMAGE_CREATION_OPERATORS.each do |operator|
+      define_method operator do |*options|
+        add_creation_operator(__method__.to_s, *options)
         self
-      else
-        super(symbol, *args)
       end
     end
 
