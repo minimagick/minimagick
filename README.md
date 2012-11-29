@@ -8,9 +8,11 @@ Tested on the following Rubies: MRI 1.8.7, 1.9.2, 1.9.3, REE, JRuby, Rubinius.
 
 ## Installation
 
-Add
-    gem "mini_magick"
-to your Gemfile.
+Add the gem to your Gemfile:
+
+```ruby
+gem "mini_magick"
+```
 
 ## Why?
 
@@ -112,7 +114,7 @@ image["%m:%f %wx%h"]        # Or you can use one of the many options of the form
 For more on the format command see
 http://www.imagemagick.org/script/command-line-options.php#format
 
-== Windows Users
+## Windows Users
 
 When passing in a blob or IOStream, Windows users need to make sure they read the file in as binary.
 
