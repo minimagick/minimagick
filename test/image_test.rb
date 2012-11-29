@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'digest/md5'
 
 #MiniMagick.processor = :gm
 
@@ -253,16 +254,10 @@ class ImageTest < Test::Unit::TestCase
       result = image.composite(Image.open(TIFF_IMAGE_PATH)) do |c|
         c.gravity "center"
       end
-      assert `diff -s #{result.path} test/files/composited.jpg`.include?("identical")
+      assert_equal Digest::MD5.hexdigest(File.read(result.path)), Digest::MD5.hexdigest(File.read("./test/files/composited.jpg"))
     else
       puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
     end
-    #TODO - need to write test that works cross platform
-    #I thought the following would work but there is a 4 byte difference between the files.
-    #Not sure if it's caused from this test breaking for the right reason though..
-    #assert File.identical?(result.path, COMP_IMAGE_PATH)
-    #This following test will only work on Linux
-    assert `diff -s #{result.path} #{COMP_IMAGE_PATH}`.include?("identical") unless RUBY_PLATFORM =~ /mswin|mingw|cygwin/
   end
 
   # http://github.com/probablycorey/mini_magick/issues#issue/8
