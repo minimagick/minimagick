@@ -455,6 +455,11 @@ module MiniMagick
       "#{MiniMagick.processor} #{@tool} #{@args.join(' ')}".strip
     end
 
+    def repage!
+      add_command '+repage'
+      self
+    end
+
     # Add each mogrify command in both underscore and dash format
     MOGRIFY_COMMANDS.each do |mogrify_command|
 
@@ -497,7 +502,12 @@ module MiniMagick
     end
 
     def add_command(command, *options)
-      push "-#{command}"
+      if command.start_with? "+"
+        push command
+      else
+        push "-#{command}"
+      end
+
       if options.any?
         options.each do |o|
           push escape_string(o)
