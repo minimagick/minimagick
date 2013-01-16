@@ -222,7 +222,7 @@ module MiniMagick
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
       when "colorspace"
-        run_command("identify", "-format", format_option("%r"), escaped_path).split("\n")[0]
+        run_command("identify", "-format", format_option("%r"), escaped_path).split("\n")[0].strip
       when "format"
         run_command("identify", "-format", format_option("%m"), escaped_path).split("\n")[0]
       when "height"
