@@ -102,6 +102,15 @@ image = MiniMagick::Image.new("input.jpg")
 image.resize "100x100"
 ```
 
+Want to add +repage?
+```ruby
+image = MiniMagick::Image.open(image_uri)
+image.combine_options do |c|
+  c.crop("0x35").repage.+
+end
+
+```
+
 Want to get some meta-information out?
 
 ```ruby
