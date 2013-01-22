@@ -17,18 +17,9 @@ gem "mini_magick"
 ## Why?
 
 I was using RMagick and loving it, but it was eating up huge amounts
-of memory. A simple script like this...
-
-```ruby
-Magick::read("image.jpg") do |f|
-  f.write("manipulated.jpg")
-end
-```
-
-...would use over 100MB of Ram. On my local machine this wasn't a
-problem, but on my hosting server the ruby apps would crash because of
-their 100MB memory limit.
-
+of memory. Even a simple script would use over 100MB of Ram. On my
+local machine this wasn't a problem, but on my hosting server the
+ruby apps would crash because of their 100MB memory limit.
 
 ## Solution!
 
@@ -113,6 +104,26 @@ image["%m:%f %wx%h"]        # Or you can use one of the many options of the form
 
 For more on the format command see
 http://www.imagemagick.org/script/command-line-options.php#format
+
+Want to composite (merge) two images?
+
+```ruby
+first_image = MiniMagick::Image.open "first.jpg"
+second_image = MiniMagick::Image.open "second.jpg"
+first_image.composite(second_image) do |c|
+  c.compose "Over" # OverCompositeOp
+  c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
+end
+first_image.write "output.jpg"
+```
+
+## Thinking of switching from RMagick?
+
+Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.
+
+* To piece together MiniMagick commands is to refer to the [Mogrify Documentation](http://www.imagemagick.org/script/mogrify.php). For instance you can use the `-flop` option as `image.flop`.
+* Operations on a MiniMagick image tend to happen in-place as `image.trim`, whereas RMagick has both copying and in-place methods like `image.trim` and `image.trim!`.
+* Top open files with MiniMagick you use `MiniMagick::Image.open` as you would `Magick::Image.read`. To open a file and directly edit it, use `MiniMagick::Image.new`.
 
 ## Windows Users
 
