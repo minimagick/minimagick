@@ -151,3 +151,7 @@ And you are sorted.
 # Requirements
 
 You must have ImageMagick or GraphicsMagick installed.
+
+# Caveats
+
+Version 3.5 doesn't work in Ruby 1.9.2-p180. If you are running this Ruby version use the 3.4 version of this gem.
