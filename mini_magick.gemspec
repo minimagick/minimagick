@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.summary     = "Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick"
   s.description = ""
+  s.requirements << "You must have ImageMagick or GraphicsMagick installed"
 
   s.authors     = ["Corey Johnson", "Hampton Catlin", "Peter Kieltyka"]
   s.email       = ["probablycorey@gmail.com", "hcatlin@gmail.com", "peter@nulayer.com"]
