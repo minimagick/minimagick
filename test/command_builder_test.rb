@@ -63,4 +63,9 @@ class CommandBuilderTest < Test::Unit::TestCase
     assert_equal 'test -set colorspace\ RGB', c.command
   end
 
+  def test_adjoin
+    c = CommandBuilder.new("test")
+    c.adjoin.+ "foo_%d.png"
+    assert_equal '+adjoin foo_\%d.png', c.args.join(" ")
+  end
 end
