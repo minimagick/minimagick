@@ -362,7 +362,7 @@ module MiniMagick
 
       c << @path if tool.to_s == "convert"
       block.call(c)
-      c << @path
+      c << @path if tool.to_s == 'mogrify'
       run(c)
     end
 

@@ -354,4 +354,14 @@ class ImageTest < Test::Unit::TestCase
     assert_equal "image/tiff",  tiff.mime_type
     assert_equal "image/gif",   hidden_gif.mime_type
   end
+
+  def test_image_adjoin
+    image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+    image.combine_options 'convert' do |c|
+      c.quality 100
+      c.adjoin.+ "image_%d.png"
+    end
+    assert File.exists?('image_0.png')
+    image.destroy!
+  end
 end
