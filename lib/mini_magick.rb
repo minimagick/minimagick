@@ -7,6 +7,7 @@ require 'shellwords'
 module MiniMagick
   class << self
     attr_accessor :processor
+    attr_accessor :processor_path
     attr_accessor :timeout
 
 
@@ -20,6 +21,10 @@ module MiniMagick
       elsif `type -P gm`.size > 0
         self.processor = "gm"
       end
+    end
+
+    def windows?
+      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
     end
 
     def image_magick_version
@@ -368,7 +373,7 @@ module MiniMagick
 
     # Check to see if we are running on win32 -- we need to escape things differently
     def windows?
-      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+      MiniMagick.windows?
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
@@ -454,7 +459,14 @@ module MiniMagick
     end
 
     def command
-      "#{MiniMagick.processor} #{@tool} #{@args.join(' ')}".strip
+      com = "#{@tool} #{@args.join(' ')}".strip
+      com = "#{MiniMagick.processor} #{com}" unless MiniMagick.processor.nil?
+
+      unless MiniMagick.processor_path.nil?
+        seperator = MiniMagick.windows? ? "\\" : "/"
+        com = "#{MiniMagick.processor_path}#{seperator}#{com}"
+      end
+      com.strip
     end
 
     # Add each mogrify command in both underscore and dash format
