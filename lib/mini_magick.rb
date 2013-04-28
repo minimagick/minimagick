@@ -192,7 +192,7 @@ module MiniMagick
     end
 
     def escaped_path
-      Pathname.new(@path).to_s.inspect
+      Pathname.new(@path).to_s.shellescape
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -287,9 +287,9 @@ module MiniMagick
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
       if page
-        c << @path + "[#{page}]"
+        c << "#{@path}[#{page}]".shellescape
       else
-        c << @path
+        c << escaped_path
       end
       run(c)
 
@@ -365,9 +365,9 @@ module MiniMagick
     def combine_options(tool = "mogrify", &block)
       c = CommandBuilder.new(tool)
 
-      c << @path if tool.to_s == "convert"
+      c << escaped_path if tool.to_s == "convert"
       block.call(c)
-      c << @path
+      c << escaped_path
       run(c)
     end
 
@@ -459,7 +459,7 @@ module MiniMagick
     end
 
     def command
-      com = "#{@tool} #{@args.join(' ')}".strip
+      com = "#{@tool} #{@args.join ' '}".strip
       com = "#{MiniMagick.processor} #{com}" unless MiniMagick.processor.nil?
 
       unless MiniMagick.processor_path.nil?
