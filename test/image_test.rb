@@ -199,6 +199,16 @@ class ImageTest < Test::Unit::TestCase
     image.destroy!
   end
 
+  def test_image_combine_options_with_filename_with_special_characters_in_it
+    image = Image.new(SPECIAL_CHARS_IMAGE_PATH)
+    assert_nothing_raised do
+      image.combine_options("identify") do |c|
+        c.ping
+      end
+    end
+    image.destroy!
+  end
+
   def test_exif
     image = Image.open(EXIF_IMAGE_PATH)
     assert_equal('0220', image["exif:ExifVersion"])
@@ -234,6 +244,23 @@ class ImageTest < Test::Unit::TestCase
     image.format('png')
     assert !File.exist?(before)
     image.destroy!
+  end
+
+  def test_change_format_of_image_with_special_characters
+    tempfile = Tempfile.new('magick with special! "chars\'')
+
+    File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
+      tempfile.write(f.read)
+      tempfile.rewind
+    end
+
+    image = Image.new(tempfile.path)
+    image.format('png')
+    assert File.exists?(image.path)
+    image.destroy!
+
+    File.delete(image.path)
+    tempfile.unlink
   end
 
   def test_bad_method_bug
