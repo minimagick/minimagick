@@ -36,7 +36,7 @@ class CommandBuilderTest < Test::Unit::TestCase
   def test_plus_modifier_and_multiple_options
     c = CommandBuilder.new("test")
     c.distort.+ 'srt', '0.6 20'
-    assert_equal '+distort srt 0.6\ 20', c.args.join(" ")
+    assert_equal '\+distort srt 0.6\ 20', c.args.join(" ")
   end
 
   def test_valid_command

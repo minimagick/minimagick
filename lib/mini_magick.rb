@@ -23,10 +23,6 @@ module MiniMagick
       end
     end
 
-    def windows?
-      RUBY_PLATFORM =~ /mswin|mingw|cygwin/
-    end
-
     def image_magick_version
       @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
     end
@@ -111,8 +107,8 @@ module MiniMagick
         image = create(".dat", validate = false) { |f| f.write(blob) }
         # Use ImageMagick to convert the raw data file to an image file of the desired format:
         converted_image_path = image.path[0..-4] + format
-        argument = "-size #{columns}x#{rows} -depth #{depth} #{map}:#{image.path} #{converted_image_path}"
-        cmd = CommandBuilder.new("convert", argument) #Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
+        arguments = ["-size", "#{columns}x#{rows}", "-depth", "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
+        cmd = CommandBuilder.new("convert", *arguments) #Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
         image.run(cmd)
         # Update the image instance with the path of the properly formatted image, and return:
         image.path = converted_image_path
@@ -191,10 +187,6 @@ module MiniMagick
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
     end
 
-    def escaped_path
-      Pathname.new(@path).to_s.shellescape
-    end
-
     # Checks to make sure that MiniMagick can read the file and understand it.
     #
     # This uses the 'identify' command line utility to check the file. If you are having
@@ -203,7 +195,7 @@ module MiniMagick
     #
     # @return [Boolean]
     def valid?
-      run_command("identify", @path)
+      run_command("identify", path)
       true
     rescue MiniMagick::Invalid
       false
@@ -229,29 +221,29 @@ module MiniMagick
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
       when "colorspace"
-        run_command("identify", "-format", format_option("%r"), escaped_path).split("\n")[0].strip
+        run_command("identify", "-format", '%r\n', path).split("\n")[0].strip
       when "format"
-        run_command("identify", "-format", format_option("%m"), escaped_path).split("\n")[0]
+        run_command("identify", "-format", '%m\n', path).split("\n")[0]
       when "height"
-        run_command("identify", "-format", format_option("%h"), escaped_path).split("\n")[0].to_i
+        run_command("identify", "-format", '%h\n', path).split("\n")[0].to_i
       when "width"
-        run_command("identify", "-format", format_option("%w"), escaped_path).split("\n")[0].to_i
+        run_command("identify", "-format", '%w\n', path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", format_option("%w %h"), escaped_path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-format", '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
-        File.size(@path) # Do this because calling identify -format "%b" on an animated gif fails!
+        File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
         # Get the EXIF original capture as a Time object
         Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
-        result = run_command('identify', '-format', "\"%[#{value}]\"", escaped_path).chop
+        result = run_command('identify', '-format', "%[#{value}]", path).chop
         if result.include?(",")
           read_character_data(result)
         else
           result
         end
       else
-        run_command('identify', '-format', "\"#{value}\"", escaped_path).split("\n")[0]
+        run_command('identify', '-format', value, path).split("\n")[0]
       end
     end
 
@@ -261,7 +253,7 @@ module MiniMagick
     #
     # @return [String] Whatever the result from the command line is. May not be terribly useful.
     def <<(*args)
-      run_command("mogrify", *args << escaped_path)
+      run_command("mogrify", *args << path)
     end
 
     # This is used to change the format of the image. That is, from "tiff to jpg" or something like that.
@@ -287,17 +279,17 @@ module MiniMagick
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
       if page
-        c << "#{@path}[#{page}]".shellescape
+        c << "#{path}[#{page}]"
       else
-        c << escaped_path
+        c << path
       end
       run(c)
 
-      old_path = @path.dup
-      @path.sub!(/(\.\w*)?$/, ".#{format}")
-      File.delete(old_path) if old_path != @path
+      old_path = path
+      self.path = path.sub(/(\.\w*)?$/, ".#{format}")
+      File.delete(old_path) if old_path != path
 
-      unless File.exists?(@path)
+      unless File.exists?(path)
         raise MiniMagick::Error, "Unable to format to #{format}"
       end
     end
@@ -316,10 +308,10 @@ module MiniMagick
     # Writes the temporary image that we are using for processing to the output path
     def write(output_to)
       if output_to.kind_of?(String) || !output_to.respond_to?(:write)
-        FileUtils.copy_file @path, output_to
-        run_command "identify", output_to.to_s.inspect # Verify that we have a good image
+        FileUtils.copy_file path, output_to
+        run_command "identify", output_to.to_s # Verify that we have a good image
       else # stream
-        File.open(@path, "rb") do |f|
+        File.open(path, "rb") do |f|
           f.binmode
           while chunk = f.read(8192)
             output_to.write(chunk)
@@ -332,7 +324,7 @@ module MiniMagick
     # Gives you raw image data back
     # @return [String] binary string
     def to_blob
-      f = File.new @path
+      f = File.new path
       f.binmode
       f.read
     ensure
@@ -365,15 +357,10 @@ module MiniMagick
     def combine_options(tool = "mogrify", &block)
       c = CommandBuilder.new(tool)
 
-      c << escaped_path if tool.to_s == "convert"
+      c << path if tool.to_s == "convert"
       block.call(c)
-      c << escaped_path
+      c << path
       run(c)
-    end
-
-    # Check to see if we are running on win32 -- we need to escape things differently
-    def windows?
-      MiniMagick.windows?
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
@@ -392,11 +379,6 @@ module MiniMagick
 
       run(command)
       return Image.new(second_tempfile.path, second_tempfile)
-    end
-
-    # Outputs a carriage-return delimited format string for Unix and Windows
-    def format_option(format)
-      windows? ? "\"#{format}\\n\"" : "\"#{format}\\\\n\""
     end
 
     def run_command(command, *args)
@@ -450,8 +432,6 @@ module MiniMagick
   end
 
   class CommandBuilder
-    attr_reader :args
-
     def initialize(tool, *options)
       @tool = tool
       @args = []
@@ -459,14 +439,15 @@ module MiniMagick
     end
 
     def command
-      com = "#{@tool} #{@args.join ' '}".strip
+      com = "#{@tool} #{args.join(' ')}".strip
       com = "#{MiniMagick.processor} #{com}" unless MiniMagick.processor.nil?
 
-      unless MiniMagick.processor_path.nil?
-        seperator = MiniMagick.windows? ? "\\" : "/"
-        com = "#{MiniMagick.processor_path}#{seperator}#{com}"
-      end
+      com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
       com.strip
+    end
+
+    def args
+      @args.map(&:shellescape)
     end
 
     # Add each mogrify command in both underscore and dash format
@@ -505,7 +486,7 @@ module MiniMagick
       push(@args.pop.gsub(/^-/, '+'))
       if options.any?
         options.each do |o|
-          push escape_string(o)
+          push o
         end
       end
     end
@@ -514,13 +495,9 @@ module MiniMagick
       push "-#{command}"
       if options.any?
         options.each do |o|
-          push escape_string(o)
+          push o
         end
       end
-    end
-
-    def escape_string(value)
-      Shellwords.escape(value.to_s)
     end
 
     def add_creation_operator(command, *options)
