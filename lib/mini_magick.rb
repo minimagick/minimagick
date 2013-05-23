@@ -131,7 +131,9 @@ module MiniMagick
         if file_or_url.include?("://")
           require 'open-uri'
           ext ||= File.extname(URI.parse(file_or_url).path)
-          self.read(Kernel::open(file_or_url), ext)
+          Kernel::open(file_or_url) do |f|
+            self.read(f, ext)
+          end
         else
           ext ||= File.extname(file_or_url)
           File.open(file_or_url, "rb") do |f|
