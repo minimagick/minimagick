@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'rubygems'
 require 'test/unit'
 require 'pathname'
@@ -9,7 +11,7 @@ module MiniMagickTestFiles
   test_files = File.expand_path(File.dirname(__FILE__) + "/files")
   SIMPLE_IMAGE_PATH        = test_files + "/simple.gif"
   MINUS_IMAGE_PATH         = test_files + "/simple-minus.gif"
-  SPECIAL_CHARS_IMAGE_PATH = test_files + "/special! \"chars'.gif"
+  SPECIAL_CHARS_IMAGE_PATH = test_files + "/special! _chars' )(-æøå.gif"
   TIFF_IMAGE_PATH          = test_files + "/leaves (spaced).tiff"
   NOT_AN_IMAGE_PATH        = test_files + "/not_an_image.php"
   GIF_WITH_JPG_EXT         = test_files + "/actually_a_gif.jpg"
