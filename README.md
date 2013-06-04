@@ -27,7 +27,7 @@ Using MiniMagick the ruby processes memory remains small (it spawns
 ImageMagick's command line program mogrify which takes up some memory
 as well, but is much smaller compared to RMagick)
 
-MiniMagick gives you access to all the commandline options ImageMagick
+MiniMagick gives you access to all the command line options ImageMagick
 has (Found here http://www.imagemagick.org/script/mogrify.php)
 
 
@@ -121,9 +121,9 @@ first_image.write "output.jpg"
 
 Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.
 
-* To piece together MiniMagick commands is to refer to the [Mogrify Documentation](http://www.imagemagick.org/script/mogrify.php). For instance you can use the `-flop` option as `image.flop`.
+* To piece together MiniMagick commands refer to the [Mogrify Documentation](http://www.imagemagick.org/script/mogrify.php). For instance you can use the `-flop` option as `image.flop`.
 * Operations on a MiniMagick image tend to happen in-place as `image.trim`, whereas RMagick has both copying and in-place methods like `image.trim` and `image.trim!`.
-* Top open files with MiniMagick you use `MiniMagick::Image.open` as you would `Magick::Image.read`. To open a file and directly edit it, use `MiniMagick::Image.new`.
+* To open files with MiniMagick you use `MiniMagick::Image.open` as you would `Magick::Image.read`. To open a file and directly edit it, use `MiniMagick::Image.new`.
 
 ## Windows Users
 
