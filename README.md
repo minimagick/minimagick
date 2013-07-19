@@ -117,6 +117,22 @@ end
 result.write "output.jpg"
 ```
 
+## Configuration
+
+By default all temporary files are written to the temporary directory of the system `Dir.tmpdir`. If your application does not have permissions to write there, you may choose another directory:
+
+```ruby
+MiniMagick::Image.setup do |config|
+  config.tmpdir = Rails.root.join('tmp', 'uploads').to_s
+end
+```
+
+If you're using Rails, create an initializer for this:
+
+```ruby
+config/initializers/mini_magick.rb
+```
+
 ## Thinking of switching from RMagick?
 
 Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.

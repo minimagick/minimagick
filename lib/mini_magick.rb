@@ -5,6 +5,7 @@ require 'pathname'
 require 'shellwords'
 
 module MiniMagick
+
   class << self
     attr_accessor :processor
     attr_accessor :processor_path
@@ -46,6 +47,13 @@ module MiniMagick
   class Image
     # @return [String] The location of the current working file
     attr_accessor :path
+
+    @@tmpdir = Dir.tmpdir
+    mattr_accessor :tmpdir
+
+    def self.setup
+      yield self
+    end
 
     # Class Methods
     # -------------
@@ -159,7 +167,7 @@ module MiniMagick
       # @return [Image] The created image
       def create(ext = nil, validate = true, &block)
         begin
-          tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
+          tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase], @@tmpdir)
           tempfile.binmode
           block.call(tempfile)
           tempfile.close
@@ -367,7 +375,7 @@ module MiniMagick
 
     def composite(other_image, output_extension = 'jpg', &block)
       begin
-        second_tempfile = Tempfile.new(output_extension)
+        second_tempfile = Tempfile.new(output_extension, @@tmpdir)
         second_tempfile.binmode
       ensure
         second_tempfile.close
