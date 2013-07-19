@@ -110,11 +110,11 @@ Want to composite (merge) two images?
 ```ruby
 first_image = MiniMagick::Image.open "first.jpg"
 second_image = MiniMagick::Image.open "second.jpg"
-first_image.composite(second_image) do |c|
+result = first_image.composite(second_image) do |c|
   c.compose "Over" # OverCompositeOp
   c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
 end
-first_image.write "output.jpg"
+result.write "output.jpg"
 ```
 
 ## Thinking of switching from RMagick?
