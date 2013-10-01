@@ -238,7 +238,7 @@ module MiniMagick
         # Get the EXIF original capture as a Time object
         Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
-        result = run_command('identify', '-format', "%[#{value}]", path).chop
+        result = run_command('identify', '-format', "%[#{value}]", path).chomp
         if result.include?(",")
           read_character_data(result)
         else
