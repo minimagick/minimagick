@@ -4,13 +4,13 @@ require 'stringio'
 require 'pathname'
 require 'shellwords'
 require 'mini_magick/command_builder'
+require 'mini_magick/errors'
 
 module MiniMagick
   class << self
     attr_accessor :processor
     attr_accessor :processor_path
     attr_accessor :timeout
-
 
     # Experimental method for automatically selecting a processor
     # such as gm. Only works on *nix.
@@ -36,9 +36,6 @@ module MiniMagick
       image_magick_version >= minimum_image_magick_version
     end
   end
-
-  class Error < RuntimeError; end
-  class Invalid < StandardError; end
 
   class Image
     # @return [String] The location of the current working file
