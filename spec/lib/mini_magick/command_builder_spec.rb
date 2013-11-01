@@ -28,5 +28,12 @@ describe MiniMagick::CommandBuilder do
       builder.resize "30x40"
       builder.command.should == "test -resize 30x40"
     end
+
+    it "builds a complicated command" do
+      builder.resize "30x40"
+      builder.alpha '1 3 4'
+      builder.resize 'mome fingo'
+      builder.args.join(" ").should == '-resize 30x40 -alpha 1\ 3\ 4 -resize mome\ fingo'
+    end
   end
 end
