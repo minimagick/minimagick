@@ -1,5 +1,10 @@
 require 'spec_helper'
 
+# All tests tagged as `ported` are ported from
+# testunit tests and are there for backwards compatibility
+
+MiniMagick.processor = '' #TODO: This should point to mogrify instead
+
 describe MiniMagick::CommandBuilder do
   before(:each) do
     @processor = MiniMagick.processor
@@ -11,10 +16,17 @@ describe MiniMagick::CommandBuilder do
     MiniMagick.processor = @processor
   end
 
-  let(:builder){ MiniMagick::CommandBuilder.new('test') }
+  describe "ported from testunit", ported: true do
+    let(:builder){ MiniMagick::CommandBuilder.new('test') }
 
-  it "should build a basic command" do
-    builder.resize "30x40"
-    '-resize 30x40'.should == builder.args.join(" ")
+    it "builds a basic command" do
+      builder.resize "30x40"
+      builder.args.join(" ").should == '-resize 30x40'
+    end
+
+    it "builds a full command" do
+      builder.resize "30x40"
+      builder.command.should == "test -resize 30x40"
+    end
   end
 end
