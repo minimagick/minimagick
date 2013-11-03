@@ -81,4 +81,25 @@ describe MiniMagick::CommandBuilder do
       builder.command.should == "/a/strange/path/processor test -auto-orient"
     end
   end
+
+  context 'deprecated' do
+    let(:builder){ MiniMagick::CommandBuilder.new('test') }
+    before(:each) { MiniMagick.processor = 'mogrify' }
+
+    it "builds a full command" do
+      builder.resize "30x40"
+      builder.command.should == "test -resize 30x40"
+    end
+
+    it "sets a colorspace correctly" do
+      builder.set 'colorspace RGB'
+      builder.command.should == 'test -set colorspace\ RGB'
+    end
+
+    it "sets a processor path correctly" do
+      MiniMagick.processor_path = "/a/strange/path"
+      builder.auto_orient
+      builder.command.should == "/a/strange/path/test -auto-orient"
+    end
+  end
 end
