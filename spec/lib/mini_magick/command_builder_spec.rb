@@ -3,7 +3,7 @@ require 'spec_helper'
 # All tests tagged as `ported` are ported from
 # testunit tests and are there for backwards compatibility
 
-MiniMagick.processor = 'mogrify' #TODO: This should point to mogrify instead
+MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::CommandBuilder do
   before(:each) do
