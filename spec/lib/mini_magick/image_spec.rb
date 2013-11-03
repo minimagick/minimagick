@@ -5,7 +5,7 @@ require 'tempfile'
 MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::Image do
-  describe "ported from testunit", ported: true do
+  describe "ported from testunit", :ported => true do
     it 'reads image from blob' do
       File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
         image = MiniMagick::Image.read(f.read)
