@@ -18,9 +18,9 @@ module MiniMagick
     #
     # TODO: Write tests for this and figure out what platforms it supports
     def choose_processor
-      if `type -P mogrify`.size > 0
+      if `which mogrify`.size > 0
         return
-      elsif `type -P gm`.size > 0
+      elsif `which gm`.size > 0
         self.processor = "gm"
       end
     end
