@@ -220,5 +220,150 @@ describe MiniMagick::Image do
       image["EXIF:ExifVersion"].should == ''
       image.destroy!
     end
+
+    it 'inspects the original at of an image' do
+      image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
+      image[:original_at].should == Time.local('2005', '2', '23', '23', '17', '24')
+      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+      image[:original_at].should be nil
+      image.destroy!
+    end
+
+    it 'has the same path for tempfile and image' do
+      image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      image.instance_eval("@tempfile.path").should == image.path
+      image.destroy!
+    end
+
+    it 'has the tempfile at path after format' do
+      image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      image.format('png')
+      File.exists?(image.path).should be true
+      image.destroy!
+    end
+
+    it "hasn't previous tempfile at path after format" do
+      image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      before = image.path.dup
+      image.format('png')
+      File.exist?(before).should be false
+      image.destroy!
+    end
+
+    it "changes the format of image with special characters" do
+      tempfile = Tempfile.new('magick with special! "chars\'')
+
+      File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
+        tempfile.write(f.read)
+        tempfile.rewind
+      end
+
+      image = MiniMagick::Image.new(tempfile.path)
+      image.format('png')
+      File.exists?(image.path).should be true
+      image.destroy!
+
+      File.delete(image.path)
+      tempfile.unlink
+    end
+
+    it "raises exception when calling wrong method" do
+      image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      expect { image.to_blog }.to raise_error(NoMethodError)
+      image.to_blob
+      image.destroy!
+    end
+
+    it "can create a composite of two images" do
+      if MiniMagick.valid_version_installed?
+        image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
+        result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH)) do |c|
+          c.gravity "center"
+        end
+        File.exists?(result.path).should be true
+      else
+        puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
+      end
+    end
+
+    # https://github.com/minimagick/minimagick/issues/8
+    it "has issue 8 fixed" do
+      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+      expect do
+        image.combine_options do |c|
+          c.sample "50%"
+          c.rotate "-90>"
+        end
+      end.to_not raise_error
+      image.destroy!
+    end
+
+    # https://github.com/minimagick/minimagick/issues/8 
+    it 'has issue 15 fixed' do
+      expect do
+        image = MiniMagick::Image.open(Pathname.new(SIMPLE_IMAGE_PATH))
+        output = Pathname.new("test.gif")
+        image.write(output)
+      end.to_not raise_error
+      FileUtils.rm("test.gif")
+    end
+
+    # https://github.com/minimagick/minimagick/issues/37
+    it 'respects the language set' do
+      original_lang = ENV["LANG"]
+      ENV["LANG"] = "fr_FR.UTF-8"
+
+      expect  do
+        image = MiniMagick::Image.open(NOT_AN_IMAGE_PATH)
+        image.destroy
+      end.to raise_error(MiniMagick::Invalid)
+
+      ENV["LANG"] = original_lang
+    end
+
+    it 'can import pixels with default format' do
+      columns = 325
+      rows = 200
+      depth = 16 # 16 bits (2 bytes) per pixel
+      map = 'gray'
+      pixels = Array.new(columns*rows) {|i| i}
+      blob = pixels.pack("S*") # unsigned short, native byte order
+      image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map)
+      image.valid?.should be true
+      image[:format].to_s.downcase.should == 'png'
+      image[:width].should == columns
+      image[:height].should == rows
+      image.write("#{Dir.tmpdir}/imported_pixels_image.png")
+    end
+
+    it 'can import pixels with custom format' do
+      columns = 325
+      rows = 200
+      depth = 16 # 16 bits (2 bytes) per pixel
+      map = 'gray'
+      format = 'jpeg'
+      pixels = Array.new(columns*rows) {|i| i}
+      blob = pixels.pack("S*") # unsigned short, native byte order
+      image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map, format)
+      image.valid?.should be true
+      image[:format].to_s.downcase.should == format
+      image[:width].should == columns
+      image[:height].should == rows
+      image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
+    end
+
+    it 'loads mimetype correctly' do
+      gif =         MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+      jpeg =        MiniMagick::Image.open(EXIF_IMAGE_PATH)
+      png =         MiniMagick::Image.open(PNG_PATH)
+      tiff =        MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      hidden_gif =  MiniMagick::Image.open(GIF_WITH_JPG_EXT)
+
+      gif.mime_type.should == "image/gif"
+      jpeg.mime_type.should == "image/jpeg"
+      png.mime_type.should == "image/png"
+      tiff.mime_type.should == "image/tiff"
+      hidden_gif.mime_type == "image/gif"
+    end
   end
 end
