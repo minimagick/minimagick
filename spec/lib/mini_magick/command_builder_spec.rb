@@ -3,7 +3,7 @@ require 'spec_helper'
 # All tests tagged as `ported` are ported from
 # testunit tests and are there for backwards compatibility
 
-MiniMagick.processor = nil #TODO: This should point to mogrify instead
+MiniMagick.processor = 'mogrify' #TODO: This should point to mogrify instead
 
 describe MiniMagick::CommandBuilder do
   before(:each) do
@@ -84,7 +84,7 @@ describe MiniMagick::CommandBuilder do
 
   context 'deprecated' do
     let(:builder){ MiniMagick::CommandBuilder.new('test') }
-    before(:each) { MiniMagick.processor = 'mogrify' }
+    before(:each) { MiniMagick.processor = nil }
 
     it "builds a full command" do
       builder.resize "30x40"

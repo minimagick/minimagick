@@ -36,5 +36,19 @@ module MiniMagick
     def valid_version_installed?
       image_magick_version >= minimum_image_magick_version
     end
+
+    # Picks the right processor if it isn't set and tells if it's mogrify
+    def mogrify?
+      self.choose_processor if self.processor.nil?
+
+      self.processor == 'mogrify'
+    end
+
+    # Picks the right processor if it isn't set and tells if it's gm
+    def gm?
+      self.choose_processor if self.processor.nil?
+
+      self.processor == 'gm'
+    end
   end
 end

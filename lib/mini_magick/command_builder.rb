@@ -11,7 +11,7 @@ module MiniMagick
 
     def command
       com = "#{@tool} #{args.join(' ')}".strip
-      com = "#{MiniMagick.processor} #{com}" unless MiniMagick.processor.nil? || MiniMagick.processor.eql?('mogrify')
+      com = "#{MiniMagick.processor} #{com}" unless MiniMagick.mogrify?
 
       com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
       com.strip
