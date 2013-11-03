@@ -16,7 +16,7 @@ describe MiniMagick::CommandBuilder do
     MiniMagick.processor = @processor
   end
 
-  describe "ported from testunit", ported: true do
+  describe "ported from testunit", :ported => true do
     let(:builder){ MiniMagick::CommandBuilder.new('test') }
 
     it "builds a basic command" do
