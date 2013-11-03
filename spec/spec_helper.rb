@@ -1,9 +1,9 @@
+require 'rubygems'
+require 'bundler/setup'
 require 'rspec'
 require 'mocha/api'
 
-Dir.glob("lib/**/*.rb").each do |file|
-  require_relative "../#{file}"
-end
+require 'mini_magick'
 
 RSpec.configure do |config|
   config.mock_framework = :mocha
