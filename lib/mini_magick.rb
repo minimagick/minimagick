@@ -56,12 +56,8 @@ module MiniMagick
       @path.include?(' ') ? path.inspect : path
     end
 
-    def path_for_windows(path)
-      Pathname.new(path).to_s
-    end
-
     def path
-      IS_WINDOWS ? path_for_windows(@path) : @path
+      IS_WINDOWS ? path_for_windows_quote_space(@path) : @path
     end
 
     def path=(path)
@@ -251,7 +247,7 @@ module MiniMagick
       when "width"
         run_command("identify", "-format", '%w\n', path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-format", IS_WINDOWS ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
         File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
@@ -362,7 +358,7 @@ module MiniMagick
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
       combine_options do |c|
-        c.send(symbol, *args)
+          c.send(symbol, *args)
       end
     end
 
@@ -471,7 +467,12 @@ module MiniMagick
     def escape_string_windows(value)
       # For Windows, ^ is the escape char, equivalent to \ in Unix.
       escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
-      escaped.include?(' ') ? escaped.inspect : escaped
+      if escaped !~ /^".+"$/ && escaped.include?("'")
+        escaped.inspect
+      else
+        escaped
+      end
+
     end
 
     def args
