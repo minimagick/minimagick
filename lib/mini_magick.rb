@@ -449,7 +449,11 @@ module MiniMagick
     end
 
     def args
-      @args.map(&:shellescape)
+      if RUBY_PLATFORM["mingw"]
+        @args.map { |arg| "\"#{arg}\"" }
+      else
+        @args.map(&:shellescape)
+      end
     end
 
     # Add each mogrify command in both underscore and dash format
