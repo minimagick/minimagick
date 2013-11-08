@@ -6,6 +6,7 @@ require 'shellwords'
 require 'mini_magick/command_builder'
 require 'mini_magick/errors'
 require 'mini_magick/image'
+require 'mini_magick/utilities'
 
 module MiniMagick
   class << self
@@ -13,14 +14,10 @@ module MiniMagick
     attr_accessor :processor_path
     attr_accessor :timeout
 
-    # Experimental method for automatically selecting a processor
-    # such as gm. Only works on *nix.
-    #
-    # TODO: Write tests for this and figure out what platforms it supports
     def choose_processor
-      if `which mogrify`.size > 0
+      if MiniMagick::Utilities.which('mogrify').size > 0
         self.processor = 'mogrify'
-      elsif `which gm`.size > 0
+      elsif MiniMagick::Utilities.which('gm').size > 0
         self.processor = "gm"
       end
     end
