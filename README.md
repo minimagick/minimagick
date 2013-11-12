@@ -14,6 +14,11 @@ Add the gem to your Gemfile:
 gem "mini_magick"
 ```
 
+## Information
+
+* [Rdoc](http://rubydoc.info/github/minimagick/minimagick)
+
+
 ## Why?
 
 I was using RMagick and loving it, but it was eating up huge amounts
