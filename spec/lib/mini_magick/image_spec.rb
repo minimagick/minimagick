@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'pathname'
 require 'tempfile'
 
-MiniMagick.processor = 'gm'
+MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::Image do
   describe "ported from testunit", :ported => true do
