@@ -160,3 +160,4 @@ You must have ImageMagick or GraphicsMagick installed.
 # Caveats
 
 Version 3.5 doesn't work in Ruby 1.9.2-p180. If you are running this Ruby version use the 3.4 version of this gem.
+Version 3.6 supports Windows on a best effort basis. Most of the functions are working. However some special edge cases, especially involving file name with special characters are not expected to work.

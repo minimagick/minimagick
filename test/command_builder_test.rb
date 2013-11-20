@@ -1,4 +1,4 @@
-require 'test_helper'
+require File.expand_path('../test_helper', __FILE__)
 
 class CommandBuilderTest < Test::Unit::TestCase
   include MiniMagick
@@ -30,13 +30,21 @@ class CommandBuilderTest < Test::Unit::TestCase
     c.resize "30x40"
     c.alpha "1 3 4"
     c.resize "mome fingo"
-    assert_equal '-resize 30x40 -alpha 1\ 3\ 4 -resize mome\ fingo', c.args.join(" ")
+    if IS_WINDOWS
+      assert_equal '-resize 30x40 -alpha 1 3 4 -resize mome fingo', c.args.join(" ")
+    else
+      assert_equal '-resize 30x40 -alpha 1\ 3\ 4 -resize mome\ fingo', c.args.join(" ")
+    end
   end
 
   def test_plus_modifier_and_multiple_options
     c = CommandBuilder.new("test")
     c.distort.+ 'srt', '0.6 20'
-    assert_equal '\+distort srt 0.6\ 20', c.args.join(" ")
+    if IS_WINDOWS
+      assert_equal '+distort srt 0.6 20', c.args.join(" ")
+    else
+      assert_equal '\+distort srt 0.6\ 20', c.args.join(" ")
+    end
   end
 
   def test_valid_command
@@ -70,7 +78,11 @@ class CommandBuilderTest < Test::Unit::TestCase
   def test_set
     c = CommandBuilder.new("test")
     c.set "colorspace RGB"
-    assert_equal 'test -set colorspace\ RGB', c.command
+    if IS_WINDOWS
+      assert_equal 'test -set colorspace RGB', c.command
+    else
+      assert_equal 'test -set colorspace\ RGB', c.command
+    end
   end
 
   def test_processor_path

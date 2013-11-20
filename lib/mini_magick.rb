@@ -3,8 +3,10 @@ require 'subexec'
 require 'stringio'
 require 'pathname'
 require 'shellwords'
+require 'rbconfig'
 
 module MiniMagick
+
   class << self
     attr_accessor :processor
     attr_accessor :processor_path
@@ -40,13 +42,27 @@ module MiniMagick
 
   IMAGE_CREATION_OPERATORS = %w{canvas caption gradient label logo pattern plasma radial radient rose text tile xc }
 
+  IS_WINDOWS = RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+
   class Error < RuntimeError; end
   class Invalid < StandardError; end
 
   class Image
-    # @return [String] The location of the current working file
-    attr_accessor :path
 
+    def path_for_windows_quote_space(path)
+      path = Pathname.new(@path).to_s
+      # For Windows, if a path contains space char, you need to quote it, otherwise you SHOULD NOT quote it.
+      # If you quote a path that does not contains space, it will not work.
+      @path.include?(' ') ? path.inspect : path
+    end
+
+    def path
+      IS_WINDOWS ? path_for_windows_quote_space(@path) : @path
+    end
+
+    def path=(path)
+      @path = path
+    end
     # Class Methods
     # -------------
     class << self
@@ -231,7 +247,7 @@ module MiniMagick
       when "width"
         run_command("identify", "-format", '%w\n', path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-format", IS_WINDOWS ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
         File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
@@ -311,7 +327,7 @@ module MiniMagick
     def write(output_to)
       if output_to.kind_of?(String) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
-        run_command "identify", output_to.to_s # Verify that we have a good image
+        run_command "identify", IS_WINDOWS ? path_for_windows_quote_space(output_to.to_s) : output_to.to_s # Verify that we have a good image
       else # stream
         File.open(path, "rb") do |f|
           f.binmode
@@ -342,7 +358,7 @@ module MiniMagick
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
       combine_options do |c|
-        c.send(symbol, *args)
+          c.send(symbol, *args)
       end
     end
 
@@ -448,8 +464,23 @@ module MiniMagick
       com.strip
     end
 
+    def escape_string_windows(value)
+      # For Windows, ^ is the escape char, equivalent to \ in Unix.
+      escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
+      if escaped !~ /^".+"$/ && escaped.include?("'")
+        escaped.inspect
+      else
+        escaped
+      end
+
+    end
+
     def args
-      @args.map(&:shellescape)
+      if !IS_WINDOWS
+        @args.map(&:shellescape)
+      else
+        @args.map { |arg| escape_string_windows(arg) }
+      end
     end
 
     # Add each mogrify command in both underscore and dash format

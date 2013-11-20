@@ -1,4 +1,4 @@
-require 'test_helper'
+require File.expand_path('../test_helper', __FILE__)
 require 'digest/md5'
 
 #MiniMagick.processor = :gm
@@ -6,6 +6,11 @@ require 'digest/md5'
 class ImageTest < Test::Unit::TestCase
   include MiniMagick
   include MiniMagickTestFiles
+
+  def omit_test(*args)
+    # Some test runner will use test-unit (RubyMine), some will use minitest (Rake). This is a safe way to omit test
+    self.respond_to?(:omit) ? omit(*args) : skip(*args)
+  end
 
   def test_image_from_blob
     File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
@@ -131,6 +136,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_erroneous_image_meta_info
+    omit_test("Windows batch has problem handling this file type") if IS_WINDOWS
     image = Image.new(ERRONEOUS_IMAGE_PATH)
     assert_equal 10, image[:width]
     assert_equal 10, image[:height]
@@ -247,6 +253,7 @@ class ImageTest < Test::Unit::TestCase
   end
 
   def test_change_format_of_image_with_special_characters
+    omit_test("Win Ruby is not able to handle this") if IS_WINDOWS
     tempfile = Tempfile.new('magick with special! "chars\'')
 
     File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
