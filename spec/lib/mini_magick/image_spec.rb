@@ -203,16 +203,6 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
-    it "combines options in image named with special characters" do
-      image = MiniMagick::Image.new(SPECIAL_CHARS_IMAGE_PATH)
-      expect do
-        image.combine_options("identify") do |c|
-          c.ping
-        end
-      end.to_not raise_error
-      image.destroy!
-    end
-
     it "inspects the EXIF of an image" do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
       image["exif:ExifVersion"].should == '0220'
