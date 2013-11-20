@@ -3,6 +3,21 @@ module MiniMagick
     # @return [String] The location of the current working file
     attr_accessor :path
 
+    def path_for_windows_quote_space(path)
+      path = Pathname.new(@path).to_s
+      # For Windows, if a path contains space char, you need to quote it, otherwise you SHOULD NOT quote it.
+      # If you quote a path that does not contains space, it will not work.
+      @path.include?(' ') ? path.inspect : path
+    end
+
+    def path
+      MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path
+    end
+
+    def path=(path)
+      @path = path
+    end
+
     # Class Methods
     # -------------
     class << self
@@ -187,7 +202,7 @@ module MiniMagick
       when "width"
         run_command("identify", "-format", '%w\n', path).split("\n")[0].to_i
       when "dimensions"
-        run_command("identify", "-format", '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
+        run_command("identify", "-format", MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
       when "size"
         File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
       when "original_at"
@@ -267,7 +282,7 @@ module MiniMagick
     def write(output_to)
       if output_to.kind_of?(String) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
-        run_command "identify", output_to.to_s # Verify that we have a good image
+        run_command "identify", MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) :  output_to.to_s # Verify that we have a good image
       else # stream
         File.open(path, "rb") do |f|
           f.binmode

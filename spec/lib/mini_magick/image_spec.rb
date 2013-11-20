@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'pathname'
 require 'tempfile'
 
-MiniMagick.processor = 'mogrify'
+MiniMagick.processor = 'gm'
 
 describe MiniMagick::Image do
   describe "ported from testunit", :ported => true do
@@ -14,7 +14,7 @@ describe MiniMagick::Image do
       end
     end
 
-    it 'reads image from tempfile' do
+    it 'reads image from tempfile', :if => !MiniMagick::Utilities.windows? do
       tempfile = Tempfile.new('magick')
 
       File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
@@ -240,7 +240,7 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
-    it "changes the format of image with special characters" do
+    it "changes the format of image with special characters", :if => !MiniMagick::Utilities.windows? do
       tempfile = Tempfile.new('magick with special! "chars\'')
 
       File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|

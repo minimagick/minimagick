@@ -17,8 +17,23 @@ module MiniMagick
       com.strip
     end
 
+    def escape_string_windows(value)
+      # For Windows, ^ is the escape char, equivalent to \ in Unix.
+      escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
+      if escaped !~ /^".+"$/ && escaped.include?("'")
+        escaped.inspect
+      else
+        escaped
+      end
+
+    end
+
     def args
-      @args.map(&:shellescape)
+      if !MiniMagick::Utilities.windows?
+        @args.map(&:shellescape)
+      else
+        @args.map { |arg| escape_string_windows(arg) }
+      end
     end
 
     # Add each mogrify command in both underscore and dash format

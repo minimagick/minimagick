@@ -29,16 +29,42 @@ describe MiniMagick::CommandBuilder do
       builder.command.should == "test -resize 30x40"
     end
 
-    it "builds a complicated command" do
-      builder.resize "30x40"
-      builder.alpha '1 3 4'
-      builder.resize 'mome fingo'
-      builder.args.join(" ").should == '-resize 30x40 -alpha 1\ 3\ 4 -resize mome\ fingo'
+    describe 'windows only', :if => MiniMagick::Utilities.windows? do
+      it "builds a complicated command" do
+        builder.resize "30x40"
+        builder.alpha '1 3 4'
+        builder.resize 'mome fingo'
+        builder.args.join(" ").should == '-resize 30x40 -alpha 1 3 4 -resize mome fingo'
+      end
+
+      it "builds a command with multiple options and plus modifier" do
+        builder.distort.+ 'srt', '0.6 20'
+        builder.args.join(" ").should == '+distort srt 0.6 20'
+      end
+
+      it "sets a colorspace correctly" do
+        builder.set 'colorspace RGB'
+        builder.command.should == 'test -set colorspace RGB'
+      end
     end
 
-    it "builds a command with multiple options and plus modifier" do
-      builder.distort.+ 'srt', '0.6 20'
-      builder.args.join(" ").should == '\+distort srt 0.6\ 20'
+    describe 'not windows', :if => !MiniMagick::Utilities.windows? do
+      it "builds a complicated command" do
+        builder.resize "30x40"
+        builder.alpha '1 3 4'
+        builder.resize 'mome fingo'
+        builder.args.join(" ").should == '-resize 30x40 -alpha 1\ 3\ 4 -resize mome\ fingo'
+      end
+
+      it "sets a colorspace correctly" do
+        builder.set 'colorspace RGB'
+        builder.command.should == 'test -set colorspace\ RGB'
+      end
+
+      it "builds a command with multiple options and plus modifier" do
+        builder.distort.+ 'srt', '0.6 20'
+        builder.args.join(" ").should == '\+distort srt 0.6\ 20'
+      end
     end
 
     it "raises error when command is invalid" do
@@ -63,10 +89,7 @@ describe MiniMagick::CommandBuilder do
       builder.args.join(' ').should == 'canvas:black'
     end
 
-    it "sets a colorspace correctly" do
-      builder.set 'colorspace RGB'
-      builder.command.should == 'test -set colorspace\ RGB'
-    end
+
 
     it "sets a processor path correctly" do
       MiniMagick.processor_path = "/a/strange/path"

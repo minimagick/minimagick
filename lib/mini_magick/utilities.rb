@@ -1,3 +1,5 @@
+require 'rbconfig'
+
 module MiniMagick
   module Utilities
     class << self
@@ -18,6 +20,10 @@ module MiniMagick
       # Finds out if the host OS is windows
       def windows?
         RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+      end
+
+      def windows_escape(cmdline)
+        '"' + cmdline.gsub(/\\(?=\\*\")/, "\\\\\\").gsub(/\"/, "\\\"").gsub(/\\$/, "\\\\\\").gsub("%", "%%") + '"'
       end
     end
   end
