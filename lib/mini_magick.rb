@@ -9,6 +9,7 @@ module MiniMagick
     attr_accessor :processor
     attr_accessor :processor_path
     attr_accessor :timeout
+    attr_accessor :strict_mode
 
 
     # Experimental method for automatically selecting a processor
@@ -42,6 +43,7 @@ module MiniMagick
 
   class Error < RuntimeError; end
   class Invalid < StandardError; end
+  class StrictModeError < Error; end
 
   class Image
     # @return [String] The location of the current working file
@@ -435,17 +437,13 @@ module MiniMagick
 
   class CommandBuilder
     def initialize(tool, *options)
-      @tool = tool
+      @tool = Tool.new tool
       @args = []
       options.each { |arg| push(arg) }
     end
 
     def command
-      com = "#{@tool} #{args.join(' ')}".strip
-      com = "#{MiniMagick.processor} #{com}" unless MiniMagick.processor.nil?
-
-      com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
-      com.strip
+      [@tool.path, *args].join ' '
     end
 
     def args
@@ -516,5 +514,34 @@ module MiniMagick
       @args << arg.to_s.strip
     end
     alias :<< :push
+  end
+
+  class Tool
+    TOOLS = %w{convert composite identify mogrify}.freeze
+    PROCESSORS = [nil, "gm"]
+
+    def initialize(tool, options = {})
+      @tool = tool
+      @processor = options.fetch(:processor, MiniMagick.processor)
+      @processor_path = options.fetch(:processor_path, MiniMagick.processor_path)
+      strict_mode = options.fetch(:strict_mode, MiniMagick.strict_mode)
+
+      validate_args if strict_mode
+    end
+
+    def path
+      File.join [@processor_path, binary].compact
+    end
+
+    private
+      def validate_args
+        raise StrictModeError, "'#@tool' is not in the list of allowed tools: #{TOOLS.join ', '}" unless TOOLS.include? @tool
+        raise StrictModeError, "processor must be either nil or 'gm'" unless PROCESSORS.include? @processor
+        raise StrictModeError, "'#@processor_path' is not a valid directory" unless @processor_path.nil? || File.directory?(@processor_path)
+      end
+
+      def binary
+        "#@processor #@tool".strip
+      end
   end
 end
