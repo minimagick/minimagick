@@ -114,9 +114,18 @@ describe MiniMagick::CommandBuilder do
       builder.command.should == "test -resize 30x40"
     end
 
-    it "sets a colorspace correctly" do
-      builder.set 'colorspace RGB'
-      builder.command.should == 'test -set colorspace\ RGB'
+    describe 'windows only', :if => MiniMagick::Utilities.windows? do
+      it "sets a colorspace correctly" do
+        builder.set 'colorspace RGB'
+        builder.command.should == 'test -set colorspace RGB'
+      end
+    end
+
+    describe 'not windows', :if => !MiniMagick::Utilities.windows? do
+      it "sets a colorspace correctly" do
+        builder.set 'colorspace RGB'
+        builder.command.should == 'test -set colorspace\ RGB'
+      end
     end
 
     it "sets a processor path correctly" do
