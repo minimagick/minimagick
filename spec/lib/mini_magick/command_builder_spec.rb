@@ -89,8 +89,6 @@ describe MiniMagick::CommandBuilder do
       builder.args.join(' ').should == 'canvas:black'
     end
 
-
-
     it "sets a processor path correctly" do
       MiniMagick.processor_path = "/a/strange/path"
       builder.auto_orient
