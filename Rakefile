@@ -1,20 +1,18 @@
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-require 'rake/testtask'
-
 $:.unshift 'lib'
 
 desc 'Default: run unit tests.'
-task :default => [:print_version, :test]
+task :default => [:print_version, :spec]
 
 task :print_version do 
   puts `mogrify --version`
 end
 
-desc 'Test the mini_magick plugin.'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'test'
-  t.test_files = Dir.glob("test/**/*_test.rb")
-  t.verbose = true
+require 'rspec/core/rake_task'
+
+desc "Run specs"
+RSpec::Core::RakeTask.new do |t|
+  t.pattern = "./spec/**/*_spec.rb"
 end
