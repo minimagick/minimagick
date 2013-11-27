@@ -50,18 +50,10 @@ module MiniMagick
       dashed_command      = mogrify_command.to_s.gsub("_","-")
       underscored_command = mogrify_command.to_s.gsub("-","_")
 
-      #TODO: Refactor this code in multiple classes
-      if mogrify_command != 'annotate'
-        define_method(underscored_command) do |*options|
-          add_command(__method__.to_s.gsub("_","-"), *options)
-          self
-        end
-      else
-        define_method(underscored_command) do |*options|
-          options[1] = Utilities.windows_escape(options[1])
-          add_command(__method__.to_s.gsub("_","-"), *options)
-          self
-        end       
+      define_method(underscored_command) do |*options|
+        options[1] = Utilities.windows_escape(options[1]) if mogrify_command == 'annotate'
+        add_command(__method__.to_s.gsub("_","-"), *options)
+        self
       end
 
       alias_method dashed_command, underscored_command
