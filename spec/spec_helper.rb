@@ -13,6 +13,7 @@ end
 
 # Image files from testunit port to RSpec
 test_files = File.expand_path(File.dirname(__FILE__) + "/files")
+TEST_FILES_PATH          = test_files
 SIMPLE_IMAGE_PATH        = test_files + "/simple.gif"
 MINUS_IMAGE_PATH         = test_files + "/simple-minus.gif"
 TIFF_IMAGE_PATH          = test_files + "/leaves (spaced).tiff"

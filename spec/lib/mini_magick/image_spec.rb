@@ -27,6 +27,26 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
+    # from https://github.com/minimagick/minimagick/issues/163
+    it 'annotates image with whitespace', :wip => true do
+      expect do
+        message = 'a b'
+
+        image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+        image.combine_options do |c|
+          c.gravity 'SouthWest'
+          c.fill 'white'
+          c.stroke 'black'
+          c.strokewidth '2'
+          c.pointsize '48'
+          c.interline_spacing '-9'
+          c.annotate '0', message
+        end
+
+        image.write TEST_FILES_PATH + "/test_out.jpg"
+      end.to_not raise_error
+    end
+
     it 'opens image' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       image.valid?.should be true
