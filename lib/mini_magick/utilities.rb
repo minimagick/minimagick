@@ -22,8 +22,14 @@ module MiniMagick
         RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       end
 
-      def windows_escape(cmdline)
-        '"' + cmdline.gsub(/\\(?=\\*\")/, "\\\\\\").gsub(/\"/, "\\\"").gsub(/\\$/, "\\\\\\").gsub("%", "%%") + '"'
+      def windows_escape(value)
+        # For Windows, ^ is the escape char, equivalent to \ in Unix.
+        escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
+        if escaped !~ /^".+"$/ && escaped.include?("'")
+          escaped.inspect
+        else
+          escaped
+        end
       end
     end
   end
