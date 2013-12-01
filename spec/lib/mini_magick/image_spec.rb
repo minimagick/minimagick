@@ -29,10 +29,11 @@ describe MiniMagick::Image do
 
     # from https://github.com/minimagick/minimagick/issues/163
     it 'annotates image with whitespace', :wip => true do
+      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+
       expect do
         message = 'a b'
 
-        image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
         image.combine_options do |c|
           c.gravity 'SouthWest'
           c.fill 'white'
@@ -42,8 +43,6 @@ describe MiniMagick::Image do
           c.interline_spacing '-9'
           c.annotate '0', message
         end
-
-        image.write TEST_FILES_PATH + "/test_out.jpg"
       end.to_not raise_error
     end
 
