@@ -28,7 +28,7 @@ describe MiniMagick::Image do
     end
 
     # from https://github.com/minimagick/minimagick/issues/163
-    it 'annotates image with whitespace', :wip => true do
+    it 'annotates image with whitespace' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
 
       expect do
