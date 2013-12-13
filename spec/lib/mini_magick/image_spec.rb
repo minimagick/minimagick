@@ -251,6 +251,13 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
+    it 'has the same path for tempfile and image after format' do
+      image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
+      image.format('png')
+      image.instance_eval("@tempfile.path").should == image.path
+      image.destroy!
+    end
+
     it "hasn't previous tempfile at path after format" do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       before = image.path.dup
