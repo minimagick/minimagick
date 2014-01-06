@@ -21,13 +21,15 @@ module MiniMagick
     # === Returns
     # * [String] The detected procesor
     def choose_processor
-      if MiniMagick::Utilities.which('mogrify').size > 0
-        self.processor = 'mogrify'
-      elsif MiniMagick::Utilities.which('gm').size > 0
-        self.processor = "gm"
+      self.processor = if MiniMagick::Utilities.which('mogrify')
+        "mogrify"
+      elsif MiniMagick::Utilities.which('gm')
+        "gm"
+      else
+        nil
       end
     end
-    
+
     ##
     # Discovers the imagemagick version based on mogrify's output.
     #
@@ -36,7 +38,7 @@ module MiniMagick
     def image_magick_version
       @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
     end
-    
+
     ##
     # The minimum allowed imagemagick version
     #

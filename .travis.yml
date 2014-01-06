@@ -13,3 +13,5 @@ rvm:
 matrix:
   allow_failures:
     - rvm: ruby-head
+before_install:
+  - sudo apt-get install -qq graphicsmagick
