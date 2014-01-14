@@ -46,6 +46,7 @@ module MiniMagick
       end
 
       alias_method dashed_command, underscored_command
+      alias_method "mogrify_#{underscored_command}", underscored_command
     end
 
     def format(*options)
@@ -57,6 +58,20 @@ module MiniMagick
         add_creation_operator(__method__.to_s, *options)
         self
       end
+
+      alias_method "operator_#{operator}", operator
+    end
+
+    (MOGRIFY_COMMANDS & IMAGE_CREATION_OPERATORS).each do |command_or_operator|
+      define_method command_or_operator do |*options|
+        if @tool == 'mogrify'
+          method = self.method("mogrify_#{command_or_operator}")
+        else
+          method = self.method("operator_#{command_or_operator}")
+        end
+        method.call(*options)
+      end
+
     end
 
     def +(*options)

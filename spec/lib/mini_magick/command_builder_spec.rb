@@ -67,6 +67,24 @@ describe MiniMagick::CommandBuilder do
       end
     end
 
+    describe 'common verbs between morgify and image creation operators' do
+      context 'mogrify' do
+        let(:builder) {described_class.new('mogrify')}
+
+        it 'builds the command' do
+          builder.caption 'caption_text'
+          builder.command.should == 'mogrify -caption caption_text'    
+        end
+      end
+
+      context 'other' do
+        it 'builds the command' do
+          builder.caption 'caption_text'
+          builder.command.should == 'test caption:caption_text'    
+        end
+      end
+    end
+
     it "raises error when command is invalid" do
       expect do
         command = MiniMagick::CommandBuilder.new('test', 'path')
