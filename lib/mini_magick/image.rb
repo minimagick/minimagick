@@ -280,7 +280,7 @@ module MiniMagick
     # @return [IOStream, Boolean] If you pass in a file location [String] then you get a success boolean. If its a stream, you get it back.
     # Writes the temporary image that we are using for processing to the output path
     def write(output_to)
-      if output_to.kind_of?(String) || !output_to.respond_to?(:write)
+      if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         run_command "identify", MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) :  output_to.to_s # Verify that we have a good image
       else # stream
