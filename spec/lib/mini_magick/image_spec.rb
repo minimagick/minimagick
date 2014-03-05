@@ -5,6 +5,27 @@ require 'tempfile'
 MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::Image do
+  context "when ImageMagick and GraphicsMagick are both unavailable" do
+    before do
+      MiniMagick::Utilities.expects(:which).at_least_once.returns(nil)
+      MiniMagick.instance_variable_set(:@processor, nil)
+      @old_path = ENV['PATH']
+      ENV['PATH'] = ''
+    end
+    
+    after do
+      ENV['PATH'] = @old_path
+    end
+
+    it "raises an exception with 'No such file' in the message" do
+      begin
+        MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+      rescue Exception => e
+        e.message.should match(/No such file/)
+      end
+    end
+  end
+
   describe "ported from testunit", :ported => true do
     it 'reads image from blob' do
       File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
