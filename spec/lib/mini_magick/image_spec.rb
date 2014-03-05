@@ -21,7 +21,7 @@ describe MiniMagick::Image do
       begin
         MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       rescue Exception => e
-        e.message.should match(/No such file/)
+        e.message.should match(/(No such file|not found)/)
       end
     end
   end
