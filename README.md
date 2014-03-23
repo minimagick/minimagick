@@ -155,6 +155,15 @@ MiniMagick.processor = :gm
 
 And you are sorted.
 
+## Optional image validation
+
+By default, MiniMagick validates image each time it's opening or writing it. Validation means executing `identify -quiet -ping` command on target image. This adds additional overhead to the whole processing. Sometimes it's safe to assume that all input and output images are valid by default and turn off validation:
+
+```ruby
+MiniMagick.validate_on_create = false
+MiniMagick.validate_on_write = false
+```
+
 # Requirements
 
 You must have ImageMagick or GraphicsMagick installed.

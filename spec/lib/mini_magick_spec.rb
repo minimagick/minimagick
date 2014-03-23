@@ -50,4 +50,7 @@ describe MiniMagick do
       MiniMagick.processor = "gm"
     end
   end
+
+  its(:validate_on_create) { should be_true }
+  its(:validate_on_write) { should be_true }
 end

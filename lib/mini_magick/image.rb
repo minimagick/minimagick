@@ -128,7 +128,7 @@ module MiniMagick
       # @param validate [Boolean] If false, skips validation of the created image. Defaults to true.
       # @yield [IOStream] You can #write bits to this object to create the new Image
       # @return [Image] The created image
-      def create(ext = nil, validate = true, &block)
+      def create(ext = nil, validate = MiniMagick.validate_on_create, &block)
         begin
           tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
           tempfile.binmode
@@ -282,7 +282,9 @@ module MiniMagick
     def write(output_to)
       if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
-        run_command "identify", MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) :  output_to.to_s # Verify that we have a good image
+        if MiniMagick.validate_on_write
+          run_command "identify", MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) :  output_to.to_s # Verify that we have a good image
+        end
       else # stream
         File.open(path, "rb") do |f|
           f.binmode

@@ -9,10 +9,15 @@ require 'mini_magick/image'
 require 'mini_magick/utilities'
 
 module MiniMagick
+  @validate_on_create = true
+  @validate_on_write = true
+
   class << self
     attr_accessor :processor
     attr_accessor :processor_path
     attr_accessor :timeout
+    attr_accessor :validate_on_create
+    attr_accessor :validate_on_write
 
     ##
     # Tries to detect the current processor based if any of the processors exist.
