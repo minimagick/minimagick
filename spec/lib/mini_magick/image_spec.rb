@@ -80,14 +80,47 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
-    it 'creates an image' do
-      expect do
-        image = MiniMagick::Image.create do |f|
-          #Had to replace the old File.read with the following to work across all platforms
+    describe '.create' do
+      subject(:create) do
+        MiniMagick::Image.create do |f|
+          # Had to replace the old File.read with the following to work across all platforms
           f.write(File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read })
         end
-        image.destroy!
-      end.to_not raise_error
+      end
+
+      it 'creates an image' do
+        expect do
+          image = create
+          image.destroy!
+        end.to_not raise_error
+      end
+
+      describe 'validation' do
+        before do
+          @old_validate = MiniMagick.validate_on_create
+          MiniMagick.validate_on_create = validate
+        end
+
+        context 'MiniMagick.validate_on_create = true' do
+          let(:validate) { true }
+
+          it 'validates image' do
+            described_class.any_instance.expects(:valid?).returns(true)
+            create
+          end
+        end
+
+        context 'MiniMagick.validate_on_create = false' do
+          let(:validate) { false }
+
+          it 'skips validation' do
+            described_class.any_instance.expects(:valid?).never
+            create
+          end
+        end
+
+        after { MiniMagick.validate_on_create = @old_validate }
+      end
     end
 
     it 'loads a new image' do
@@ -116,39 +149,77 @@ describe MiniMagick::Image do
       end.to_not raise_error
     end
 
-    it 'opens and writes an image' do
-      output_path = "output.gif"
-      begin
-        image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
-        image.write output_path
+    describe '#write' do
+      it 'opens and writes an image' do
+        output_path = "output.gif"
+        begin
+          image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
+          image.write output_path
 
-        File.exists?(output_path).should be true
-      ensure
-        File.delete output_path
+          File.exists?(output_path).should be true
+        ensure
+          File.delete output_path
+        end
+        image.destroy!
       end
-      image.destroy!
-    end
 
-    it 'opens and writes an image with space in its filename' do
-      output_path = "test output.gif"
-      begin
-        image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
-        image.write output_path
+      it 'opens and writes an image with space in its filename' do
+        output_path = "test output.gif"
+        begin
+          image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
+          image.write output_path
 
-        File.exists?(output_path).should be true
-      ensure
-        File.delete output_path
+          File.exists?(output_path).should be true
+        ensure
+          File.delete output_path
+        end
+        image.destroy!
       end
-      image.destroy!
-    end
 
-    it 'writes an image with stream' do
-      stream = StringIO.new
-      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image.write("#{Dir.tmpdir}/foo.gif")
-      image.write(stream)
-      MiniMagick::Image.read(stream.string).valid?.should be true
-      image.destroy!
+      it 'writes an image with stream' do
+        stream = StringIO.new
+        image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+        image.write("#{Dir.tmpdir}/foo.gif")
+        image.write(stream)
+        MiniMagick::Image.read(stream.string).valid?.should be true
+        image.destroy!
+      end
+
+      describe 'validation' do
+        let(:image) { MiniMagick::Image.new(SIMPLE_IMAGE_PATH) }
+        let(:output_path) { 'output.gif' }
+
+        before do
+          @old_validate = MiniMagick.validate_on_write
+          MiniMagick.validate_on_write = validate
+        end
+
+        subject(:write) { image.write output_path }
+
+        context 'MiniMagick.validate_on_write = true' do
+          let(:validate) { true }
+
+          it 'runs post-validation' do
+            image.expects(:run_command).with('identify', output_path)
+            write
+          end
+        end
+
+        context 'MiniMagick.validate_on_write = false' do
+          let(:validate) { false }
+
+          it 'runs post-validation' do
+            image.expects(:run_command).never
+            write
+          end
+        end
+
+        after do 
+          image.destroy!
+          File.delete output_path
+          MiniMagick.validate_on_write = @old_validate
+        end
+      end
     end
 
     it 'tells when an image is invalid' do
