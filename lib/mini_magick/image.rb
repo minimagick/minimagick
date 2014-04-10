@@ -155,6 +155,7 @@ module MiniMagick
     def initialize(input_path, tempfile = nil)
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
+      @info = {}
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -189,32 +190,36 @@ module MiniMagick
     # @return [String, Numeric, Array, Time, Object] Depends on the method called! Defaults to String for unknown commands
     def [](value)
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
-      case value.to_s
-      when 'colorspace'
-        run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
-      when 'format'
-        run_command('identify', '-format', '%m\n', path).split("\n")[0]
-      when 'height'
-        run_command('identify', '-format', '%h\n', path).split("\n")[0].to_i
-      when 'width'
-        run_command('identify', '-format', '%w\n', path).split("\n")[0].to_i
-      when 'dimensions'
-        run_command('identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map { |v|v.to_i }
-      when 'size'
-        File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
-      when 'original_at'
-        # Get the EXIF original capture as a Time object
-        Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
-      when /^EXIF\:/i
-        result = run_command('identify', '-format', "%[#{value}]", path).chomp
-        if result.include?(',')
-          read_character_data(result)
-        else
-          result
-        end
-      else
-        run_command('identify', '-format', value, path).split("\n")[0]
-      end
+      return @info[value] if @info.key? value
+
+      result = case value.to_s
+               when 'colorspace'
+                 run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
+               when 'format'
+                 run_command('identify', '-format', '%m\n', path).split("\n")[0]
+               when 'height'
+                 run_command('identify', '-format', '%h\n', path).split("\n")[0].to_i
+               when 'width'
+                 run_command('identify', '-format', '%w\n', path).split("\n")[0].to_i
+               when 'dimensions'
+                 run_command('identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map { |v|v.to_i }
+               when 'size'
+                 File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
+               when 'original_at'
+                 # Get the EXIF original capture as a Time object
+                 Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
+               when /^EXIF\:/i
+                 result = run_command('identify', '-format', "%[#{value}]", path).chomp
+                 if result.include?(',')
+                   read_character_data(result)
+                 else
+                   result
+                 end
+               else
+                 run_command('identify', '-format', value, path).split("\n")[0]
+               end
+      @info[value] = result
+      result
     end
 
     # Sends raw commands to imagemagick's `mogrify` command. The image path is automatically appended to the command.
@@ -363,6 +368,7 @@ module MiniMagick
     end
 
     def run(command_builder)
+      @info = {} # clear stored info
       command = command_builder.command
 
       sub = Subexec.run(command, timeout: MiniMagick.timeout)
