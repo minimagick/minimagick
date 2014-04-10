@@ -5,14 +5,14 @@ require 'tempfile'
 MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::Image do
-  context "when ImageMagick and GraphicsMagick are both unavailable" do
+  context 'when ImageMagick and GraphicsMagick are both unavailable' do
     before do
       MiniMagick::Utilities.expects(:which).at_least_once.returns(nil)
       MiniMagick.instance_variable_set(:@processor, nil)
       @old_path = ENV['PATH']
       ENV['PATH'] = ''
     end
-    
+
     after do
       ENV['PATH'] = @old_path
     end
@@ -26,16 +26,16 @@ describe MiniMagick::Image do
     end
   end
 
-  describe "ported from testunit", :ported => true do
+  describe 'ported from testunit', ported: true do
     it 'reads image from blob' do
-      File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
+      File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
         image = MiniMagick::Image.read(f.read)
         image.valid?.should be true
         image.destroy!
       end
     end
 
-    it 'reads image from tempfile', :if => !MiniMagick::Utilities.windows? do
+    it 'reads image from tempfile', if: !MiniMagick::Utilities.windows? do
       tempfile = Tempfile.new('magick')
 
       File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
@@ -74,7 +74,7 @@ describe MiniMagick::Image do
     end
 
     it 'reads image from buffer' do
-      buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read }
+      buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH, 'rb') { |f| f.read }
       image = MiniMagick::Image.read(buffer)
       image.valid?.should be true
       image.destroy!
@@ -84,7 +84,7 @@ describe MiniMagick::Image do
       subject(:create) do
         MiniMagick::Image.create do |f|
           # Had to replace the old File.read with the following to work across all platforms
-          f.write(File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read })
+          f.write(File.open(SIMPLE_IMAGE_PATH, 'rb') { |f| f.read })
         end
       end
 
@@ -131,13 +131,13 @@ describe MiniMagick::Image do
     end
 
     it 'loads remote image' do
-      image = MiniMagick::Image.open("http://upload.wikimedia.org/wikipedia/en/b/bc/Wiki.png")
+      image = MiniMagick::Image.open('http://upload.wikimedia.org/wikipedia/en/b/bc/Wiki.png')
       image.valid?.should be true
       image.destroy!
     end
 
     it 'loads remote image with complex url' do
-      image = MiniMagick::Image.open("http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar")
+      image = MiniMagick::Image.open('http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar')
       image.valid?.should be true
       image.destroy!
     end
@@ -145,18 +145,18 @@ describe MiniMagick::Image do
     it 'reformats an image with a given extension' do
       expect do
         image = MiniMagick::Image.open(CAP_EXT_PATH)
-        image.format "jpg"
+        image.format 'jpg'
       end.to_not raise_error
     end
 
     describe '#write' do
       it 'opens and writes an image' do
-        output_path = "output.gif"
+        output_path = 'output.gif'
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
 
-          File.exists?(output_path).should be true
+          File.exist?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -164,12 +164,12 @@ describe MiniMagick::Image do
       end
 
       it 'opens and writes an image with space in its filename' do
-        output_path = "test output.gif"
+        output_path = 'test output.gif'
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
 
-          File.exists?(output_path).should be true
+          File.exist?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -214,7 +214,7 @@ describe MiniMagick::Image do
           end
         end
 
-        after do 
+        after do
           image.destroy!
           File.delete output_path
           MiniMagick.validate_on_write = @old_validate
@@ -270,7 +270,7 @@ describe MiniMagick::Image do
 
     it 'resizes an image correctly' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image.resize "20x30!"
+      image.resize '20x30!'
 
       image[:width].should be 20
       image[:height].should be 30
@@ -291,8 +291,8 @@ describe MiniMagick::Image do
     it 'combines options to create an image with resize and blur' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       image.combine_options do |c|
-        c.resize "20x30!"
-        c.blur "50"
+        c.resize '20x30!'
+        c.blur '50'
       end
 
       image[:width].should be 20
@@ -303,22 +303,22 @@ describe MiniMagick::Image do
 
     it "combines options to create an image even with minuses symbols on it's name it" do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      background = "#000000"
+      background = '#000000'
       expect do
         image.combine_options do |c|
           c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
-          c.thumbnail "300x500>"
+          c.thumbnail '300x500>'
           c.background background
         end
       end.to_not raise_error
       image.destroy!
     end
 
-    it "inspects the EXIF of an image" do
+    it 'inspects the EXIF of an image' do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      image["exif:ExifVersion"].should == '0220'
+      image['exif:ExifVersion'].should == '0220'
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image["EXIF:ExifVersion"].should == ''
+      image['EXIF:ExifVersion'].should == ''
       image.destroy!
     end
 
@@ -332,14 +332,14 @@ describe MiniMagick::Image do
 
     it 'has the same path for tempfile and image' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
-      image.instance_eval("@tempfile.path").should == image.path
+      image.instance_eval('@tempfile.path').should == image.path
       image.destroy!
     end
 
     it 'has the tempfile at path after format' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       image.format('png')
-      File.exists?(image.path).should be true
+      File.exist?(image.path).should be true
       image.destroy!
     end
 
@@ -351,7 +351,7 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
-    it "changes the format of image with special characters", :if => !MiniMagick::Utilities.windows? do
+    it 'changes the format of image with special characters', if: !MiniMagick::Utilities.windows? do
       tempfile = Tempfile.new('magick with special! "chars\'')
 
       File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
@@ -361,65 +361,65 @@ describe MiniMagick::Image do
 
       image = MiniMagick::Image.new(tempfile.path)
       image.format('png')
-      File.exists?(image.path).should be true
+      File.exist?(image.path).should be true
       image.destroy!
 
       File.delete(image.path)
       tempfile.unlink
     end
 
-    it "raises exception when calling wrong method" do
+    it 'raises exception when calling wrong method' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       expect { image.to_blog }.to raise_error(NoMethodError)
       image.to_blob
       image.destroy!
     end
 
-    it "can create a composite of two images" do
+    it 'can create a composite of two images' do
       if MiniMagick.valid_version_installed?
         image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
         result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH)) do |c|
-          c.gravity "center"
+          c.gravity 'center'
         end
-        File.exists?(result.path).should be true
+        File.exist?(result.path).should be true
       else
         puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
       end
     end
 
     # https://github.com/minimagick/minimagick/issues/8
-    it "has issue 8 fixed" do
+    it 'has issue 8 fixed' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       expect do
         image.combine_options do |c|
-          c.sample "50%"
-          c.rotate "-90>"
+          c.sample '50%'
+          c.rotate '-90>'
         end
       end.to_not raise_error
       image.destroy!
     end
 
-    # https://github.com/minimagick/minimagick/issues/8 
+    # https://github.com/minimagick/minimagick/issues/8
     it 'has issue 15 fixed' do
       expect do
         image = MiniMagick::Image.open(Pathname.new(SIMPLE_IMAGE_PATH))
-        output = Pathname.new("test.gif")
+        output = Pathname.new('test.gif')
         image.write(output)
       end.to_not raise_error
-      FileUtils.rm("test.gif")
+      FileUtils.rm('test.gif')
     end
 
     # https://github.com/minimagick/minimagick/issues/37
     it 'respects the language set' do
-      original_lang = ENV["LANG"]
-      ENV["LANG"] = "fr_FR.UTF-8"
+      original_lang = ENV['LANG']
+      ENV['LANG'] = 'fr_FR.UTF-8'
 
       expect  do
         image = MiniMagick::Image.open(NOT_AN_IMAGE_PATH)
         image.destroy
       end.to raise_error(MiniMagick::Invalid)
 
-      ENV["LANG"] = original_lang
+      ENV['LANG'] = original_lang
     end
 
     it 'can import pixels with default format' do
@@ -427,8 +427,8 @@ describe MiniMagick::Image do
       rows = 200
       depth = 16 # 16 bits (2 bytes) per pixel
       map = 'gray'
-      pixels = Array.new(columns*rows) {|i| i}
-      blob = pixels.pack("S*") # unsigned short, native byte order
+      pixels = Array.new(columns * rows) { |i| i }
+      blob = pixels.pack('S*') # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map)
       image.valid?.should be true
       image[:format].to_s.downcase.should == 'png'
@@ -443,8 +443,8 @@ describe MiniMagick::Image do
       depth = 16 # 16 bits (2 bytes) per pixel
       map = 'gray'
       format = 'jpeg'
-      pixels = Array.new(columns*rows) {|i| i}
-      blob = pixels.pack("S*") # unsigned short, native byte order
+      pixels = Array.new(columns * rows) { |i| i }
+      blob = pixels.pack('S*') # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map, format)
       image.valid?.should be true
       image[:format].to_s.downcase.should == format
@@ -460,11 +460,11 @@ describe MiniMagick::Image do
       tiff =        MiniMagick::Image.open(TIFF_IMAGE_PATH)
       hidden_gif =  MiniMagick::Image.open(GIF_WITH_JPG_EXT)
 
-      gif.mime_type.should == "image/gif"
-      jpeg.mime_type.should == "image/jpeg"
-      png.mime_type.should == "image/png"
-      tiff.mime_type.should == "image/tiff"
-      hidden_gif.mime_type == "image/gif"
+      gif.mime_type.should == 'image/gif'
+      jpeg.mime_type.should == 'image/jpeg'
+      png.mime_type.should == 'image/png'
+      tiff.mime_type.should == 'image/tiff'
+      hidden_gif.mime_type == 'image/gif'
     end
   end
 end

@@ -27,9 +27,9 @@ module MiniMagick
     # * [String] The detected procesor
     def choose_processor
       self.processor = if MiniMagick::Utilities.which('mogrify')
-        "mogrify"
+                         'mogrify'
       elsif MiniMagick::Utilities.which('gm')
-        "gm"
+                         'gm'
       else
         nil
       end
@@ -41,7 +41,7 @@ module MiniMagick
     # === Returns
     # * The imagemagick version
     def image_magick_version
-      @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
+      @@version ||= Gem::Version.create(`mogrify --version`.split(' ')[2].split('-').first)
     end
 
     ##
@@ -50,7 +50,7 @@ module MiniMagick
     # === Returns
     # * The minimum imagemagick version
     def minimum_image_magick_version
-      @@minimum_version ||= Gem::Version.create("6.6.3")
+      @@minimum_version ||= Gem::Version.create('6.6.3')
     end
 
     ##
@@ -68,9 +68,9 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def mogrify?
-      self.choose_processor if self.processor.nil?
+      choose_processor if processor.nil?
 
-      self.processor == 'mogrify'
+      processor == 'mogrify'
     end
 
     ##
@@ -79,9 +79,9 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def gm?
-      self.choose_processor if self.processor.nil?
+      choose_processor if processor.nil?
 
-      self.processor == 'gm'
+      processor == 'gm'
     end
   end
 end

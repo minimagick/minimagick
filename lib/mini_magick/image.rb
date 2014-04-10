@@ -14,10 +14,6 @@ module MiniMagick
       MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path
     end
 
-    def path=(path)
-      @path = path
-    end
-
     # Class Methods
     # -------------
     class << self
@@ -25,12 +21,14 @@ module MiniMagick
       #
       # Use this to pass in a stream object. Must respond to Object#read(size) or be a binary string object (BLOBBBB)
       #
-      # As a change from the old API, please try and use IOStream objects. They are much, much better and more efficient!
+      # As a change from the old API, please try and use IOStream objects.
+      # They are much, much better and more efficient!
       #
       # Probably easier to use the #open method if you want to open a file or a URL.
       #
       # @param stream [IOStream, String] Some kind of stream object that needs to be read or is a binary String blob!
-      # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues, give this a try.
+      # @param ext [String] A manual extension to use for reading the file. Not required, but if you are having issues,
+      # give this a try.
       # @return [Image]
       def read(stream, ext = nil)
         if stream.is_a?(String)
@@ -41,7 +39,7 @@ module MiniMagick
           if File.respond_to?(:binread)
             stream = StringIO.new File.binread(stream.path.to_s)
           else
-            stream = StringIO.new File.open(stream.path.to_s,"rb") { |f| f.read }
+            stream = StringIO.new File.open(stream.path.to_s, 'rb') { |f| f.read }
           end
         end
 
@@ -54,7 +52,7 @@ module MiniMagick
 
       # @deprecated Please use Image.read instead!
       def from_blob(blob, ext = nil)
-        warn "Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read"
+        warn 'Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read'
         create(ext) { |f| f.write(blob) }
       end
 
@@ -71,15 +69,16 @@ module MiniMagick
       # * [rows] <tt>Integer</tt> -- Number of rows.
       # * [depth] <tt>Integer</tt> -- Bit depth of the encoded pixel data.
       # * [map] <tt>String</tt> -- A code for the mapping of the pixel data. Example: 'gray' or 'rgb'.
-      # * [format] <tt>String</tt> -- The file extension of the image format to be used when creating the image object. Defaults to 'png'.
+      # * [format] <tt>String</tt> -- The file extension of the image format to be used when creating the image object.
+      # Defaults to 'png'.
       #
-      def import_pixels(blob, columns, rows, depth, map, format="png")
+      def import_pixels(blob, columns, rows, depth, map, format = 'png')
         # Create an image object with the raw pixel data string:
-        image = create(".dat", validate = false) { |f| f.write(blob) }
+        image = create('.dat', false) { |f| f.write(blob) }
         # Use ImageMagick to convert the raw data file to an image file of the desired format:
         converted_image_path = image.path[0..-4] + format
-        arguments = ["-size", "#{columns}x#{rows}", "-depth", "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
-        cmd = CommandBuilder.new("convert", *arguments) #Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
+        arguments = ['-size', "#{columns}x#{rows}", '-depth', "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
+        cmd = CommandBuilder.new('convert', *arguments) # Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
         image.run(cmd)
         # Update the image instance with the path of the properly formatted image, and return:
         image.path = converted_image_path
@@ -99,23 +98,23 @@ module MiniMagick
       # @return [Image] The loaded image
       def open(file_or_url, ext = nil)
         file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
-        if file_or_url.include?("://")
+        if file_or_url.include?('://')
           require 'open-uri'
           ext ||= File.extname(URI.parse(file_or_url).path)
-          Kernel::open(file_or_url) do |f|
-            self.read(f, ext)
+          Kernel.open(file_or_url) do |f|
+            read(f, ext)
           end
         else
           ext ||= File.extname(file_or_url)
-          File.open(file_or_url, "rb") do |f|
-            self.read(f, ext)
+          File.open(file_or_url, 'rb') do |f|
+            read(f, ext)
           end
         end
       end
 
       # @deprecated Please use MiniMagick::Image.open(file_or_url) now
       def from_file(file, ext = nil)
-        warn "Warning: MiniMagick::Image.from_file is now deprecated. Please use Image.open"
+        warn 'Warning: MiniMagick::Image.from_file is now deprecated. Please use Image.open'
         open(file, ext)
       end
 
@@ -135,11 +134,9 @@ module MiniMagick
           block.call(tempfile)
           tempfile.close
 
-          image = self.new(tempfile.path, tempfile)
+          image = new(tempfile.path, tempfile)
 
-          if validate and !image.valid?
-            raise MiniMagick::Invalid
-          end
+          fail MiniMagick::Invalid if validate && !image.valid?
           return image
         ensure
           tempfile.close if tempfile
@@ -168,7 +165,7 @@ module MiniMagick
     #
     # @return [Boolean]
     def valid?
-      run_command("identify", path)
+      run_command('identify', path)
       true
     rescue MiniMagick::Invalid
       false
@@ -193,24 +190,24 @@ module MiniMagick
     def [](value)
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       case value.to_s
-      when "colorspace"
-        run_command("identify", "-format", '%r\n', path).split("\n")[0].strip
-      when "format"
-        run_command("identify", "-format", '%m\n', path).split("\n")[0]
-      when "height"
-        run_command("identify", "-format", '%h\n', path).split("\n")[0].to_i
-      when "width"
-        run_command("identify", "-format", '%w\n', path).split("\n")[0].to_i
-      when "dimensions"
-        run_command("identify", "-format", MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map{|v|v.to_i}
-      when "size"
+      when 'colorspace'
+        run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
+      when 'format'
+        run_command('identify', '-format', '%m\n', path).split("\n")[0]
+      when 'height'
+        run_command('identify', '-format', '%h\n', path).split("\n")[0].to_i
+      when 'width'
+        run_command('identify', '-format', '%w\n', path).split("\n")[0].to_i
+      when 'dimensions'
+        run_command('identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map { |v|v.to_i }
+      when 'size'
         File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
-      when "original_at"
+      when 'original_at'
         # Get the EXIF original capture as a Time object
-        Time.local(*self["EXIF:DateTimeOriginal"].split(/:|\s+/)) rescue nil
+        Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
       when /^EXIF\:/i
         result = run_command('identify', '-format', "%[#{value}]", path).chomp
-        if result.include?(",")
+        if result.include?(',')
           read_character_data(result)
         else
           result
@@ -226,7 +223,7 @@ module MiniMagick
     #
     # @return [String] Whatever the result from the command line is. May not be terribly useful.
     def <<(*args)
-      run_command("mogrify", *args << path)
+      run_command('mogrify', *args << path)
     end
 
     # This is used to change the format of the image. That is, from "tiff to jpg" or something like that.
@@ -262,15 +259,15 @@ module MiniMagick
       self.path = path.sub(/(\.\w*)?$/, ".#{format}")
       File.delete(old_path) if old_path != path
 
-      unless File.exists?(path)
-        raise MiniMagick::Error, "Unable to format to #{format}"
+      unless File.exist?(path)
+        fail MiniMagick::Error, "Unable to format to #{format}"
       end
     end
 
     # Collapse images with sequences to the first frame (ie. animated gifs) and
     # preserve quality
     def collapse!
-      run_command("mogrify", "-quality", "100", "#{path}[0]")
+      run_command('mogrify', '-quality', '100', "#{path}[0]")
     end
 
     # Writes the temporary file out to either a file location (by passing in a String) or by
@@ -283,10 +280,10 @@ module MiniMagick
       if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
-          run_command "identify", MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) :  output_to.to_s # Verify that we have a good image
+          run_command 'identify', MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) : output_to.to_s # Verify that we have a good image
         end
       else # stream
-        File.open(path, "rb") do |f|
+        File.open(path, 'rb') do |f|
           f.binmode
           while chunk = f.read(8192)
             output_to.write(chunk)
@@ -308,7 +305,7 @@ module MiniMagick
 
     def mime_type
       format = self[:format]
-      "image/" + format.to_s.downcase
+      'image/' + format.to_s.downcase
     end
 
     # If an unknown method is called then it is sent through the mogrify program
@@ -329,10 +326,10 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(tool = "mogrify", &block)
+    def combine_options(tool = 'mogrify', &block)
       c = CommandBuilder.new(tool)
 
-      c << path if tool.to_s == "convert"
+      c << path if tool.to_s == 'convert'
       block.call(c)
       c << path
       run(c)
@@ -346,14 +343,14 @@ module MiniMagick
         second_tempfile.close
       end
 
-      command = CommandBuilder.new("composite")
+      command = CommandBuilder.new('composite')
       block.call(command) if block
       command.push(other_image.path)
-      command.push(self.path)
+      command.push(path)
       command.push(second_tempfile.path)
 
       run(command)
-      return Image.new(second_tempfile.path, second_tempfile)
+      Image.new(second_tempfile.path, second_tempfile)
     end
 
     def run_command(command, *args)
@@ -368,7 +365,7 @@ module MiniMagick
     def run(command_builder)
       command = command_builder.command
 
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      sub = Subexec.run(command, timeout: MiniMagick.timeout)
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
@@ -376,11 +373,11 @@ module MiniMagick
 
         # Raise the appropriate error
         if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          raise Invalid, sub.output
+          fail Invalid, sub.output
         else
           # TODO: should we do something different if the command times out ...?
           # its definitely better for logging.. otherwise we dont really know
-          raise Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{:status_code => sub.exitstatus, :output => sub.output}.inspect}"
+          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ status_code: sub.exitstatus, output: sub.output }.inspect}"
         end
       else
         sub.output
@@ -389,19 +386,20 @@ module MiniMagick
 
     def destroy!
       return if @tempfile.nil?
-      File.unlink(path) if File.exists?(path)
+      File.unlink(path) if File.exist?(path)
       @tempfile = nil
     end
 
     private
-      # Sometimes we get back a list of character values
-      def read_character_data(list_of_characters)
-        chars = list_of_characters.gsub(" ", "").split(",")
-        result = ""
-        chars.each do |val|
-          result << ("%c" % val.to_i)
-        end
-        result
+
+    # Sometimes we get back a list of character values
+    def read_character_data(list_of_characters)
+      chars = list_of_characters.gsub(' ', '').split(',')
+      result = ''
+      chars.each do |val|
+        result << ('%c' % val.to_i)
       end
+      result
+    end
   end
 end
