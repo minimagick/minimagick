@@ -2,7 +2,7 @@
 
 A ruby wrapper for ImageMagick or GraphicsMagick command line.
 
-Tested on the following Rubies: MRI 1.8.7, 1.9.2, 1.9.3, 2.0.0, REE, JRuby, Rubinius.
+Tested on the following Rubies: MRI 1.9.2, 1.9.3, 2.0.0, 2.1.1, JRuby, Rubinius.
 
 [![Build Status](https://secure.travis-ci.org/nadavshatz/minimagick.png)](http://travis-ci.org/nadavshatz/minimagick)
 [![Code Climate](https://codeclimate.com/github/nadavshatz/minimagick.png)](https://codeclimate.com/github/nadavshatz/minimagick)
