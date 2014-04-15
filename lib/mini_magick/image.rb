@@ -98,7 +98,7 @@ module MiniMagick
       # @param ext [String] Specify the extension you want to read it as
       # @return [Image] The loaded image
       def open(file_or_url, ext = nil)
-        file_or_url = file_or_url.to_s # Force it to be a String... hell or highwater
+        file_or_url = file_or_url.to_s # Force it to be a String... Hell or high water
         if file_or_url.include?('://')
           require 'open-uri'
           ext ||= File.extname(URI.parse(file_or_url).path)
@@ -156,7 +156,6 @@ module MiniMagick
     def initialize(input_path, tempfile = nil)
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
-      @info = {}
       reset_queue
     end
 
@@ -171,6 +170,7 @@ module MiniMagick
       @queue << (MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path)
       run(@queue)
       reset_queue
+      @info = {}
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -188,10 +188,7 @@ module MiniMagick
     end
 
     def info(key)
-      if @command_queued
-        @info = {}
-        run_queue
-      end
+      run_queue if @command_queued
 
       @info[key]
     end
@@ -222,11 +219,14 @@ module MiniMagick
                   when 'format'
                     run_command('identify', '-format', '%m\n', path).split("\n")[0]
                   when 'dimensions', 'width', 'height'
-                    width_height = run_command('identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path).split("\n")[0].split.map { |v| v.to_i }
+                    width_height = run_command(
+                      'identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path
+                    ).split("\n")[0].split.map { |v| v.to_i }
+
                     @info[:width] = width_height[0]
                     @info[:height] = width_height[1]
                     @info[:dimensions] = width_height
-                    width_height
+                    nil
                   when 'size'
                     File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
                   when 'original_at'
@@ -243,7 +243,7 @@ module MiniMagick
                     run_command('identify', '-format', value, path).split("\n")[0]
                   end
 
-      @info[value] = retrieved unless @info.key? value # if we didn't store it yet then do
+      @info[value] = retrieved unless retrieved.nil?
       @info[value]
     end
 
@@ -260,8 +260,8 @@ module MiniMagick
     # Once you run it, the instance is pointing to a new file with a new extension!
     #
     # *DANGER*: This renames the file that the instance is pointing to. So, if you manually opened the
-    # file with Image.new(file_path)... then that file is DELETED! If you used Image.open(file) then
-    # you are ok. The original file will still be there. But, any changes to it might not be...
+    # file with Image.new(file_path)... Then that file is DELETED! If you used Image.open(file) then
+    # you are OK. The original file will still be there. But, any changes to it might not be...
     #
     # Formatting an animation into a non-animated type will result in ImageMagick creating multiple
     # pages (starting with 0).  You can choose which page you want to manipulate.  We default to the
@@ -270,7 +270,7 @@ module MiniMagick
     # If you would like to convert between animated formats, pass nil as your
     # page and ImageMagick will copy all of the pages.
     #
-    # @param format [String] The target format... like 'jpg', 'gif', 'tiff', etc.
+    # @param format [String] The target format... Like 'jpg', 'gif', 'tiff', etc.
     # @param page [Integer] If this is an animated gif, say which 'page' you want
     # with an integer. Default 0 will convert only the first page; 'nil' will
     # convert all pages.
@@ -280,19 +280,13 @@ module MiniMagick
 
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
-      if page
-        c << "#{path}[#{page}]"
-      else
-        c << path
-      end
+      c << page ? "#{path}[#{page}]" : path
       run(c)
 
       old_path = path
-      self.path = if page
-                    path.sub(/(\.\w*)?$/, ".#{format}")
-                  else
-                    path.sub(/(\.\w*)?$/, "-0.#{format}")
-                  end
+
+      self.path = path.sub(/(\.\w*)?$/, page ? ".#{format}" : "-0.#{format}")
+
       File.delete(old_path) if old_path != path
 
       unless File.exist?(path)
@@ -300,7 +294,7 @@ module MiniMagick
       end
     end
 
-    # Collapse images with sequences to the first frame (ie. animated gifs) and
+    # Collapse images with sequences to the first frame (i.e. animated gifs) and
     # preserve quality
     def collapse!
       run_command('mogrify', '-quality', '100', "#{path}[0]")
@@ -318,7 +312,9 @@ module MiniMagick
       if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
-          run_command 'identify', MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) : output_to.to_s # Verify that we have a good image
+          run_command(
+            'identify', MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) : output_to.to_s
+          ) # Verify that we have a good image
         end
       else # stream
         File.open(path, 'rb') do |f|
@@ -351,8 +347,8 @@ module MiniMagick
     # If an unknown method is called then it is sent through the mogrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
-      @command_queued = true
       @queue.send(symbol, *args)
+      @command_queued = true
     end
 
     # You can use multiple commands together using this method. Very easy to use!
@@ -366,8 +362,10 @@ module MiniMagick
     #
     # @yieldparam command [CommandBuilder]
     def combine_options
-      @command_queued = true
-      yield @queue
+      if block_given?
+        yield @queue
+        @command_queued = true
+      end
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
@@ -415,7 +413,7 @@ module MiniMagick
           fail Invalid, sub.output
         else
           # TODO: should we do something different if the command times out ...?
-          # its definitely better for logging.. otherwise we dont really know
+          # its definitely better for logging.. Otherwise we don't really know
           fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ status_code: sub.exitstatus, output: sub.output }.inspect}"
         end
       else
