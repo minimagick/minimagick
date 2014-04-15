@@ -1,7 +1,7 @@
 module MiniMagick
   class Image
     # @return [String] The location of the current working file
-    attr_accessor :path
+    attr_writer :path
 
     def path_for_windows_quote_space(path)
       path = Pathname.new(@path).to_s
@@ -156,7 +156,20 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
       @info = {}
-      @dirty_info = false
+      @comand_queued = false
+      reset_queue
+    end
+
+    def reset_queue
+      @queue = MiniMagick::CommandBuilder.new('mogrify')
+      # @queue << path
+    end
+
+    def run_queue
+      @queue << path
+      run(@queue)
+      @comand_queued = false
+      reset_queue
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -174,9 +187,9 @@ module MiniMagick
     end
 
     def info(key)
-      if @dirty_info
+      if @command_queued
         @info = {}
-        @dirty_info = false
+        run_queue
       end
 
       @info[key]
@@ -229,7 +242,7 @@ module MiniMagick
                     run_command('identify', '-format', value, path).split("\n")[0]
                   end
 
-      @dirty_info = false # no need to clear it, we just accessed it.
+      # @dirty_info = false # no need to clear it, we just accessed it.
       @info[value] = retrieved unless @info.key? value # if we didn't store it yet then do
       @info[value]
     end
@@ -263,6 +276,8 @@ module MiniMagick
     # convert all pages.
     # @return [nil]
     def format(format, page = 0)
+      run_queue if @command_queued
+
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
       if page
@@ -274,10 +289,10 @@ module MiniMagick
 
       old_path = path
       self.path = if page
-        path.sub(/(\.\w*)?$/, ".#{format}")
-      else
-        path.sub(/(\.\w*)?$/, "-0.#{format}")
-      end
+                    path.sub(/(\.\w*)?$/, ".#{format}")
+                  else
+                    path.sub(/(\.\w*)?$/, "-0.#{format}")
+                  end
       File.delete(old_path) if old_path != path
 
       unless File.exist?(path)
@@ -298,6 +313,8 @@ module MiniMagick
     # @return [IOStream, Boolean] If you pass in a file location [String] then you get a success boolean. If its a stream, you get it back.
     # Writes the temporary image that we are using for processing to the output path
     def write(output_to)
+      run_queue if @command_queued
+
       if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
@@ -317,6 +334,8 @@ module MiniMagick
     # Gives you raw image data back
     # @return [String] binary string
     def to_blob
+      run_queue if @command_queued
+
       f = File.new path
       f.binmode
       f.read
@@ -332,9 +351,8 @@ module MiniMagick
     # If an unknown method is called then it is sent through the mogrify program
     # Look here to find all the commands (http://www.imagemagick.org/script/mogrify.php)
     def method_missing(symbol, *args)
-      combine_options do |c|
-        c.send(symbol, *args)
-      end
+      @command_queued = true
+      @queue.send(symbol, *args)
     end
 
     # You can use multiple commands together using this method. Very easy to use!
@@ -347,16 +365,14 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(tool = 'mogrify', &block)
-      c = CommandBuilder.new(tool)
-
-      c << path if tool.to_s == 'convert'
-      block.call(c)
-      c << path
-      run(c)
+    def combine_options(&block)
+      @command_queued = true
+      block.call(@queue)
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
+      run_queue if @command_queued
+
       begin
         second_tempfile = Tempfile.new(output_extension)
         second_tempfile.binmode
@@ -375,6 +391,8 @@ module MiniMagick
     end
 
     def run_command(command, *args)
+      run_queue if @command_queued
+
       if command == 'identify'
         args.unshift '-ping'  # -ping "efficiently determine image characteristics."
         args.unshift '-quiet' if MiniMagick.mogrify? # graphicsmagick has no -quiet option.
@@ -384,8 +402,8 @@ module MiniMagick
     end
 
     def run(command_builder)
-      @dirty_info = true # clear stored info
       command = command_builder.command
+      puts command
 
       sub = Subexec.run(command, timeout: MiniMagick.timeout)
 
