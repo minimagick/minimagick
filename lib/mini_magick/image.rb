@@ -156,13 +156,14 @@ module MiniMagick
     def initialize(input_path, tempfile = nil)
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
+      @info = {}
       reset_queue
     end
 
     def reset_queue
       @command_queued = false
       @queue = MiniMagick::CommandBuilder.new('mogrify')
-      # @queue << path
+      @info.clear
     end
 
     def run_queue
@@ -170,7 +171,6 @@ module MiniMagick
       @queue << (MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path)
       run(@queue)
       reset_queue
-      @info = {}
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
