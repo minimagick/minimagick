@@ -280,12 +280,12 @@ module MiniMagick
 
       c = CommandBuilder.new('mogrify', '-format', format)
       yield c if block_given?
-      c << page ? "#{path}[#{page}]" : path
+      c <<  (page ? "#{path}[#{page}]" : path)
       run(c)
 
       old_path = path
 
-      self.path = path.sub(/(\.\w*)?$/, page ? ".#{format}" : "-0.#{format}")
+      self.path = path.sub(/(\.\w*)?$/, (page ? ".#{format}" : "-0.#{format}"))
 
       File.delete(old_path) if old_path != path
 
