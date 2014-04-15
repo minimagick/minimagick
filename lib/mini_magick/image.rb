@@ -11,6 +11,7 @@ module MiniMagick
     end
 
     def path
+      run_queue if @command_queued
       MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path
     end
 
@@ -156,19 +157,19 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile # ensures that the tempfile will stick around until this image is garbage collected.
       @info = {}
-      @comand_queued = false
       reset_queue
     end
 
     def reset_queue
+      @command_queued = false
       @queue = MiniMagick::CommandBuilder.new('mogrify')
       # @queue << path
     end
 
     def run_queue
-      @queue << path
+      return nil unless @command_queued
+      @queue << (MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path)
       run(@queue)
-      @comand_queued = false
       reset_queue
     end
 
@@ -242,7 +243,6 @@ module MiniMagick
                     run_command('identify', '-format', value, path).split("\n")[0]
                   end
 
-      # @dirty_info = false # no need to clear it, we just accessed it.
       @info[value] = retrieved unless @info.key? value # if we didn't store it yet then do
       @info[value]
     end
@@ -365,9 +365,9 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [CommandBuilder]
-    def combine_options(&block)
+    def combine_options
       @command_queued = true
-      block.call(@queue)
+      yield @queue
     end
 
     def composite(other_image, output_extension = 'jpg', &block)
@@ -403,7 +403,6 @@ module MiniMagick
 
     def run(command_builder)
       command = command_builder.command
-      puts command
 
       sub = Subexec.run(command, timeout: MiniMagick.timeout)
 
