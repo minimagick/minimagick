@@ -150,13 +150,19 @@ describe MiniMagick::Image do
     end
 
     describe '#write' do
+      it 'reformats a PSD with a given a extension and all layers' do
+        expect do
+          image = MiniMagick::Image.open(PSD_IMAGE_PATH)
+          image.format('jpg', nil)
+        end.to_not raise_error
+      end
+
       it 'opens and writes an image' do
         output_path = "output.gif"
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
-
-          File.exists?(output_path).should be true
+            File.exists?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -467,4 +473,4 @@ describe MiniMagick::Image do
       hidden_gif.mime_type == "image/gif"
     end
   end
-end
+end 

@@ -259,7 +259,11 @@ module MiniMagick
       run(c)
 
       old_path = path
-      self.path = path.sub(/(\.\w*)?$/, ".#{format}")
+      self.path = if page
+        path.sub(/(\.\w*)?$/, ".#{format}")
+      else
+        path.sub(/(\.\w*)?$/, "-0.#{format}")
+      end
       File.delete(old_path) if old_path != path
 
       unless File.exists?(path)
