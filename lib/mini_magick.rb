@@ -28,11 +28,11 @@ module MiniMagick
     def choose_processor
       self.processor = if MiniMagick::Utilities.which('mogrify')
                          'mogrify'
-      elsif MiniMagick::Utilities.which('gm')
+                       elsif MiniMagick::Utilities.which('gm')
                          'gm'
-      else
-        nil
-      end
+                       else
+                         nil
+                       end
     end
 
     ##

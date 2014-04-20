@@ -84,7 +84,7 @@ describe MiniMagick::Image do
       subject(:create) do
         MiniMagick::Image.create do |f|
           # Had to replace the old File.read with the following to work across all platforms
-          f.write(File.open(SIMPLE_IMAGE_PATH, 'rb') { |f| f.read })
+          f.write(File.open(SIMPLE_IMAGE_PATH, 'rb') { |fi| fi.read })
         end
       end
 
@@ -137,7 +137,9 @@ describe MiniMagick::Image do
     end
 
     it 'loads remote image with complex url' do
-      image = MiniMagick::Image.open('http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar')
+      image = MiniMagick::Image.open(
+        'http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar'
+      )
       image.valid?.should be true
       image.destroy!
     end
@@ -245,7 +247,7 @@ describe MiniMagick::Image do
       image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
       image[:width].should be 150
       image[:height].should be 55
-      image[:dimensions].should == [150, 55]
+      image[:dimensions].should eq [150, 55]
       image[:colorspace].should be_an_instance_of(String)
       image[:format].should match(/^gif$/i)
       image.destroy!
@@ -255,14 +257,14 @@ describe MiniMagick::Image do
       image = MiniMagick::Image.new(ERRONEOUS_IMAGE_PATH)
       image[:width].should be 10
       image[:height].should be 10
-      image[:dimensions].should == [10, 10]
-      image[:format].should == 'JPEG'
+      image[:dimensions].should eq [10, 10]
+      image[:format].should eq 'JPEG'
       image.destroy!
     end
 
     it 'inspects meta info from tiff images' do
       image = MiniMagick::Image.new(TIFF_IMAGE_PATH)
-      image[:format].to_s.downcase.should == 'tiff'
+      image[:format].to_s.downcase.should eq 'tiff'
       image[:width].should be 50
       image[:height].should be 41
       image.destroy!
@@ -270,7 +272,7 @@ describe MiniMagick::Image do
 
     it 'inspects a gif with jpg format correctly' do
       image = MiniMagick::Image.new(GIF_WITH_JPG_EXT)
-      image[:format].to_s.downcase.should == 'gif'
+      image[:format].to_s.downcase.should eq 'gif'
       image.destroy!
     end
 
@@ -322,15 +324,15 @@ describe MiniMagick::Image do
 
     it 'inspects the EXIF of an image' do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      image['exif:ExifVersion'].should == '0220'
+      image['exif:ExifVersion'].should eq '0220'
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image['EXIF:ExifVersion'].should == ''
+      image['EXIF:ExifVersion'].should be_empty
       image.destroy!
     end
 
     it 'inspects the original at of an image' do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      image[:original_at].should == Time.local('2005', '2', '23', '23', '17', '24')
+      image[:original_at].should eq Time.local('2005', '2', '23', '23', '17', '24')
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       image[:original_at].should be nil
       image.destroy!
@@ -338,7 +340,7 @@ describe MiniMagick::Image do
 
     it 'has the same path for tempfile and image' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
-      image.instance_eval('@tempfile.path').should == image.path
+      image.instance_eval('@tempfile.path').should eq image.path
       image.destroy!
     end
 
@@ -437,9 +439,9 @@ describe MiniMagick::Image do
       blob = pixels.pack('S*') # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map)
       image.valid?.should be true
-      image[:format].to_s.downcase.should == 'png'
-      image[:width].should == columns
-      image[:height].should == rows
+      image[:format].to_s.downcase.should eq 'png'
+      image[:width].should eq columns
+      image[:height].should eq rows
       image.write("#{Dir.tmpdir}/imported_pixels_image.png")
     end
 
@@ -453,9 +455,9 @@ describe MiniMagick::Image do
       blob = pixels.pack('S*') # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map, format)
       image.valid?.should be true
-      image[:format].to_s.downcase.should == format
-      image[:width].should == columns
-      image[:height].should == rows
+      image[:format].to_s.downcase.should eq format
+      image[:width].should eq columns
+      image[:height].should eq rows
       image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
     end
 
@@ -466,11 +468,11 @@ describe MiniMagick::Image do
       tiff =        MiniMagick::Image.open(TIFF_IMAGE_PATH)
       hidden_gif =  MiniMagick::Image.open(GIF_WITH_JPG_EXT)
 
-      gif.mime_type.should == 'image/gif'
-      jpeg.mime_type.should == 'image/jpeg'
-      png.mime_type.should == 'image/png'
-      tiff.mime_type.should == 'image/tiff'
-      hidden_gif.mime_type == 'image/gif'
+      gif.mime_type.should eq 'image/gif'
+      jpeg.mime_type.should eq 'image/jpeg'
+      png.mime_type.should eq 'image/png'
+      tiff.mime_type.should eq 'image/tiff'
+      hidden_gif.mime_type.should eq 'image/gif'
     end
   end
 end

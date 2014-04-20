@@ -11,7 +11,7 @@ describe MiniMagick do
     end
 
     it 'returns nil on nonexistent executables' do
-      MiniMagick::Utilities.which('yogrify').should == nil
+      MiniMagick::Utilities.which('yogrify').should be_nil
     end
   end
 
