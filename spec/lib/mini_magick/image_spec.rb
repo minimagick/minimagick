@@ -12,7 +12,7 @@ describe MiniMagick::Image do
       @old_path = ENV['PATH']
       ENV['PATH'] = ''
     end
-    
+
     after do
       ENV['PATH'] = @old_path
     end
@@ -162,7 +162,7 @@ describe MiniMagick::Image do
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
-            File.exists?(output_path).should be true
+            File.exist?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -175,7 +175,7 @@ describe MiniMagick::Image do
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
 
-          File.exists?(output_path).should be true
+          File.exist?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -220,7 +220,7 @@ describe MiniMagick::Image do
           end
         end
 
-        after do 
+        after do
           image.destroy!
           File.delete output_path
           MiniMagick.validate_on_write = @old_validate
@@ -345,7 +345,7 @@ describe MiniMagick::Image do
     it 'has the tempfile at path after format' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       image.format('png')
-      File.exists?(image.path).should be true
+      File.exist?(image.path).should be true
       image.destroy!
     end
 
@@ -367,7 +367,7 @@ describe MiniMagick::Image do
 
       image = MiniMagick::Image.new(tempfile.path)
       image.format('png')
-      File.exists?(image.path).should be true
+      File.exist?(image.path).should be true
       image.destroy!
 
       File.delete(image.path)
@@ -387,7 +387,7 @@ describe MiniMagick::Image do
         result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH)) do |c|
           c.gravity "center"
         end
-        File.exists?(result.path).should be true
+        File.exist?(result.path).should be true
       else
         puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
       end
@@ -405,7 +405,7 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
-    # https://github.com/minimagick/minimagick/issues/8 
+    # https://github.com/minimagick/minimagick/issues/8
     it 'has issue 15 fixed' do
       expect do
         image = MiniMagick::Image.open(Pathname.new(SIMPLE_IMAGE_PATH))
@@ -473,4 +473,4 @@ describe MiniMagick::Image do
       hidden_gif.mime_type == "image/gif"
     end
   end
-end 
+end
