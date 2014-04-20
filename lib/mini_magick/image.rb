@@ -266,7 +266,7 @@ module MiniMagick
       end
       File.delete(old_path) if old_path != path
 
-      unless File.exists?(path)
+      unless File.exist?(path)
         raise MiniMagick::Error, "Unable to format to #{format}"
       end
     end
@@ -393,7 +393,7 @@ module MiniMagick
 
     def destroy!
       return if @tempfile.nil?
-      File.unlink(path) if File.exists?(path)
+      File.unlink(path) if File.exist?(path)
       @tempfile = nil
     end
 
