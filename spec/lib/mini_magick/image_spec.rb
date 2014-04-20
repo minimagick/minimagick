@@ -162,7 +162,7 @@ describe MiniMagick::Image do
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
-          File.exists?(output_path).should be true
+          File.exist?(output_path).should be true
         ensure
           File.delete output_path
         end
@@ -473,4 +473,4 @@ describe MiniMagick::Image do
       hidden_gif.mime_type == 'image/gif'
     end
   end
-end 
+end
