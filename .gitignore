@@ -4,3 +4,5 @@ coverage
 .idea
 .yardoc
 .rvmrc
+.rubocop.yml
+tags
