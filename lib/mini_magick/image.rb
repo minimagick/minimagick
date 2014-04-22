@@ -354,7 +354,7 @@ module MiniMagick
       block.call(command) if block
       command.push(other_image.path)
       command.push(self.path)
-      command.push(mask.path) unless mask.nil?
+      command.push(mask.path) if mask
       command.push(second_tempfile.path)
 
       run(command)
