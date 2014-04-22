@@ -393,6 +393,19 @@ describe MiniMagick::Image do
       end
     end
 
+    # https://github.com/minimagick/minimagick/issues/212
+    it "can create a composite of two images with mask" do
+      if MiniMagick.valid_version_installed?
+        image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
+        result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH), 'jpg', MiniMagick::Image.open(PNG_PATH)) do |c|
+          c.gravity "center"
+        end
+        File.exist?(result.path).should be true
+      else
+        puts "Need at least version #{MiniMagick.minimum_image_magick_version} of ImageMagick"
+      end
+    end
+    
     # https://github.com/minimagick/minimagick/issues/8
     it "has issue 8 fixed" do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
