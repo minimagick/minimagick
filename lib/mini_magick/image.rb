@@ -342,7 +342,7 @@ module MiniMagick
       run(c)
     end
 
-    def composite(other_image, output_extension = 'jpg', &block)
+    def composite(other_image, output_extension = 'jpg', mask = nil, &block)
       begin
         second_tempfile = Tempfile.new(output_extension)
         second_tempfile.binmode
@@ -354,6 +354,7 @@ module MiniMagick
       block.call(command) if block
       command.push(other_image.path)
       command.push(self.path)
+      command.push(mask.path) if mask
       command.push(second_tempfile.path)
 
       run(command)
