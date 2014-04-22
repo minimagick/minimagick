@@ -27,9 +27,9 @@ module MiniMagick
     # * [String] The detected procesor
     def choose_processor
       self.processor = if MiniMagick::Utilities.which('mogrify')
-                         'mogrify'
+                         :mogrify
                        elsif MiniMagick::Utilities.which('gm')
-                         'gm'
+                         :gm
                        else
                          nil
                        end
@@ -70,7 +70,8 @@ module MiniMagick
     def mogrify?
       choose_processor if processor.nil?
 
-      processor == 'mogrify'
+      return processor.to_sym.downcase == :mogrify unless processor.nil?
+      false
     end
 
     ##
@@ -81,7 +82,8 @@ module MiniMagick
     def gm?
       choose_processor if processor.nil?
 
-      processor == 'gm'
+      return processor.to_sym.downcase == :gm unless processor.nil?
+      false
     end
   end
 end

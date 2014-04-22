@@ -29,7 +29,7 @@ describe MiniMagick do
     it "sets the processor to mogrify (default) if it's not set" do
       MiniMagick.processor = nil
       MiniMagick.mogrify?
-      MiniMagick.processor.should == 'mogrify'
+      MiniMagick.processor.should == :mogrify
     end
   end
 
