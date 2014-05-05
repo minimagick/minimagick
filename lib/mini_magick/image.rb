@@ -401,8 +401,15 @@ module MiniMagick
 
     def run(command_builder)
       command = command_builder.command
-
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      output_tempfile = Tempfile.new(['mini_magick_subcmd_output', '.log'])
+      begin
+        sub = Subexec.run(command, :timeout => MiniMagick.timeout, :log_file => output_tempfile.path)
+        output_tempfile.rewind
+        cmd_output = IO.readlines(output_tempfile.path)
+      ensure
+        output_tempfile.close
+        output_tempfile.unlink
+      end
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
@@ -417,7 +424,7 @@ module MiniMagick
           fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
         end
       else
-        sub.output
+        cmd_output
       end
     end
 
