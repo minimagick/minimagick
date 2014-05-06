@@ -4,7 +4,7 @@ Bundler::GemHelper.install_tasks
 $:.unshift 'lib'
 
 desc 'Default: run unit tests.'
-task default: [:print_version, :spec]
+task :default => [:print_version, :spec]
 
 task :print_version do
   puts `mogrify --version`
