@@ -7,6 +7,7 @@ MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::CommandBuilder do
   before(:each) do
+    MiniMagick.clear_limits!
     @processor = MiniMagick.processor
     @processor_path = MiniMagick.processor_path
   end
@@ -17,7 +18,7 @@ describe MiniMagick::CommandBuilder do
   end
 
   describe "ported from testunit", :ported => true do
-    let(:builder){ MiniMagick::CommandBuilder.new('test') }
+    let(:builder) { MiniMagick::CommandBuilder.new('test') }
 
     it "builds a basic command" do
       builder.resize "30x40"
@@ -69,18 +70,52 @@ describe MiniMagick::CommandBuilder do
 
     describe 'common verbs between morgify and image creation operators' do
       context 'mogrify' do
-        let(:builder) {described_class.new('mogrify')}
+        let(:builder) { described_class.new('mogrify') }
 
         it 'builds the command' do
           builder.caption 'caption_text'
-          builder.command.should == 'mogrify -caption caption_text'    
+          builder.command.should == 'mogrify -caption caption_text'
         end
       end
 
       context 'other' do
         it 'builds the command' do
           builder.caption 'caption_text'
-          builder.command.should == 'test caption:caption_text'    
+          builder.command.should == 'test caption:caption_text'
+        end
+      end
+    end
+
+
+    describe 'resource limits' do
+      context "instance variables" do
+        let(:dummy_module) do
+          Module.new do
+            include MiniMagick
+          end
+        end
+
+        it "should allow module limits" do
+          dummy_module.module_eval("MiniMagick.time_limit = 120")
+        end
+
+      end
+
+      context "commands" do
+
+        it "should not fail for valid limits" do
+          command = MiniMagick::CommandBuilder.new('test', 'path')
+
+          command.canvas 'black'
+          command.time_limit "120"
+          command.thread_limit "2"
+          command.memory_limit "512mb"
+          command.map_limit "512mb"
+          command.args.join(' ').should == 'path canvas:black'
+          command.limits.join(' ').should =~ /-limit time/
+          command.limits.join(' ').should =~ /-limit thread/
+          command.limits.join(' ').should =~ /-limit memory/
+          command.limits.join(' ').should =~ /-limit map/
         end
       end
     end
@@ -122,7 +157,7 @@ describe MiniMagick::CommandBuilder do
   end
 
   context 'deprecated' do
-    let(:builder){ MiniMagick::CommandBuilder.new('test') }
+    let(:builder) { MiniMagick::CommandBuilder.new('test') }
     before(:each) { MiniMagick.processor = nil }
 
     it "builds a full command" do
