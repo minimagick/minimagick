@@ -53,7 +53,7 @@ describe MiniMagick do
 
   context "module limits" do
     %w{disk file map memory thread time} .each do |resource |
-      it "has limits for memory" do
+      it "has limits for #{resource}" do
         rnd = rand(100)
         MiniMagick.send("#{resource}_limit=", rnd.to_s)
         MiniMagick.send("#{resource}_limit").should ==rnd.to_s
