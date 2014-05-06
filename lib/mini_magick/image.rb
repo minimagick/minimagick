@@ -376,7 +376,7 @@ module MiniMagick
       begin
         sub = Subexec.run(command, :timeout => MiniMagick.timeout, :log_file => output_tempfile.path)
         output_tempfile.rewind
-        cmd_output = IO.readlines(output_tempfile.path)
+        cmd_output = IO.read(output_tempfile.path)
       ensure
         output_tempfile.close
         output_tempfile.unlink
