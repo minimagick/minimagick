@@ -123,7 +123,31 @@ result = first_image.composite(second_image) do |c|
 end
 result.write "output.jpg"
 ```
-
+Want to limit the resources used by the various operations (see ImageMagick docs for information on these)?
+Set it for the module:
+```ruby
+# put this in an initializer...
+MiniMagick.disk_limit = "1GB"
+# reset with MiniMagick.reset_limits!
+```
+Use everywhere:
+```ruby
+first_image = MiniMagick::Image.open "gigantic_image_1.jpg"
+second_image = MiniMagick::Image.open "gigantic_image_2.jpg"
+result = first_image.composite(second_image) do |c|
+  c.compose "Over" # OverCompositeOp
+  c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
+end
+result.write "output.jpg"
+```
+Or, set limits per-instance:
+```ruby
+image = MiniMagick::Image.open("http://www.google.com/images/logos/logo.png")
+image.memory_limit "512mB"
+image.resize "5x5"
+image.format "gif"
+image.write "localcopy.gif"
+```
 ## Thinking of switching from RMagick?
 
 Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.
