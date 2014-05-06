@@ -392,7 +392,7 @@ module MiniMagick
           raise Invalid, cmd_output
         else
           # TODO: should we do something different if the command times out ...?
-          # its definitely better for logging.. otherwise we dont really know
+          # its definitely better for logging.. otherwise we don't really know
           raise Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{:status_code => sub.exitstatus, :output => cmd_output}.inspect}"
         end
       else
