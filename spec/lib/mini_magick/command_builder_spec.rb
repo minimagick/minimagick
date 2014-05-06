@@ -16,7 +16,7 @@ describe MiniMagick::CommandBuilder do
     MiniMagick.processor = @processor
   end
 
-  describe 'ported from testunit', ported: true do
+  describe 'ported from testunit', :ported => true do
     let(:builder) { MiniMagick::CommandBuilder.new('test') }
 
     it 'builds a basic command' do
@@ -29,7 +29,7 @@ describe MiniMagick::CommandBuilder do
       builder.command.should eq 'test -resize 30x40'
     end
 
-    describe 'windows only', if: MiniMagick::Utilities.windows? do
+    describe 'windows only', :if => MiniMagick::Utilities.windows? do
       it 'builds a complicated command' do
         builder.resize '30x40'
         builder.alpha '1 3 4'
@@ -48,7 +48,7 @@ describe MiniMagick::CommandBuilder do
       end
     end
 
-    describe 'not windows', if: !MiniMagick::Utilities.windows? do
+    describe 'not windows', :if => !MiniMagick::Utilities.windows? do
       it 'builds a complicated command' do
         builder.resize '30x40'
         builder.alpha '1 3 4'
@@ -130,14 +130,14 @@ describe MiniMagick::CommandBuilder do
       builder.command.should eq 'test -resize 30x40'
     end
 
-    describe 'windows only', if: MiniMagick::Utilities.windows? do
+    describe 'windows only', :if => MiniMagick::Utilities.windows? do
       it 'sets a colorspace correctly' do
         builder.set 'colorspace RGB'
         builder.command.should eq 'test -set colorspace RGB'
       end
     end
 
-    describe 'not windows', if: !MiniMagick::Utilities.windows? do
+    describe 'not windows', :if => !MiniMagick::Utilities.windows? do
       it 'sets a colorspace correctly' do
         builder.set 'colorspace RGB'
         builder.command.should eq 'test -set colorspace\ RGB'

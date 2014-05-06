@@ -70,7 +70,7 @@ module MiniMagick
     def mogrify?
       choose_processor if processor.nil?
 
-      return processor.to_sym.downcase == :mogrify unless processor.nil?
+      return processor.to_s.downcase.to_sym == :mogrify unless processor.nil?
       false
     end
 
@@ -82,7 +82,7 @@ module MiniMagick
     def gm?
       choose_processor if processor.nil?
 
-      return processor.to_sym.downcase == :gm unless processor.nil?
+      return processor.to_s.downcase.to_sym == :gm unless processor.nil?
       false
     end
   end

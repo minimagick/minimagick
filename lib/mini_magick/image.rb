@@ -402,7 +402,7 @@ module MiniMagick
     def run(command_builder)
       command = command_builder.command
 
-      sub = Subexec.run(command, timeout: MiniMagick.timeout)
+      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
@@ -414,7 +414,7 @@ module MiniMagick
         else
           # TODO: should we do something different if the command times out ...?
           # its definitely better for logging.. Otherwise we don't really know
-          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ status_code: sub.exitstatus, output: sub.output }.inspect}"
+          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
         end
       else
         sub.output
