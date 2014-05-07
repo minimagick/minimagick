@@ -123,7 +123,8 @@ result = first_image.composite(second_image) do |c|
 end
 result.write "output.jpg"
 ```
-Want to bound the resources used by the various operations (see ImageMagick docs for information on these), but not have to change it everywhere?
+Want to centrally limit the resources used by the various operations (see ImageMagick docs for information on these)? Be able to tune without changing code in multiple locations?
+
 Set it for the module:
 ```ruby
 # put this in an initializer...
@@ -148,6 +149,11 @@ image.resize "5x5"
 image.format "gif"
 image.write "localcopy.gif"
 ```
+Note: there is also the limit command itself
+```ruby
+image.limit "memory" "512mB"
+```
+
 ## Thinking of switching from RMagick?
 
 Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.
