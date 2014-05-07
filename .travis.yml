@@ -9,7 +9,7 @@ rvm:
   - ree
   - jruby-18mode
   - jruby-19mode
-  - jruby-20mode
+#  - jruby-20mode
   - jruby-head
 matrix:
   allow_failures:
