@@ -399,12 +399,12 @@ describe MiniMagick::Image do
     end
 
     it "can enforce limits with an operation" do
-      image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH), 'jpg', MiniMagick::Image.open(PNG_PATH)) do |c|
-        c.memory_limit "1GB"
-        c.gravity "center"
+      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
+      image.combine_options do |c|
+        c.resize "20x30!"
+        c.blur "50"
+        c.limit "memory","1GB"
       end
-      File.exist?(result.path).should be true
     end
 
     # https://github.com/minimagick/minimagick/issues/8

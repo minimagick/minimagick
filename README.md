@@ -123,7 +123,7 @@ result = first_image.composite(second_image) do |c|
 end
 result.write "output.jpg"
 ```
-Want to limit the resources used by the various operations (see ImageMagick docs for information on these)?
+Want to bound the resources used by the various operations (see ImageMagick docs for information on these), but not have to change it everywhere?
 Set it for the module:
 ```ruby
 # put this in an initializer...
@@ -140,10 +140,10 @@ result = first_image.composite(second_image) do |c|
 end
 result.write "output.jpg"
 ```
-Or, set limits per-instance:
+Or, set use the limit command for a particular resource and value:
 ```ruby
 image = MiniMagick::Image.open("http://www.google.com/images/logos/logo.png")
-image.memory_limit "512mB"
+image.limit "memory","512mB"
 image.resize "5x5"
 image.format "gif"
 image.write "localcopy.gif"

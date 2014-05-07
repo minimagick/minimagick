@@ -9,27 +9,20 @@ module MiniMagick
       @args = []
       options.each { |arg| push(arg) }
       # gather limits
-      @limits = {}
+      @module_limits = {}
 
       # handle any limits at module level
       RESOURCES.each do |resource|
         value = MiniMagick.__send__(:"#{resource}_limit")
         if value
-          @limits[resource]=value
+          @module_limits[resource]=value
         end
       end
 
     end
 
-    def add_limit_cmd
-      @limits.each_pair do |limit_name,limit_value|
-        add_limit(limit_name, limit_value)
-      end
-    end
-
     def command
-
-      com = "#{@tool} #{(limits + args).join(' ')} ".strip
+      com = "#{@tool} #{(module_limits + args).join(' ')} ".strip
       com = "#{MiniMagick.processor} #{com}" unless MiniMagick.mogrify?
 
       com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
@@ -45,15 +38,11 @@ module MiniMagick
     end
 
     def args
-      if !MiniMagick::Utilities.windows?
-        @args.map(&:shellescape)
-      else
-        @args.map { |arg| Utilities.windows_escape(arg) }
-      end
+      @args.map {|arg| escape_fn(arg)}
     end
 
-    def limits
-      @limits.to_a.map { |el| "-limit #{escape_fn(el[0].to_s)} #{escape_fn(el[1].to_s)}" }
+    def module_limits
+      @module_limits.to_a.map { |el| "-limit #{escape_fn(el[0].to_s)} #{escape_fn(el[1].to_s)}" }
     end
 
     # Add each mogrify command in both underscore and dash format
@@ -78,14 +67,6 @@ module MiniMagick
 
       alias_method dashed_command, underscored_command
       alias_method "mogrify_#{underscored_command}", underscored_command
-    end
-
-    RESOURCES.each do |resource_name|
-      underscored_command = "#{resource_name.to_s.gsub("-", "_")}_limit"
-      define_method(underscored_command) do |*options|
-        @limits[resource_name] = options[0] #add_command(__method__.to_s.gsub("_", "-"), *options)
-        self
-      end
     end
 
     def format(*options)

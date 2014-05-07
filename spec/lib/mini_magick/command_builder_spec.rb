@@ -88,34 +88,31 @@ describe MiniMagick::CommandBuilder do
 
 
     describe 'resource limits' do
-      context "instance variables" do
-        let(:dummy_module) do
-          Module.new do
-            include MiniMagick
-          end
+      context "using module attributes" do
+        it "should not fail for valid limits" do
+          MiniMagick.time_limit = 120
+          command = MiniMagick::CommandBuilder.new('test', 'path')
+          command.canvas 'black'
+          command.args.join(' ').should =~ /path canvas:black/
+          command.command.should =~ /-limit time/
         end
-
-        it "should allow module limits" do
-          dummy_module.module_eval("MiniMagick.time_limit = 120")
-        end
-
       end
 
-      context "commands" do
+      context "using commands" do
 
         it "should not fail for valid limits" do
           command = MiniMagick::CommandBuilder.new('test', 'path')
 
           command.canvas 'black'
-          command.time_limit "120"
-          command.thread_limit "2"
-          command.memory_limit "512mb"
-          command.map_limit "512mb"
-          command.args.join(' ').should == 'path canvas:black'
-          command.limits.join(' ').should =~ /-limit time/
-          command.limits.join(' ').should =~ /-limit thread/
-          command.limits.join(' ').should =~ /-limit memory/
-          command.limits.join(' ').should =~ /-limit map/
+          command.limit "time", "120"
+          command.limit "thread","2"
+          command.limit "memory", "512mb"
+          command.limit "map","512mb"
+          command.args.join(' ').should =~ /path canvas:black/
+          command.args.join(' ').should =~ /-limit time/
+          command.args.join(' ').should =~ /-limit thread/
+          command.args.join(' ').should =~ /-limit memory/
+          command.args.join(' ').should =~ /-limit map/
         end
       end
     end
