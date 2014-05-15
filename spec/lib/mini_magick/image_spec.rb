@@ -21,7 +21,7 @@ describe MiniMagick::Image do
       begin
         MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       rescue Exception => e
-        e.message.should match(/(No such file|not found)/)
+        expect(e.message).to match(/(No such file|not found)/)
       end
     end
   end
@@ -30,7 +30,7 @@ describe MiniMagick::Image do
     it 'reads image from blob' do
       File.open(SIMPLE_IMAGE_PATH, "rb") do |f|
         image = MiniMagick::Image.read(f.read)
-        image.valid?.should be true
+        expect(image.valid?).to be true
         image.destroy!
       end
     end
@@ -44,7 +44,7 @@ describe MiniMagick::Image do
       end
 
       image = MiniMagick::Image.read(tempfile)
-      image.valid?.should be true
+      expect(image.valid?).to be true
       image.destroy!
     end
 
@@ -69,14 +69,14 @@ describe MiniMagick::Image do
 
     it 'opens image' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image.valid?.should be true
+      expect(image.valid?).to be true
       image.destroy!
     end
 
     it 'reads image from buffer' do
       buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH,"rb") { |f| f.read }
       image = MiniMagick::Image.read(buffer)
-      image.valid?.should be true
+      expect(image.valid?).to be true
       image.destroy!
     end
 
@@ -132,13 +132,13 @@ describe MiniMagick::Image do
 
     it 'loads remote image' do
       image = MiniMagick::Image.open("http://upload.wikimedia.org/wikipedia/en/b/bc/Wiki.png")
-      image.valid?.should be true
+      expect(image.valid?).to be true
       image.destroy!
     end
 
     it 'loads remote image with complex url' do
       image = MiniMagick::Image.open("http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar")
-      image.valid?.should be true
+      expect(image.valid?).to be true
       image.destroy!
     end
 
@@ -162,7 +162,7 @@ describe MiniMagick::Image do
         begin
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
-            File.exist?(output_path).should be true
+            expect(File.exist?(output_path)).to be true
         ensure
           File.delete output_path
         end
@@ -175,7 +175,7 @@ describe MiniMagick::Image do
           image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
           image.write output_path
 
-          File.exist?(output_path).should be true
+          expect(File.exist?(output_path)).to be true
         ensure
           File.delete output_path
         end
@@ -187,7 +187,7 @@ describe MiniMagick::Image do
         image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
         image.write("#{Dir.tmpdir}/foo.gif")
         image.write(stream)
-        MiniMagick::Image.read(stream.string).valid?.should be true
+        expect(MiniMagick::Image.read(stream.string).valid?).to be true
         image.destroy!
       end
 
@@ -230,7 +230,7 @@ describe MiniMagick::Image do
 
     it 'tells when an image is invalid' do
       image = MiniMagick::Image.new(NOT_AN_IMAGE_PATH)
-      image.valid?.should be false
+      expect(image.valid?).to be false
       image.destroy!
     end
 
@@ -243,34 +243,34 @@ describe MiniMagick::Image do
 
     it 'inspects image meta info' do
       image = MiniMagick::Image.new(SIMPLE_IMAGE_PATH)
-      image[:width].should be 150
-      image[:height].should be 55
-      image[:dimensions].should == [150, 55]
-      image[:colorspace].should be_an_instance_of(String)
-      image[:format].should match(/^gif$/i)
+      expect(image[:width]).to be 150
+      expect(image[:height]).to be 55
+      expect(image[:dimensions]).to eq([150, 55])
+      expect(image[:colorspace]).to be_an_instance_of(String)
+      expect(image[:format]).to match(/^gif$/i)
       image.destroy!
     end
 
     it 'inspects an erroneus image meta info' do
       image = MiniMagick::Image.new(ERRONEOUS_IMAGE_PATH)
-      image[:width].should be 10
-      image[:height].should be 10
-      image[:dimensions].should == [10, 10]
-      image[:format].should == 'JPEG'
+      expect(image[:width]).to be 10
+      expect(image[:height]).to be 10
+      expect(image[:dimensions]).to eq([10, 10])
+      expect(image[:format]).to eq('JPEG')
       image.destroy!
     end
 
     it 'inspects meta info from tiff images' do
       image = MiniMagick::Image.new(TIFF_IMAGE_PATH)
-      image[:format].to_s.downcase.should == 'tiff'
-      image[:width].should be 50
-      image[:height].should be 41
+      expect(image[:format].to_s.downcase).to eq('tiff')
+      expect(image[:width]).to be 50
+      expect(image[:height]).to be 41
       image.destroy!
     end
 
     it 'inspects a gif with jpg format correctly' do
       image = MiniMagick::Image.new(GIF_WITH_JPG_EXT)
-      image[:format].to_s.downcase.should == 'gif'
+      expect(image[:format].to_s.downcase).to eq('gif')
       image.destroy!
     end
 
@@ -278,9 +278,9 @@ describe MiniMagick::Image do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
       image.resize "20x30!"
 
-      image[:width].should be 20
-      image[:height].should be 30
-      image[:format].should match(/^gif$/i)
+      expect(image[:width]).to be 20
+      expect(image[:height]).to be 30
+      expect(image[:format]).to match(/^gif$/i)
       image.destroy!
     end
 
@@ -289,8 +289,8 @@ describe MiniMagick::Image do
       original_width, original_height = image[:width], image[:height]
       image.resize "#{original_width + 10}x#{original_height + 10}>"
 
-      image[:width].should be original_width
-      image[:height].should be original_height
+      expect(image[:width]).to be original_width
+      expect(image[:height]).to be original_height
       image.destroy!
     end
 
@@ -301,9 +301,9 @@ describe MiniMagick::Image do
         c.blur "50"
       end
 
-      image[:width].should be 20
-      image[:height].should be 30
-      image[:format].should match(/^gif$/i)
+      expect(image[:width]).to be 20
+      expect(image[:height]).to be 30
+      expect(image[:format]).to match(/^gif$/i)
       image.destroy!
     end
 
@@ -322,30 +322,30 @@ describe MiniMagick::Image do
 
     it "inspects the EXIF of an image" do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      image["exif:ExifVersion"].should == '0220'
+      expect(image["exif:ExifVersion"]).to eq('0220')
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image["EXIF:ExifVersion"].should == ''
+      expect(image["EXIF:ExifVersion"]).to eq('')
       image.destroy!
     end
 
     it 'inspects the original at of an image' do
       image = MiniMagick::Image.open(EXIF_IMAGE_PATH)
-      image[:original_at].should == Time.local('2005', '2', '23', '23', '17', '24')
+      expect(image[:original_at]).to eq(Time.local('2005', '2', '23', '23', '17', '24'))
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image[:original_at].should be nil
+      expect(image[:original_at]).to be nil
       image.destroy!
     end
 
     it 'has the same path for tempfile and image' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
-      image.instance_eval("@tempfile.path").should == image.path
+      expect(image.instance_eval("@tempfile.path")).to eq(image.path)
       image.destroy!
     end
 
     it 'has the tempfile at path after format' do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       image.format('png')
-      File.exist?(image.path).should be true
+      expect(File.exist?(image.path)).to be true
       image.destroy!
     end
 
@@ -353,7 +353,7 @@ describe MiniMagick::Image do
       image = MiniMagick::Image.open(TIFF_IMAGE_PATH)
       before = image.path.dup
       image.format('png')
-      File.exist?(before).should be false
+      expect(File.exist?(before)).to be false
       image.destroy!
     end
 
@@ -367,7 +367,7 @@ describe MiniMagick::Image do
 
       image = MiniMagick::Image.new(tempfile.path)
       image.format('png')
-      File.exist?(image.path).should be true
+      expect(File.exist?(image.path)).to be true
       image.destroy!
 
       File.delete(image.path)
@@ -386,7 +386,7 @@ describe MiniMagick::Image do
       result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH)) do |c|
         c.gravity "center"
       end
-      File.exist?(result.path).should be true
+      expect(File.exist?(result.path)).to be true
     end
 
     # https://github.com/minimagick/minimagick/issues/212
@@ -395,7 +395,7 @@ describe MiniMagick::Image do
       result = image.composite(MiniMagick::Image.open(TIFF_IMAGE_PATH), 'jpg', MiniMagick::Image.open(PNG_PATH)) do |c|
         c.gravity "center"
       end
-      File.exist?(result.path).should be true
+      expect(File.exist?(result.path)).to be true
     end
 
     # https://github.com/minimagick/minimagick/issues/8
@@ -441,10 +441,10 @@ describe MiniMagick::Image do
       pixels = Array.new(columns*rows) {|i| i}
       blob = pixels.pack("S*") # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map)
-      image.valid?.should be true
-      image[:format].to_s.downcase.should == 'png'
-      image[:width].should == columns
-      image[:height].should == rows
+      expect(image.valid?).to be true
+      expect(image[:format].to_s.downcase).to eq('png')
+      expect(image[:width]).to eq(columns)
+      expect(image[:height]).to eq(rows)
       image.write("#{Dir.tmpdir}/imported_pixels_image.png")
     end
 
@@ -457,10 +457,10 @@ describe MiniMagick::Image do
       pixels = Array.new(columns*rows) {|i| i}
       blob = pixels.pack("S*") # unsigned short, native byte order
       image = MiniMagick::Image.import_pixels(blob, columns, rows, depth, map, format)
-      image.valid?.should be true
-      image[:format].to_s.downcase.should == format
-      image[:width].should == columns
-      image[:height].should == rows
+      expect(image.valid?).to be true
+      expect(image[:format].to_s.downcase).to eq(format)
+      expect(image[:width]).to eq(columns)
+      expect(image[:height]).to eq(rows)
       image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
     end
 
@@ -471,10 +471,10 @@ describe MiniMagick::Image do
       tiff =        MiniMagick::Image.open(TIFF_IMAGE_PATH)
       hidden_gif =  MiniMagick::Image.open(GIF_WITH_JPG_EXT)
 
-      gif.mime_type.should == "image/gif"
-      jpeg.mime_type.should == "image/jpeg"
-      png.mime_type.should == "image/png"
-      tiff.mime_type.should == "image/tiff"
+      expect(gif.mime_type).to eq("image/gif")
+      expect(jpeg.mime_type).to eq("image/jpeg")
+      expect(png.mime_type).to eq("image/png")
+      expect(tiff.mime_type).to eq("image/tiff")
       hidden_gif.mime_type == "image/gif"
     end
   end
