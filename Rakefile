@@ -1,7 +1,7 @@
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-$:.unshift 'lib'
+$LOAD_PATH.unshift 'lib'
 
 desc 'Default: run unit tests.'
 task :default => [:print_version, :spec]
