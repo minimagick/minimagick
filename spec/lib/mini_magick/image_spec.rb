@@ -468,18 +468,32 @@ describe MiniMagick::Image do
       image.write("#{Dir.tmpdir}/imported_pixels_image." + format)
     end
 
-    it 'loads mimetype correctly' do
-      gif        = described_class.open(SIMPLE_IMAGE_PATH)
-      jpeg       = described_class.open(EXIF_IMAGE_PATH)
-      png        = described_class.open(PNG_PATH)
-      tiff       = described_class.open(TIFF_IMAGE_PATH)
-      hidden_gif = described_class.open(GIF_WITH_JPG_EXT)
+    context 'mimetypes' do
 
-      expect(gif.mime_type).to eq 'image/gif'
-      expect(jpeg.mime_type).to eq 'image/jpeg'
-      expect(png.mime_type).to eq 'image/png'
-      expect(tiff.mime_type).to eq 'image/tiff'
-      expect(hidden_gif.mime_type).to eq 'image/gif'
+      it 'loads GIF' do
+        image = described_class.open(SIMPLE_IMAGE_PATH)
+        expect(image.mime_type).to eq 'image/gif'
+      end
+
+      it 'loads GIF with wrong extension' do
+        image = described_class.open(GIF_WITH_JPG_EXT)
+        expect(image.mime_type).to eq 'image/gif'
+      end
+
+      it 'loads JPEG' do
+        image = described_class.open(EXIF_IMAGE_PATH)
+        expect(image.mime_type).to eq 'image/jpeg'
+      end
+
+      it 'loads PNG' do
+        image = described_class.open(PNG_PATH)
+        expect(image.mime_type).to eq 'image/png'
+      end
+
+      it 'loads TIFF' do
+        image = described_class.open(TIFF_IMAGE_PATH)
+        expect(image.mime_type).to eq 'image/tiff'
+      end
     end
   end
 end
