@@ -423,7 +423,7 @@ module MiniMagick
     def read_character_data(list_of_characters)
       chars = list_of_characters.gsub(' ', '').split(',')
       result = ''
-      chars.each { |val| result << ('%c' % val.to_i) }
+      chars.each { |val| result << Kernel.format('%c', val.to_i) }
       result
     end
   end
