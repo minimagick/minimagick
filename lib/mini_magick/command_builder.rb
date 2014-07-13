@@ -12,16 +12,15 @@ module MiniMagick
     def command
       com = "#{@tool} #{args.join(' ')}".strip
       com = "#{MiniMagick.processor} #{com}" unless MiniMagick.mogrify?
-
-      com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
+      com = File.join(MiniMagick.processor_path, com) if MiniMagick.processor_path
       com.strip
     end
 
     def args
-      if !MiniMagick::Utilities.windows?
-        @args.map(&:shellescape)
-      else
+      if MiniMagick::Utilities.windows?
         @args.map { |arg| Utilities.windows_escape(arg) }
+      else
+        @args.map(&:shellescape)
       end
     end
 
@@ -49,8 +48,8 @@ module MiniMagick
       alias_method "mogrify_#{underscored_command}", underscored_command
     end
 
-    def format(*options)
-      fail Error, "You must call 'format' on the image object directly!"
+    def format(*_options)
+      raise Error, "You must call 'format' on the image object directly!"
     end
 
     IMAGE_CREATION_OPERATORS.each do |operator|
@@ -71,34 +70,21 @@ module MiniMagick
         end
         method.call(*options)
       end
-
     end
 
     def +(*options)
       push(@args.pop.gsub(/^-/, '+'))
-      if options.any?
-        options.each do |o|
-          push o
-        end
-      end
+      options.to_a.each { |option| push(option) }
     end
 
     def add_command(command, *options)
       push "-#{command}"
-      if options.any?
-        options.each do |o|
-          push o
-        end
-      end
+      options.to_a.each { |option| push(option) }
     end
 
     def add_creation_operator(command, *options)
       creation_command = command
-      if options.any?
-        options.each do |option|
-          creation_command << ":#{option}"
-        end
-      end
+      options.to_a.each { |option| creation_command << ":#{option}" }
       push creation_command
     end
 
