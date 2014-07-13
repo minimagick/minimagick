@@ -263,26 +263,26 @@ module MiniMagick
     # If you would like to convert between animated formats, pass nil as your
     # page and ImageMagick will copy all of the pages.
     #
-    # @param format [String] The target format... Like 'jpg', 'gif', 'tiff', etc.
+    # @param ext [String] The target extension... Like 'jpg', 'gif', 'tiff', etc.
     # @param page [Integer] If this is an animated gif, say which 'page' you want
     # with an integer. Default 0 will convert only the first page; 'nil' will
     # convert all pages.
     # @return [nil]
-    def format(format, page = 0)
+    def format(ext, page = 0)
       run_queue if @command_queued
 
-      com = CommandBuilder.new('mogrify', '-format', format)
+      com = CommandBuilder.new('mogrify', '-format', ext)
       yield com if block_given?
       com <<  (page ? "#{path}[#{page}]" : path)
       run(com)
 
       old_path  = path
-      self.path = path.sub(/(\.\w*)?\z/, (page ? ".#{format}" : "-0.#{format}"))
+      self.path = path.sub(/(\.\w*)?\z/, (page ? ".#{ext}" : "-0.#{ext}"))
 
       File.delete(old_path) if old_path != path
 
       raise MiniMagick::Error,
-            "Unable to format to #{format}" unless File.exist?(path)
+            "Unable to format to #{ext}" unless File.exist?(path)
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
