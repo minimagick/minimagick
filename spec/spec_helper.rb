@@ -2,13 +2,13 @@ require 'rubygems'
 require 'bundler/setup'
 require 'rspec'
 require 'mocha/api'
-
 require 'mini_magick'
 
 RSpec.configure do |config|
   config.mock_framework = :mocha
-  config.color_enabled = true
-  config.formatter     = 'documentation'
+  config.color          = true
+  config.formatter      = 'documentation'
+  config.raise_errors_for_deprecations!
 end
 
 # Image files from testunit port to RSpec
