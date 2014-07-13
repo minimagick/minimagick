@@ -73,7 +73,7 @@ module MiniMagick
     end
 
     def +(*options)
-      push(@args.pop.gsub(/^-/, '+'))
+      push(@args.pop.gsub(/\A-/, '+'))
       options.to_a.each { |option| push(option) }
     end
 

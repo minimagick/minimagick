@@ -225,7 +225,7 @@ module MiniMagick
                   when 'original_at'
                     # Get the EXIF original capture as a Time object
                     Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
-                  when /^EXIF\:/i
+                  when /\AEXIF\:/i
                     result = run_command('identify', '-format', "%[#{value}]", path).chomp
                     if result.include?(',')
                       read_character_data(result)
@@ -277,7 +277,7 @@ module MiniMagick
       run(com)
 
       old_path  = path
-      self.path = path.sub(/(\.\w*)?$/, (page ? ".#{format}" : "-0.#{format}"))
+      self.path = path.sub(/(\.\w*)?\z/, (page ? ".#{format}" : "-0.#{format}"))
 
       File.delete(old_path) if old_path != path
 

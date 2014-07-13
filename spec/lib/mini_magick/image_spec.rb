@@ -249,7 +249,7 @@ describe MiniMagick::Image do
       expect(image[:height]).to be 55
       expect(image[:dimensions]).to match_array [150, 55]
       expect(image[:colorspace]).to be_an_instance_of(String)
-      expect(image[:format]).to match(/^gif$/i)
+      expect(image[:format]).to match(/\Agif\z/i)
       image.destroy!
     end
 
