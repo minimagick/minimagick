@@ -281,9 +281,8 @@ module MiniMagick
 
       File.delete(old_path) if old_path != path
 
-      unless File.exist?(path)
-        fail MiniMagick::Error, "Unable to format to #{format}"
-      end
+      raise MiniMagick::Error,
+            "Unable to format to #{format}" unless File.exist?(path)
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
@@ -354,10 +353,9 @@ module MiniMagick
     #
     # @yieldparam command [CommandBuilder]
     def combine_options
-      if block_given?
-        yield @queue
-        @command_queued = true
-      end
+      return unless block_given?
+      yield @queue
+      @command_queued = true
     end
 
     def composite(other_image, output_extension = 'jpg', mask = nil, &block)
