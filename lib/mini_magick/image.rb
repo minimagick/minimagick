@@ -45,7 +45,7 @@ module MiniMagick
         end
 
         create(ext) do |f|
-          while chunk = stream.read(8192)
+          while (chunk = stream.read(8192))
             f.write(chunk)
           end
         end
@@ -310,7 +310,7 @@ module MiniMagick
       else # stream
         File.open(path, 'rb') do |file|
           file.binmode
-          while chunk = file.read(8192)
+          while (chunk = file.read(8192))
             output_to.write(chunk)
           end
         end
