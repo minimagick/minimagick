@@ -4,7 +4,7 @@ coverage
 .idea
 .yardoc
 .rvmrc
-.rubocop.yml
+.DS_Store
 tags
 .ruby-version
 .ruby-gemsets
