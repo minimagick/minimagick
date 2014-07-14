@@ -7,7 +7,7 @@ require 'mini_magick'
 
 RSpec.configure do |config|
   config.mock_framework = :mocha
-  config.color_enabled = true
+  config.color          = true
   config.formatter     = 'documentation'
 end
 
