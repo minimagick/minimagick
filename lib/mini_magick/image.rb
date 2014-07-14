@@ -224,7 +224,11 @@ module MiniMagick
                     File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
                   when 'original_at'
                     # Get the EXIF original capture as a Time object
-                    Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
+                    begin
+                      Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/))
+                    rescue
+                      nil
+                    end
                   when /\AEXIF\:/i
                     result = run_command('identify', '-format', "%[#{value}]", path).chomp
                     if result.include?(',')
