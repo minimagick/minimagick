@@ -417,12 +417,12 @@ module MiniMagick
         destroy!
 
         # Raise the appropriate error
-        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          fail Invalid, sub.output
+        if cmd_output =~ /no decode delegate/i || cmd_output =~ /did not return an image/i
+          raise Invalid, cmd_output
         else
           # TODO: should we do something different if the command times out ...?
-          # its definitely better for logging.. Otherwise we don't really know
-          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
+          # its definitely better for logging.. otherwise we don't really know
+          raise Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{:status_code => sub.exitstatus, :output => cmd_output}.inspect}"
         end
       else
         cmd_output

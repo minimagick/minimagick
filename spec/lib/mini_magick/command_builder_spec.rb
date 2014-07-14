@@ -7,6 +7,7 @@ MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::CommandBuilder do
   before(:each) do
+    MiniMagick.clear_limits!
     @processor = MiniMagick.processor
     @processor_path = MiniMagick.processor_path
   end
@@ -16,7 +17,7 @@ describe MiniMagick::CommandBuilder do
     MiniMagick.processor = @processor
   end
 
-  describe 'ported from testunit', :ported => true do
+  describe "ported from testunit", :ported => true do
     let(:builder) { MiniMagick::CommandBuilder.new('test') }
 
     it 'builds a basic command' do
@@ -73,14 +74,53 @@ describe MiniMagick::CommandBuilder do
 
         it 'builds the command' do
           builder.caption 'caption_text'
+<<<<<<< HEAD
           builder.command.should eq 'mogrify -caption caption_text'
+=======
+          builder.command.should == 'mogrify -caption caption_text'
+>>>>>>> b3a78268f538ea52fd50163eda56f585fde671e8
         end
       end
 
       context 'other' do
         it 'builds the command' do
           builder.caption 'caption_text'
+<<<<<<< HEAD
           builder.command.should eq 'test caption:caption_text'
+=======
+          builder.command.should == 'test caption:caption_text'
+        end
+      end
+    end
+
+
+    describe 'resource limits' do
+      context "using module attributes" do
+        it "should not fail for valid limits" do
+          MiniMagick.time_limit = 120
+          command = MiniMagick::CommandBuilder.new('test', 'path')
+          command.canvas 'black'
+          command.args.join(' ').should =~ /path canvas:black/
+          command.command.should =~ /-limit time/
+        end
+      end
+
+      context "using commands" do
+
+        it "should not fail for valid limits" do
+          command = MiniMagick::CommandBuilder.new('test', 'path')
+
+          command.canvas 'black'
+          command.limit "time", "120"
+          command.limit "thread","2"
+          command.limit "memory", "512mb"
+          command.limit "map","512mb"
+          command.args.join(' ').should =~ /path canvas:black/
+          command.args.join(' ').should =~ /-limit time/
+          command.args.join(' ').should =~ /-limit thread/
+          command.args.join(' ').should =~ /-limit memory/
+          command.args.join(' ').should =~ /-limit map/
+>>>>>>> b3a78268f538ea52fd50163eda56f585fde671e8
         end
       end
     end

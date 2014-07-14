@@ -51,6 +51,23 @@ describe MiniMagick do
     end
   end
 
+  context "module limits" do
+    %w{disk file map memory thread time} .each do |resource |
+      it "has limits for #{resource}" do
+        rnd = rand(100)
+        MiniMagick.send("#{resource}_limit=", rnd.to_s)
+        MiniMagick.send("#{resource}_limit").should ==rnd.to_s
+      end
+    end
+  end
+
+  context '.reset_limits!' do
+    it "clears limits" do
+      MiniMagick.memory_limit = "120mb"
+      expect { MiniMagick.clear_limits! }.to change { MiniMagick.memory_limit }.from("120mb").to(nil)
+    end
+  end
+
   its(:validate_on_create) { should be_true }
   its(:validate_on_write) { should be_true }
 end
