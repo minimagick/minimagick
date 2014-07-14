@@ -51,6 +51,6 @@ describe MiniMagick do
     end
   end
 
-  its(:validate_on_create) { should be_true }
-  its(:validate_on_write) { should be_true }
+  its(:validate_on_create) { should be_truthy }
+  its(:validate_on_write) { should be_truthy }
 end
