@@ -7,7 +7,6 @@ MiniMagick.processor = 'mogrify'
 
 describe MiniMagick::CommandBuilder do
   before(:each) do
-    MiniMagick.clear_limits!
     @processor = MiniMagick.processor
     @processor_path = MiniMagick.processor_path
   end
@@ -17,7 +16,7 @@ describe MiniMagick::CommandBuilder do
     MiniMagick.processor = @processor
   end
 
-  describe "ported from testunit", :ported => true do
+  describe 'ported from testunit', :ported => true do
     let(:builder) { MiniMagick::CommandBuilder.new('test') }
 
     it 'builds a basic command' do

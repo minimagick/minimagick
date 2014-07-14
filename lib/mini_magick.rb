@@ -19,18 +19,6 @@ module MiniMagick
     attr_accessor :validate_on_create
     attr_accessor :validate_on_write
 
-
-    # accessors are provided to set module-wide resource limits, for instance from an initializer
-    CommandBuilder::RESOURCES.each do |resource|
-      attr_accessor :"#{resource}_limit"
-    end
-
-    def clear_limits!
-      CommandBuilder::RESOURCES.each do |resource|
-        self.send("#{resource}_limit=", nil)
-      end
-    end
-
     ##
     # Tries to detect the current processor based if any of the processors exist.
     # Mogrify have precedence over gm by default.

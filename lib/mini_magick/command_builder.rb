@@ -7,41 +7,22 @@ module MiniMagick
       @tool = tool
       @args = []
       options.each { |arg| push(arg) }
-      # gather limits
-      @module_limits = {}
-
-      # handle any limits at module level
-      RESOURCES.each do |resource|
-        value = MiniMagick.__send__(:"#{resource}_limit")
-        if value
-          @module_limits[resource]=value
-        end
-      end
-
     end
 
     def command
-      com = "#{@tool} #{(module_limits + args).join(' ')} ".strip
+      com = "#{@tool} #{args.join(' ')}".strip
       com = "#{MiniMagick.processor} #{com}" unless MiniMagick.mogrify?
 
       com = File.join MiniMagick.processor_path, com unless MiniMagick.processor_path.nil?
       com.strip
     end
 
-    def escape_fn(str)
-      if !MiniMagick::Utilities.windows?
-        str.shellescape
-      else
-        Utilities.windows_escape(str)
-      end
-    end
-
     def args
-      @args.map {|arg| escape_fn(arg)}
-    end
-
-    def module_limits
-      @module_limits.to_a.map { |el| "-limit #{escape_fn(el[0].to_s)} #{escape_fn(el[1].to_s)}" }
+      if !MiniMagick::Utilities.windows?
+        @args.map(&:shellescape)
+      else
+        @args.map { |arg| Utilities.windows_escape(arg) }
+      end
     end
 
     # Add each mogrify command in both underscore and dash format
@@ -93,7 +74,6 @@ module MiniMagick
 
     end
 
-
     def +(*options)
       push(@args.pop.gsub(/^-/, '+'))
       if options.any?
@@ -120,10 +100,6 @@ module MiniMagick
         end
       end
       push creation_command
-    end
-
-    def add_limit(limit_name, value)
-      push "-limit #{limit_name} #{value}"
     end
 
     def push(arg)

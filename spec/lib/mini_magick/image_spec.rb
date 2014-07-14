@@ -400,15 +400,6 @@ describe MiniMagick::Image do
       File.exist?(result.path).should be true
     end
 
-    it "can enforce limits with an operation" do
-      image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
-      image.combine_options do |c|
-        c.resize "20x30!"
-        c.blur "50"
-        c.limit "memory","1GB"
-      end
-    end
-
     # https://github.com/minimagick/minimagick/issues/8
     it 'has issue 8 fixed' do
       image = MiniMagick::Image.open(SIMPLE_IMAGE_PATH)
