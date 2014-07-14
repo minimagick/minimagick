@@ -45,7 +45,7 @@ module MiniMagick
         end
 
         create(ext) do |f|
-          while chunk = stream.read(8192)
+          while (chunk = stream.read(8192))
             f.write(chunk)
           end
         end
@@ -102,14 +102,10 @@ module MiniMagick
         if file_or_url.include?('://')
           require 'open-uri'
           ext ||= File.extname(URI.parse(file_or_url).path)
-          Kernel.open(file_or_url) do |f|
-            read(f, ext)
-          end
+          Kernel.open(file_or_url) { |file| read(file, ext) }
         else
           ext ||= File.extname(file_or_url)
-          File.open(file_or_url, 'rb') do |f|
-            read(f, ext)
-          end
+          File.open(file_or_url, 'rb') { |file| read(file, ext) }
         end
       end
 
@@ -129,19 +125,17 @@ module MiniMagick
       # @yield [IOStream] You can #write bits to this object to create the new Image
       # @return [Image] The created image
       def create(ext = nil, validate = MiniMagick.validate_on_create, &block)
-        begin
-          tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
-          tempfile.binmode
-          block.call(tempfile)
-          tempfile.close
+        tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
+        tempfile.binmode
+        block.call(tempfile)
+        tempfile.close
 
-          image = new(tempfile.path, tempfile)
+        image = new(tempfile.path, tempfile)
 
-          fail MiniMagick::Invalid if validate && !image.valid?
-          return image
-        ensure
-          tempfile.close if tempfile
-        end
+        raise MiniMagick::Invalid if validate && !image.valid?
+        return image
+      ensure
+        tempfile.close if tempfile
       end
     end
 
@@ -189,7 +183,6 @@ module MiniMagick
 
     def info(key)
       run_queue if @command_queued
-
       @info[key]
     end
     # A rather low-level way to interact with the "identify" command. No nice API here, just
@@ -210,7 +203,7 @@ module MiniMagick
     # @return [String, Numeric, Array, Time, Object] Depends on the method called! Defaults to String for unknown commands
     def [](value)
       retrieved = info(value)
-      return retrieved unless retrieved.nil?
+      return retrieved if retrieved
 
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
       retrieved = case value.to_s
@@ -231,8 +224,12 @@ module MiniMagick
                     File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
                   when 'original_at'
                     # Get the EXIF original capture as a Time object
-                    Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
-                  when /^EXIF\:/i
+                    begin
+                      Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/))
+                    rescue
+                      nil
+                    end
+                  when /\AEXIF\:/i
                     result = run_command('identify', '-format', "%[#{value}]", path).chomp
                     if result.include?(',')
                       read_character_data(result)
@@ -243,7 +240,7 @@ module MiniMagick
                     run_command('identify', '-format', value, path).split("\n")[0]
                   end
 
-      @info[value] = retrieved unless retrieved.nil?
+      @info[value] = retrieved if retrieved
       @info[value]
     end
 
@@ -270,28 +267,26 @@ module MiniMagick
     # If you would like to convert between animated formats, pass nil as your
     # page and ImageMagick will copy all of the pages.
     #
-    # @param format [String] The target format... Like 'jpg', 'gif', 'tiff', etc.
+    # @param ext [String] The target extension... Like 'jpg', 'gif', 'tiff', etc.
     # @param page [Integer] If this is an animated gif, say which 'page' you want
     # with an integer. Default 0 will convert only the first page; 'nil' will
     # convert all pages.
     # @return [nil]
-    def format(format, page = 0)
+    def format(ext, page = 0)
       run_queue if @command_queued
 
-      c = CommandBuilder.new('mogrify', '-format', format)
-      yield c if block_given?
-      c <<  (page ? "#{path}[#{page}]" : path)
-      run(c)
+      com = CommandBuilder.new('mogrify', '-format', ext)
+      yield com if block_given?
+      com <<  (page ? "#{path}[#{page}]" : path)
+      run(com)
 
-      old_path = path
-
-      self.path = path.sub(/(\.\w*)?$/, (page ? ".#{format}" : "-0.#{format}"))
+      old_path  = path
+      self.path = path.sub(/(\.\w*)?\z/, (page ? ".#{ext}" : "-0.#{ext}"))
 
       File.delete(old_path) if old_path != path
 
-      unless File.exist?(path)
-        fail MiniMagick::Error, "Unable to format to #{format}"
-      end
+      raise MiniMagick::Error,
+            "Unable to format to #{ext}" unless File.exist?(path)
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
@@ -309,7 +304,7 @@ module MiniMagick
     def write(output_to)
       run_queue if @command_queued
 
-      if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
+      if output_to.is_a?(String) || output_to.is_a?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
           run_command(
@@ -317,9 +312,9 @@ module MiniMagick
           ) # Verify that we have a good image
         end
       else # stream
-        File.open(path, 'rb') do |f|
-          f.binmode
-          while chunk = f.read(8192)
+        File.open(path, 'rb') do |file|
+          file.binmode
+          while (chunk = file.read(8192))
             output_to.write(chunk)
           end
         end
@@ -332,11 +327,11 @@ module MiniMagick
     def to_blob
       run_queue if @command_queued
 
-      f = File.new path
-      f.binmode
-      f.read
+      file = File.new path
+      file.binmode
+      file.read
     ensure
-      f.close if f
+      file.close if file
     end
 
     def mime_type
@@ -362,10 +357,9 @@ module MiniMagick
     #
     # @yieldparam command [CommandBuilder]
     def combine_options
-      if block_given?
-        yield @queue
-        @command_queued = true
-      end
+      return unless block_given?
+      yield @queue
+      @command_queued = true
     end
 
     def composite(other_image, output_extension = 'jpg', mask = nil, &block)
@@ -381,7 +375,7 @@ module MiniMagick
       block.call(command) if block
       command.push(other_image.path)
       command.push(path)
-      command.push(mask.path) unless mask.nil?
+      command.push(mask.path) if mask
       command.push(second_tempfile.path)
 
       run(command)
@@ -402,27 +396,27 @@ module MiniMagick
     def run(command_builder)
       command = command_builder.command
 
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      subex = Subexec.run(command, :timeout => MiniMagick.timeout)
 
-      if sub.exitstatus != 0
+      if subex.exitstatus != 0
         # Clean up after ourselves in case of an error
         destroy!
 
         # Raise the appropriate error
-        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          fail Invalid, sub.output
+        if subex.output =~ /no decode delegate/i || subex.output =~ /did not return an image/i
+          raise Invalid, subex.output
         else
           # TODO: should we do something different if the command times out ...?
           # its definitely better for logging.. Otherwise we don't really know
-          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
+          raise Error, "Command (#{command.inspect.gsub('\\', '')}) failed: #{{ :status_code => subex.exitstatus, :output => subex.output }.inspect}"
         end
       else
-        sub.output
+        subex.output
       end
     end
 
     def destroy!
-      return if @tempfile.nil?
+      return unless @tempfile
       File.unlink(path) if File.exist?(path)
       @tempfile = nil
     end
@@ -433,9 +427,7 @@ module MiniMagick
     def read_character_data(list_of_characters)
       chars = list_of_characters.gsub(' ', '').split(',')
       result = ''
-      chars.each do |val|
-        result << ('%c' % val.to_i)
-      end
+      chars.each { |val| result << Kernel.format('%c', val.to_i) }
       result
     end
   end

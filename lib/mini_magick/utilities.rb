@@ -25,7 +25,7 @@ module MiniMagick
       def windows_escape(value)
         # For Windows, ^ is the escape char, equivalent to \ in Unix.
         escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
-        if escaped !~ /^".+"$/ && escaped.include?("'")
+        if escaped !~ /\A".+"\z/ && escaped.include?("'")
           escaped.inspect
         else
           escaped

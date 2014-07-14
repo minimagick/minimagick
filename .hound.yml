@@ -1,0 +1,42 @@
+---
+# As long we support ruby 1.8.x
+HashSyntax:
+  EnforcedStyle: hash_rockets
+
+# Should truly be on for well documented gems.
+Documentation:
+  Enabled: false
+
+# Opinionated to use fail over raise.
+SignalException:
+  Enabled: false
+
+# Neatly aligned code is to swell.
+SingleSpaceBeforeFirstArg:
+  Enabled: false
+
+# Don't mess with RSpec DSL.
+Blocks:
+  Exclude:
+    - 'spec/**/*'
+
+# Single quotes are faster and default in Rubocop but not hound-ci.
+StringLiterals:
+  EnforcedStyle: single_quotes
+
+# Below are refactor related.
+
+LineLength:
+  Enabled: false
+
+MethodLength:
+  Enabled: false
+
+CyclomaticComplexity:
+  Enabled: false
+
+ParameterLists:
+  Enabled: false
+
+ClassLength:
+  Enabled: false
