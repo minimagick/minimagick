@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'rspec'
-require 'rspec/its'
 require 'mocha/api'
 
 require 'mini_magick'

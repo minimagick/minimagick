@@ -51,6 +51,13 @@ describe MiniMagick do
     end
   end
 
-  its(:validate_on_create) { should be_true }
-  its(:validate_on_write) { should be_true }
+  context 'validation' do
+    it 'validates on create' do
+      expect(MiniMagick.validate_on_create).to eq(true)
+    end
+
+    it 'validates on write' do
+      expect(MiniMagick.validate_on_write).to eq(true)
+    end
+  end
 end
