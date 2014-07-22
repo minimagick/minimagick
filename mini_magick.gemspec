@@ -26,5 +26,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('test-unit')
   s.add_development_dependency('rspec')
+  s.add_development_dependency('rspec-its')
   s.add_development_dependency('mocha')
 end
