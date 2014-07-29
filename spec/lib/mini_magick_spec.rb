@@ -3,51 +3,51 @@ require 'spec_helper'
 describe MiniMagick do
   context 'which util' do
     it 'identifies when mogrify exists' do
-      MiniMagick::Utilities.which('mogrify').should_not be_nil
+      expect(MiniMagick::Utilities.which('mogrify')).not_to be_nil
     end
 
     it 'identifies when gm exists' do
-      MiniMagick::Utilities.which('gm').should_not be_nil
+      expect(MiniMagick::Utilities.which('gm')).not_to be_nil
     end
 
     it 'returns nil on nonexistent executables' do
-      MiniMagick::Utilities.which('yogrify').should be_nil
+      expect(MiniMagick::Utilities.which('yogrify')).to be_nil
     end
   end
 
   context '.mogrify?' do
     it 'checks if minimagick is using mogrify' do
-      MiniMagick.processor = 'mogrify'
-      MiniMagick.mogrify?.should == true
+      described_class.processor = 'mogrify'
+      expect(described_class).to be_mogrify
     end
 
     it "checks if minimagick isn't using mogrify" do
-      MiniMagick.processor = 'gm'
-      MiniMagick.mogrify?.should == false
+      described_class.processor = 'gm'
+      expect(described_class).not_to be_mogrify
     end
 
     it "sets the processor to mogrify (default) if it's not set" do
-      MiniMagick.processor = nil
-      MiniMagick.mogrify?
-      MiniMagick.processor.should == :mogrify
+      described_class.processor = nil
+      described_class.mogrify?
+      expect(described_class.processor).to eq :mogrify
     end
   end
 
   context '.gm?' do
     it 'checks if minimagick is using gm' do
-      MiniMagick.processor = 'gm'
-      MiniMagick.gm?.should == true
+      described_class.processor = 'gm'
+      expect(described_class).to be_gm
     end
 
     it "checks if minimagick isn't using gm" do
-      MiniMagick.processor = 'mogrify'
-      MiniMagick.gm?.should == false
+      described_class.processor = 'mogrify'
+      expect(described_class).not_to be_gm
     end
 
     it "sets the processor if it's not set" do
-      MiniMagick.processor = nil
-      MiniMagick.gm?
-      MiniMagick.processor = 'gm'
+      described_class.processor = nil
+      described_class.gm?
+      described_class.processor = 'gm'
     end
   end
 
