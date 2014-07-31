@@ -9,10 +9,15 @@ require 'mini_magick/image'
 require 'mini_magick/utilities'
 
 module MiniMagick
+  @validate_on_create = true
+  @validate_on_write = true
+
   class << self
     attr_accessor :processor
     attr_accessor :processor_path
     attr_accessor :timeout
+    attr_accessor :validate_on_create
+    attr_accessor :validate_on_write
 
     ##
     # Tries to detect the current processor based if any of the processors exist.
@@ -21,29 +26,31 @@ module MiniMagick
     # === Returns
     # * [String] The detected procesor
     def choose_processor
-      if MiniMagick::Utilities.which('mogrify').size > 0
-        self.processor = 'mogrify'
-      elsif MiniMagick::Utilities.which('gm').size > 0
-        self.processor = "gm"
-      end
+      self.processor = if MiniMagick::Utilities.which('mogrify')
+                         :mogrify
+                       elsif MiniMagick::Utilities.which('gm')
+                         :gm
+                       else
+                         nil
+                       end
     end
-    
+
     ##
     # Discovers the imagemagick version based on mogrify's output.
     #
     # === Returns
     # * The imagemagick version
     def image_magick_version
-      @@version ||= Gem::Version.create(`mogrify --version`.split(" ")[2].split("-").first)
+      @@version ||= Gem::Version.create(`mogrify --version`.split(' ')[2].split('-').first)
     end
-    
+
     ##
     # The minimum allowed imagemagick version
     #
     # === Returns
     # * The minimum imagemagick version
     def minimum_image_magick_version
-      @@minimum_version ||= Gem::Version.create("6.6.3")
+      @@minimum_version ||= Gem::Version.create('6.6.3')
     end
 
     ##
@@ -61,9 +68,9 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def mogrify?
-      self.choose_processor if self.processor.nil?
-
-      self.processor == 'mogrify'
+      choose_processor unless processor
+      return processor.to_s.downcase.to_sym == :mogrify if processor
+      false
     end
 
     ##
@@ -72,9 +79,9 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def gm?
-      self.choose_processor if self.processor.nil?
-
-      self.processor == 'gm'
+      choose_processor unless processor
+      return processor.to_s.downcase.to_sym == :gm if processor
+      false
     end
   end
 end

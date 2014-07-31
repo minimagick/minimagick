@@ -2,10 +2,11 @@
 
 A ruby wrapper for ImageMagick or GraphicsMagick command line.
 
-Tested on the following Rubies: MRI 1.8.7, 1.9.2, 1.9.3, 2.0.0, REE, JRuby, Rubinius.
+Tested on the following Rubies: MRI 1.8.7, 1.9.2, 1.9.3, 2.0.0, 2.1.1, REE, JRuby, Rubinius.
 
 [![Build Status](https://secure.travis-ci.org/minimagick/minimagick.png)](http://travis-ci.org/minimagick/minimagick)
 [![Code Climate](https://codeclimate.com/github/minimagick/minimagick.png)](https://codeclimate.com/github/minimagick/minimagick)
+[![Inline docs](http://inch-ci.org/github/minimagick/minimagick.png)](http://inch-ci.org/github/minimagick/minimagick)
 
 ## Installation
 
@@ -153,6 +154,15 @@ MiniMagick.processor = :gm
 ```
 
 And you are sorted.
+
+## Optional image validation
+
+By default, MiniMagick validates image each time it's opening or writing it. Validation means executing `identify -quiet -ping` command on target image. This adds additional overhead to the whole processing. Sometimes it's safe to assume that all input and output images are valid by default and turn off validation:
+
+```ruby
+MiniMagick.validate_on_create = false
+MiniMagick.validate_on_write = false
+```
 
 # Requirements
 
