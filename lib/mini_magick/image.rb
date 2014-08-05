@@ -278,18 +278,24 @@ module MiniMagick
     def format(format, page = 0)
       run_queue if @command_queued
 
-      c = CommandBuilder.new('mogrify', '-format', format)
-      yield c if block_given?
-      c <<  (page ? "#{path}[#{page}]" : path)
+      new_tempfile = Tempfile.new(['mini_magick', ".#{format}"]) if @tempfile && @tempfile.path == path
+      new_path = new_tempfile ? new_tempfile.path : path.sub(/(\.\w*)?$/, ".#{format}")
+
+      return if path == new_path
+
+      c = CommandBuilder.new('convert', page ? "#{path}[#{page}]" : path, '-format', format)
+      yield(c) if block_given?
+      c << new_path
       run(c)
 
-      old_path = path
+      new_path = new_path.sub(/(\.\w*)?$/, page ? ".#{format}" : "-0.#{format}")
 
-      self.path = path.sub(/(\.\w*)?$/, (page ? ".#{format}" : "-0.#{format}"))
+      File.delete(path) if path != new_path
 
-      File.delete(old_path) if old_path != path
+      @tempfile = new_tempfile if new_tempfile
+      self.path = new_path
 
-      unless File.exist?(path)
+      unless File.exists?(path)
         fail MiniMagick::Error, "Unable to format to #{format}"
       end
     end
