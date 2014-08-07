@@ -209,11 +209,12 @@ module MiniMagick
     # @see For reference see http://www.imagemagick.org/script/command-line-options.php#format
     # @return [String, Numeric, Array, Time, Object] Depends on the method called! Defaults to String for unknown commands
     def [](value)
+      value = value.to_s
       retrieved = info(value)
       return retrieved unless retrieved.nil?
 
       # Why do I go to the trouble of putting in newlines? Because otherwise animated gifs screw everything up
-      retrieved = case value.to_s
+      retrieved = case value
                   when 'colorspace'
                     run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
                   when 'format'
@@ -223,9 +224,9 @@ module MiniMagick
                       'identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path
                     ).split("\n")[0].split.map { |v| v.to_i }
 
-                    @info[:width] = width_height[0]
-                    @info[:height] = width_height[1]
-                    @info[:dimensions] = width_height
+                    @info['width'] = width_height[0]
+                    @info['height'] = width_height[1]
+                    @info['dimensions'] = width_height
                     nil
                   when 'size'
                     File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
