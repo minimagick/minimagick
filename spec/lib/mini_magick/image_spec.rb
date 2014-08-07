@@ -253,6 +253,16 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
+    it 'inspects image meta info as strings' do
+      image = described_class.new(SIMPLE_IMAGE_PATH)
+      expect(image['width']).to be(150)
+      expect(image['height']).to be(55)
+      expect(image['dimensions']).to match_array [150, 55]
+      expect(image['colorspace']).to be_an_instance_of(String)
+      expect(image['format']).to match(/^gif$/i)
+      image.destroy!
+    end
+
     it 'inspects an erroneus image meta info' do
       image = described_class.new(ERRONEOUS_IMAGE_PATH)
       expect(image[:width]).to be(10)
