@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'rspec'
-require 'rspec/its'
 require 'mocha/api'
 
 require 'mini_magick'
@@ -9,11 +8,8 @@ require 'mini_magick'
 RSpec.configure do |config|
   config.mock_framework = :mocha
   config.color          = true
-  config.formatter     = 'documentation'
-  # enable both syntaxes for specs for a while
-  config.expect_with :rspec do |c|
-    c.syntax = [:should, :expect]
-  end
+  config.formatter      = 'documentation'
+  config.raise_errors_for_deprecations!
 end
 
 # Image files from testunit port to RSpec
