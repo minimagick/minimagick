@@ -285,7 +285,7 @@ module MiniMagick
 
       old_path = path
 
-      self.path = path.sub(/(\.\w*)?$/, (page ? ".#{format}" : "-0.#{format}"))
+      self.path = Dir.glob(path.gsub(/(\.\w+)$/, "*.#{format}")).sort.first
 
       File.delete(old_path) if old_path != path
 
