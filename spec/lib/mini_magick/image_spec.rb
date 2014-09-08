@@ -253,6 +253,14 @@ describe MiniMagick::Image do
       image.destroy!
     end
 
+    it 'supports string keys for dimension attributes' do
+      image = described_class.new(SIMPLE_IMAGE_PATH)
+      expect(image["width"]).to be(150)
+      expect(image["height"]).to be(55)
+      expect(image["dimensions"]).to match_array [150, 55]
+      image.destroy!
+    end
+
     it 'inspects an erroneus image meta info' do
       image = described_class.new(ERRONEOUS_IMAGE_PATH)
       expect(image[:width]).to be(10)
