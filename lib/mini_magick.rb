@@ -16,6 +16,7 @@ module MiniMagick
     attr_accessor :processor
     attr_accessor :processor_path
     attr_accessor :timeout
+    attr_accessor :debug
     attr_accessor :validate_on_create
     attr_accessor :validate_on_write
 
