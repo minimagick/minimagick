@@ -226,7 +226,7 @@ module MiniMagick
                     @info[:width] = width_height[0]
                     @info[:height] = width_height[1]
                     @info[:dimensions] = width_height
-                    nil
+                    @info[value.to_sym]
                   when 'size'
                     File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
                   when 'original_at'
