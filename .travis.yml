@@ -1,6 +1,5 @@
 language: ruby
 cache: bundler
-bundler_args: --jobs=1 --retry=3
 rvm:
   - 1.8.7
   - 1.9.2
@@ -8,7 +7,7 @@ rvm:
   - 2.0.0
   - 2.1.1
   - ruby-head
-  - rbx-2.2.6
+  - rbx-2.2.10
   - ree
   - jruby-19mode
   - jruby-head
