@@ -16,17 +16,17 @@ describe MiniMagick do
   end
 
   context '.mogrify?' do
-    it 'checks if minimagick is using mogrify' do
-      described_class.processor = 'mogrify'
-      expect(described_class).to be_mogrify
+    it 'returns true if minimagick is using mogrify' do
+      described_class.processor = :mogrify
+      expect(described_class.mogrify?).to eq true
     end
 
-    it "checks if minimagick isn't using mogrify" do
-      described_class.processor = 'gm'
-      expect(described_class).not_to be_mogrify
+    it 'returns false if minimagick is not using mogrify' do
+      described_class.processor = :gm
+      expect(described_class.mogrify?).to eq false
     end
 
-    it "sets the processor to mogrify (default) if it's not set" do
+    it 'sets the processor if not set' do
       described_class.processor = nil
       described_class.mogrify?
       expect(described_class.processor).to eq :mogrify
@@ -34,20 +34,20 @@ describe MiniMagick do
   end
 
   context '.gm?' do
-    it 'checks if minimagick is using gm' do
-      described_class.processor = 'gm'
+    it 'returns true if minimagick is using gm' do
+      described_class.processor = :gm
       expect(described_class).to be_gm
     end
 
-    it "checks if minimagick isn't using gm" do
-      described_class.processor = 'mogrify'
+    it 'returns false if minimagick is not using gm' do
+      described_class.processor = :mogrify
       expect(described_class).not_to be_gm
     end
 
-    it "sets the processor if it's not set" do
+    it 'sets the processor if not set' do
       described_class.processor = nil
       described_class.gm?
-      described_class.processor = 'gm'
+      expect(described_class.processor).to eq :mogrify
     end
   end
 

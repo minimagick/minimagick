@@ -25,15 +25,11 @@ module MiniMagick
     # Mogrify have precedence over gm by default.
     #
     # === Returns
-    # * [String] The detected procesor
-    def choose_processor
-      self.processor = if MiniMagick::Utilities.which('mogrify')
-                         :mogrify
-                       elsif MiniMagick::Utilities.which('gm')
-                         :gm
-                       else
-                         nil
-                       end
+    # * [Symbol] The detected procesor
+    def processor
+      @processor ||= [:mogrify, :gm].detect do |processor|
+        MiniMagick::Utilities.which(processor.to_s)
+      end
     end
 
     ##
@@ -64,25 +60,21 @@ module MiniMagick
     end
 
     ##
-    # Picks the right processor if it isn't set and returns whether it's mogrify or not.
+    # Checks whether the current processory is mogrify.
     #
     # === Returns
     # * [Boolean]
     def mogrify?
-      choose_processor unless processor
-      return processor.to_s.downcase.to_sym == :mogrify if processor
-      false
+      processor.to_sym == :mogrify
     end
 
     ##
-    # Picks the right processor if it isn't set and returns whether it's graphicsmagick or not.
+    # Checks whether the current processor is graphicsmagick.
     #
     # === Returns
     # * [Boolean]
     def gm?
-      choose_processor unless processor
-      return processor.to_s.downcase.to_sym == :gm if processor
-      false
+      processor.to_sym == :gm
     end
   end
 end

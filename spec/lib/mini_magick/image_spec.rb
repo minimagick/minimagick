@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'pathname'
 require 'tempfile'
 
-MiniMagick.processor = 'mogrify'
+MiniMagick.processor = :mogrify
 
 describe MiniMagick::Image do
   context 'when ImageMagick and GraphicsMagick are both unavailable' do
