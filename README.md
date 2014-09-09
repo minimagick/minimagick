@@ -145,6 +145,14 @@ MiniMagick::Image.read(buffer)
 buffer = StringIO.new(File.read(IMAGE_PATH))
 ```
 
+Also, there has been cases where processing would fail silently, so in that
+case try increasing the timeout and/or turn on the debug mode:
+
+```ruby
+MiniMagick.timeout = 10
+MiniMagick.debug = true
+```
+
 ## Using GraphicsMagick
 
 Simply set
