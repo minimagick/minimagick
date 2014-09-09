@@ -5,7 +5,7 @@ require 'mini_magick/version'
 
 Gem::Specification.new do |s|
   s.name        = 'mini_magick'
-  s.version     = MiniMagick::VERSION
+  s.version     = MiniMagick.version
   s.platform    = Gem::Platform::RUBY
   s.summary     = 'Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick'
   s.description = 'Manipulate images with minimal use of memory via ImageMagick / GraphicsMagick'
