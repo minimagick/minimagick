@@ -60,7 +60,7 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def mogrify?
-      processor.to_sym == :mogrify
+      processor && processor.to_sym == :mogrify
     end
 
     ##
@@ -69,7 +69,7 @@ module MiniMagick
     # === Returns
     # * [Boolean]
     def gm?
-      processor.to_sym == :gm
+      processor && processor.to_sym == :gm
     end
   end
 end
