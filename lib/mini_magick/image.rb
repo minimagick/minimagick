@@ -127,19 +127,17 @@ module MiniMagick
       # @yield [IOStream] You can #write bits to this object to create the new Image
       # @return [Image] The created image
       def create(ext = nil, validate = MiniMagick.validate_on_create, &block)
-        begin
-          tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
-          tempfile.binmode
-          block.call(tempfile)
-          tempfile.close
+        tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
+        tempfile.binmode
+        block.call(tempfile)
+        tempfile.close
 
-          image = new(tempfile.path, tempfile)
+        image = new(tempfile.path, tempfile)
 
-          fail MiniMagick::Invalid if validate && !image.valid?
-          return image
-        ensure
-          tempfile.close if tempfile
-        end
+        fail MiniMagick::Invalid if validate && !image.valid?
+        return image
+      ensure
+        tempfile.close if tempfile
       end
     end
 
