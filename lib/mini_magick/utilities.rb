@@ -1,4 +1,6 @@
 require 'rbconfig'
+require 'shellwords'
+require 'pathname'
 
 module MiniMagick
   module Utilities
@@ -22,6 +24,18 @@ module MiniMagick
         RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
       end
 
+      def escape(value)
+        if windows?
+          windows_escape(value)
+        else
+          shell_escape(value)
+        end
+      end
+
+      def shell_escape(value)
+        Shellwords.escape(value)
+      end
+
       def windows_escape(value)
         # For Windows, ^ is the escape char, equivalent to \ in Unix.
         escaped = value.gsub(/\^/, '^^').gsub(/>/, '^>')
@@ -29,6 +43,18 @@ module MiniMagick
           escaped.inspect
         else
           escaped
+        end
+      end
+
+      def path(path)
+        if windows?
+          # For Windows, if a path contains space char, you need to quote it,
+          # otherwise you SHOULD NOT quote it. If you quote a path that does
+          # not contains space, it will not work.
+          pathname = Pathname.new(path).to_s
+          path.include?(' ') ? pathname.inspect : pathname
+        else
+          path
         end
       end
     end

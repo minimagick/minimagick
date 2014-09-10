@@ -3,16 +3,9 @@ module MiniMagick
     # @return [String] The location of the current working file
     attr_writer :path
 
-    def path_for_windows_quote_space(path)
-      path = Pathname.new(@path).to_s
-      # For Windows, if a path contains space char, you need to quote it, otherwise you SHOULD NOT quote it.
-      # If you quote a path that does not contains space, it will not work.
-      @path.include?(' ') ? path.inspect : path
-    end
-
     def path
       run_queue if @command_queued
-      MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path
+      MiniMagick::Utilities.path(@path)
     end
 
     # Class Methods
@@ -168,7 +161,7 @@ module MiniMagick
 
     def run_queue
       return nil unless @command_queued
-      @queue << (MiniMagick::Utilities.windows? ? path_for_windows_quote_space(@path) : @path)
+      @queue << MiniMagick::Utilities.path(@path)
       run(@queue)
       reset_queue
     end
@@ -313,7 +306,7 @@ module MiniMagick
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
           run_command(
-            'identify', MiniMagick::Utilities.windows? ? path_for_windows_quote_space(output_to.to_s) : output_to.to_s
+            'identify', MiniMagick::Utilities.path(output_to.to_s)
           ) # Verify that we have a good image
         end
       else # stream

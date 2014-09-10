@@ -18,11 +18,7 @@ module MiniMagick
     end
 
     def args
-      if MiniMagick::Utilities.windows?
-        @args.map { |arg| Utilities.windows_escape(arg) }
-      else
-        @args.map(&:shellescape)
-      end
+      @args.map { |arg| Utilities.escape(arg) }
     end
 
     # Add each mogrify command in both underscore and dash format
