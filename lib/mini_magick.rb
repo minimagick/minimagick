@@ -16,8 +16,8 @@ module MiniMagick
     attr_accessor :validate_on_write
 
     ##
-    # Tries to detect the current processor based if any of the processors exist.
-    # Mogrify have precedence over gm by default.
+    # Tries to detect the current processor based if any of the processors
+    # exist. Mogrify have precedence over gm by default.
     #
     # === Returns
     # * [Symbol] The detected procesor
