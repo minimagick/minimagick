@@ -426,13 +426,8 @@ module MiniMagick
     private
 
     # Sometimes we get back a list of character values
-    def read_character_data(list_of_characters)
-      chars = list_of_characters.gsub(' ', '').split(',')
-      result = ''
-      chars.each do |val|
-        result << ('%c' % val.to_i)
-      end
-      result
+    def read_character_data(string)
+      string.scan(/\d+/).map(&:to_i).map(&:chr).join
     end
   end
 end
