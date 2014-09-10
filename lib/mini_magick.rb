@@ -1,7 +1,3 @@
-require 'tempfile'
-require 'subexec'
-require 'stringio'
-require 'pathname'
 require 'mini_magick/command_builder'
 require 'mini_magick/errors'
 require 'mini_magick/image'

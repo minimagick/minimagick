@@ -1,3 +1,8 @@
+require 'tempfile'
+require 'subexec'
+require 'stringio'
+require 'pathname'
+
 module MiniMagick
   class Image
     # @return [String] The location of the current working file
