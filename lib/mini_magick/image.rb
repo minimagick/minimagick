@@ -296,20 +296,28 @@ module MiniMagick
     def format(format, page = 0)
       run_queue if @command_queued
 
-      c = CommandBuilder.new('mogrify', '-format', format)
-      yield c if block_given?
-      c <<  (page ? "#{path}[#{page}]" : path)
-      run(c)
-
       old_path = path
 
-      self.path = Dir.glob(path.gsub(/(\.\w+)$/, "*.#{format}")).sort.first
-
-      File.delete(old_path) if old_path != path
-
-      unless File.exist?(path)
-        fail MiniMagick::Error, "Unable to format to #{format}"
+      if @tempfile
+        new_tempfile = Tempfile.new(["mini_magick", ".#{format}"])
+        new_path = new_tempfile.path
+      else
+        new_path = File.basename(@path, ".*") + ".#{format}"
       end
+
+      cmd = CommandBuilder.new("convert", (page ? "#{@path}[#{page}]" : @path))
+      yield cmd if block_given?
+      cmd << new_path
+      run(cmd)
+
+      if @tempfile
+        @tempfile.unlink
+        @tempfile = new_tempfile
+      else
+        File.delete(old_path) if old_path != new_path
+      end
+
+      self.path = new_path
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
