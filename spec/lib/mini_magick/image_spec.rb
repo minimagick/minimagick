@@ -31,7 +31,6 @@ describe MiniMagick::Image do
       File.open(SIMPLE_IMAGE_PATH, 'rb') do |f|
         image = described_class.read(f.read)
         expect(image).to be_valid
-        image.destroy!
       end
     end
 
@@ -45,7 +44,6 @@ describe MiniMagick::Image do
 
       image = described_class.read(tempfile)
       expect(image).to be_valid
-      image.destroy!
     end
 
     # from https://github.com/minimagick/minimagick/issues/163
@@ -70,14 +68,12 @@ describe MiniMagick::Image do
     it 'opens image' do
       image = described_class.open(SIMPLE_IMAGE_PATH)
       expect(image).to be_valid
-      image.destroy!
     end
 
     it 'reads image from buffer' do
       buffer = StringIO.new File.open(SIMPLE_IMAGE_PATH, 'rb') { |f| f.read }
       image = described_class.read(buffer)
       expect(image).to be_valid
-      image.destroy!
     end
 
     describe '.create' do
@@ -91,7 +87,6 @@ describe MiniMagick::Image do
       it 'creates an image' do
         expect {
           image = create
-          image.destroy!
         }.to_not raise_error
       end
 
@@ -126,14 +121,12 @@ describe MiniMagick::Image do
     it 'loads a new image' do
       expect {
         image = described_class.new(SIMPLE_IMAGE_PATH)
-        image.destroy!
       }.to_not raise_error
     end
 
     it 'loads remote image' do
       image = described_class.open('http://upload.wikimedia.org/wikipedia/en/b/bc/Wiki.png')
       expect(image).to be_valid
-      image.destroy!
     end
 
     it 'loads remote image with complex url' do
@@ -141,7 +134,6 @@ describe MiniMagick::Image do
         'http://a0.twimg.com/a/1296609216/images/fronts/logo_withbird_home.png?extra=foo&plus=bar'
       )
       expect(image).to be_valid
-      image.destroy!
     end
 
     it 'reformats an image with a given extension' do
@@ -168,7 +160,6 @@ describe MiniMagick::Image do
         ensure
           File.delete output_path
         end
-        image.destroy!
       end
 
       it 'opens and writes an image with space in its filename' do
@@ -181,7 +172,6 @@ describe MiniMagick::Image do
         ensure
           File.delete output_path
         end
-        image.destroy!
       end
 
       it 'writes an image with stream' do
@@ -190,7 +180,6 @@ describe MiniMagick::Image do
         image.write("#{Dir.tmpdir}/foo.gif")
         image.write(stream)
         expect(described_class.read(stream.string)).to be_valid
-        image.destroy!
       end
 
       describe 'validation' do
@@ -223,7 +212,6 @@ describe MiniMagick::Image do
         end
 
         after do
-          image.destroy!
           File.delete output_path
           MiniMagick.validate_on_write = @old_validate
         end
@@ -233,13 +221,11 @@ describe MiniMagick::Image do
     it 'tells when an image is invalid' do
       image = described_class.new(NOT_AN_IMAGE_PATH)
       expect(image).not_to be_valid
-      image.destroy!
     end
 
     it "raises error when opening a file that isn't an image" do
       expect {
         image = described_class.open(NOT_AN_IMAGE_PATH)
-        image.destroy
       }.to raise_error(MiniMagick::Invalid)
     end
 
@@ -256,7 +242,6 @@ describe MiniMagick::Image do
       expect(image[:dimensions]).to match_array [150, 55]
       expect(image[:colorspace]).to be_an_instance_of(String)
       expect(image[:format]).to match(/^gif$/i)
-      image.destroy!
     end
 
     it 'supports string keys for dimension attributes' do
@@ -264,7 +249,6 @@ describe MiniMagick::Image do
       expect(image["width"]).to be(150)
       expect(image["height"]).to be(55)
       expect(image["dimensions"]).to match_array [150, 55]
-      image.destroy!
     end
 
     it 'inspects an erroneus image meta info' do
@@ -273,7 +257,6 @@ describe MiniMagick::Image do
       expect(image[:height]).to be(10)
       expect(image[:dimensions]).to match_array [10, 10]
       expect(image[:format]).to eq 'JPEG'
-      image.destroy!
     end
 
     it 'inspects meta info from tiff images' do
@@ -281,13 +264,11 @@ describe MiniMagick::Image do
       expect(image[:format].to_s.downcase).to eq 'tiff'
       expect(image[:width]).to be(50)
       expect(image[:height]).to be(41)
-      image.destroy!
     end
 
     it 'inspects a gif with jpg format correctly' do
       image = described_class.new(GIF_WITH_JPG_EXT)
       expect(image[:format].to_s.downcase).to eq 'gif'
-      image.destroy!
     end
 
     it 'resizes an image correctly' do
@@ -297,7 +278,6 @@ describe MiniMagick::Image do
       expect(image[:width]).to be(20)
       expect(image[:height]).to be(30)
       expect(image[:format]).to match(/^gif$/i)
-      image.destroy!
     end
 
     it 'resizes an image with minimum dimensions' do
@@ -307,7 +287,6 @@ describe MiniMagick::Image do
 
       expect(image[:width]).to be original_width
       expect(image[:height]).to be original_height
-      image.destroy!
     end
 
     it 'combines options to create an image with resize and blur' do
@@ -320,7 +299,6 @@ describe MiniMagick::Image do
       expect(image[:width]).to be(20)
       expect(image[:height]).to be(30)
       expect(image[:format]).to match(/\Agif\z/i)
-      image.destroy!
     end
 
     it "combines options to create an image even with minuses symbols on it's name it" do
@@ -333,7 +311,6 @@ describe MiniMagick::Image do
           c.background background
         end
       }.to_not raise_error
-      image.destroy!
     end
 
     it 'inspects the EXIF of an image' do
@@ -341,7 +318,6 @@ describe MiniMagick::Image do
       expect(image['exif:ExifVersion']).to eq '0220'
       image = described_class.open(SIMPLE_IMAGE_PATH)
       expect(image['EXIF:ExifVersion']).to be_empty
-      image.destroy!
     end
 
     it 'inspects the original at of an image' do
@@ -349,20 +325,17 @@ describe MiniMagick::Image do
       expect(image[:original_at]).to eq Time.local('2005', '2', '23', '23', '17', '24')
       image = described_class.open(SIMPLE_IMAGE_PATH)
       expect(image[:original_at]).to be_nil
-      image.destroy!
     end
 
     it 'has the same path for tempfile and image' do
       image = described_class.open(TIFF_IMAGE_PATH)
       expect(image.instance_eval('@tempfile.path')).to eq image.path
-      image.destroy!
     end
 
     it 'has the tempfile at path after format' do
       image = described_class.open(TIFF_IMAGE_PATH)
       image.format('png')
       expect(File.exist?(image.path)).to be(true)
-      image.destroy!
     end
 
     it "hasn't previous tempfile at path after format" do
@@ -370,7 +343,6 @@ describe MiniMagick::Image do
       before = image.path.dup
       image.format('png')
       expect(File.exist?(before)).to be(false)
-      image.destroy!
     end
 
     it 'changes the format of image with special characters', :if => !MiniMagick::Utilities.windows? do
@@ -384,7 +356,6 @@ describe MiniMagick::Image do
       image = described_class.new(tempfile.path)
       image.format('png')
       expect(File.exist?(image.path)).to be(true)
-      image.destroy!
 
       File.delete(image.path)
       tempfile.unlink
@@ -394,7 +365,6 @@ describe MiniMagick::Image do
       image = described_class.open(TIFF_IMAGE_PATH)
       expect { image.to_blog }.to raise_error(NoMethodError)
       image.to_blob
-      image.destroy!
     end
 
     it 'can create a composite of two images' do
@@ -423,7 +393,6 @@ describe MiniMagick::Image do
           c.rotate '-90>'
         end
       }.to_not raise_error
-      image.destroy!
     end
 
     # https://github.com/minimagick/minimagick/issues/8
@@ -443,7 +412,6 @@ describe MiniMagick::Image do
 
       expect {
         image = described_class.open(NOT_AN_IMAGE_PATH)
-        image.destroy
       }.to raise_error(MiniMagick::Invalid)
 
       ENV['LANG'] = original_lang

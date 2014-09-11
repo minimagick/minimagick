@@ -437,7 +437,7 @@ module MiniMagick
 
       if sub.exitstatus != 0
         # Clean up after ourselves in case of an error
-        destroy!
+        @tempfile.unlink if @tempfile
 
         # Raise the appropriate error
         if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
@@ -450,12 +450,6 @@ module MiniMagick
       else
         sub.output
       end
-    end
-
-    def destroy!
-      return if @tempfile.nil?
-      File.unlink(@path) if File.exist?(@path)
-      @tempfile = nil
     end
 
     private
