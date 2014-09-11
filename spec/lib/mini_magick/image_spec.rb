@@ -243,6 +243,12 @@ describe MiniMagick::Image do
       }.to raise_error(MiniMagick::Invalid)
     end
 
+    it "raises error when imagemagick raised an error during processing" do
+      image = described_class.open(SIMPLE_IMAGE_PATH)
+      image.rotate "invalid_value"
+      expect { image.run_queue }.to raise_error(MiniMagick::Error)
+    end
+
     it 'inspects image meta info' do
       image = described_class.new(SIMPLE_IMAGE_PATH)
       expect(image[:width]).to be(150)
