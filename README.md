@@ -82,16 +82,6 @@ end
 image.write "output.jpg"
 ```
 
-Want to composite two images? Super easy! (Aka, put a watermark on!)
-
-```ruby
-image = Image.open("original.png")
-result = image.composite(Image.open("watermark.png", "jpg")) do |c|
-  c.gravity "center"
-end
-result.write "my_output_file.jpg"
-```
-
 Want to manipulate an image at its source (You won't have to write it
 out because the transformations are done on that file)
 
