@@ -495,5 +495,13 @@ describe MiniMagick::Image do
       expect(tiff.mime_type).to eq 'image/tiff'
       expect(hidden_gif.mime_type).to eq 'image/gif'
     end
+
+    it 'can flatten single layer PSD\'s' do 
+      img = MiniMagick::Image.open(SINGLE_LAYER_PSD)
+
+      expect {
+        img.format('jpg', nil)
+      }.to_not raise_error
+    end
   end
 end
