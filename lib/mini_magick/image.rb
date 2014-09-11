@@ -200,7 +200,7 @@ module MiniMagick
     def info(key)
       run_queue if @command_queued
 
-      @info[key]
+      @info[key.to_s]
     end
 
     # A rather low-level way to interact with the "identify" command. No nice
@@ -222,40 +222,39 @@ module MiniMagick
     # @return [String, Numeric, Array, Time, Object] Depends on the method
     #   called! Defaults to String for unknown commands
     def [](value)
-      retrieved = info(value)
-      return retrieved unless retrieved.nil?
+      value = value.to_s
 
       # Why do I go to the trouble of putting in newlines? Because otherwise
       # animated gifs screw everything up
-      retrieved = case value.to_s
-                  when 'colorspace'
-                    run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
-                  when 'format'
-                    run_command('identify', '-format', '%m\n', path).split("\n")[0]
-                  when 'dimensions', 'width', 'height'
-                    width_height = run_command(
-                      'identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path
-                    ).split("\n")[0].split.map { |v| v.to_i }
+      retrieved = info(value) ||
+        case value
+        when 'colorspace'
+          run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
+        when 'format'
+          run_command('identify', '-format', '%m\n', path).split("\n")[0]
+        when 'dimensions', 'width', 'height'
+          dimensions = run_command(
+            'identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path
+          ).split("\n")[0].split.map { |v| v.to_i }
 
-                    @info[:width] = width_height[0]
-                    @info[:height] = width_height[1]
-                    @info[:dimensions] = width_height
-                    @info[value.to_sym]
-                  when 'size'
-                    File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
-                  when 'original_at'
-                    # Get the EXIF original capture as a Time object
-                    Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
-                  when /^EXIF\:/i
-                    result = run_command('identify', '-format', "%[#{value}]", path).chomp
-                    if result.include?(',')
-                      read_character_data(result)
-                    else
-                      result
-                    end
-                  else
-                    run_command('identify', '-format', value, path).split("\n")[0]
-                  end
+          @info["dimensions"] = dimensions
+          @info["width"], @info["height"] = @info["dimensions"]
+          @info[value]
+        when 'size'
+          File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
+        when 'original_at'
+          # Get the EXIF original capture as a Time object
+          Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
+        when /^EXIF\:/i
+          result = run_command('identify', '-format', "%[#{value}]", path).chomp
+          if result.include?(',')
+            read_character_data(result)
+          else
+            result
+          end
+        else
+          run_command('identify', '-format', value, path).split("\n")[0]
+        end
 
       @info[value] = retrieved unless retrieved.nil?
       @info[value]
