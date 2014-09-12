@@ -194,12 +194,6 @@ module MiniMagick
       false
     end
 
-    def info(key)
-      run_queue if @command_queued
-
-      @info[key.to_s]
-    end
-
     # A rather low-level way to interact with the "identify" command. No nice
     # API here, just the crazy stuff you find in ImageMagick. See the examples
     # listed!
@@ -219,11 +213,12 @@ module MiniMagick
     # @return [String, Numeric, Array, Time, Object] Depends on the method
     #   called! Defaults to String for unknown commands
     def [](value)
+      run_queue if @command_queued
       value = value.to_s
 
       # Why do I go to the trouble of putting in newlines? Because otherwise
       # animated gifs screw everything up
-      retrieved = info(value) ||
+      @info[value] ||=
         case value
         when 'colorspace'
           run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
@@ -252,10 +247,8 @@ module MiniMagick
         else
           run_command('identify', '-format', value, path).split("\n")[0]
         end
-
-      @info[value] = retrieved unless retrieved.nil?
-      @info[value]
     end
+    alias info []
 
     # Sends raw commands to imagemagick's `mogrify` command. The image path is
     # automatically appended to the command.
