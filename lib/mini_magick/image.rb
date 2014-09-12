@@ -296,8 +296,6 @@ module MiniMagick
     def format(format, page = 0)
       run_queue if @command_queued
 
-      old_path = path
-
       if @tempfile
         new_tempfile = Tempfile.new(["mini_magick", ".#{format}"])
         new_path = new_tempfile.path
@@ -315,10 +313,10 @@ module MiniMagick
         @tempfile = new_tempfile
         @tempfile.close
       else
-        File.delete(old_path) if old_path != new_path
+        File.delete(@path) unless @path == new_path
       end
 
-      self.path = new_path
+      @path = new_path
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
