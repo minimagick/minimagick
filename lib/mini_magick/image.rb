@@ -436,9 +436,6 @@ module MiniMagick
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
 
       if sub.exitstatus != 0
-        # Clean up after ourselves in case of an error
-        @tempfile.unlink if @tempfile
-
         # Raise the appropriate error
         if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
           fail Invalid, sub.output
