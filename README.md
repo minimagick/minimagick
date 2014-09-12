@@ -88,6 +88,7 @@ out because the transformations are done on that file)
 ```ruby
 image = MiniMagick::Image.new("input.jpg")
 image.resize "100x100"
+image.run_queue
 ```
 
 Want to get some meta-information out?
