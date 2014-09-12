@@ -313,6 +313,7 @@ module MiniMagick
       if @tempfile
         @tempfile.unlink
         @tempfile = new_tempfile
+        @tempfile.close
       else
         File.delete(old_path) if old_path != new_path
       end
