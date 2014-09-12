@@ -19,10 +19,8 @@ Gem::Specification.new do |s|
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.test_files   = Dir['spec/**/*']
   s.require_paths = ['lib']
-  s.add_runtime_dependency('subexec', ['~> 0.2.1'])
+  s.add_runtime_dependency 'subexec', '~> 0.2.1'
 
-  s.add_development_dependency('rake')
-  s.add_development_dependency('test-unit')
-  s.add_development_dependency('rspec', ['~> 3.0.0'])
-  s.add_development_dependency('mocha')
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec', '~> 3.1.0'
 end
