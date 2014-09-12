@@ -448,6 +448,10 @@ module MiniMagick
       end
     end
 
+    def destroy!
+      @tempfile.unlink if @tempfile
+    end
+
     private
 
     # Sometimes we get back a list of character values
