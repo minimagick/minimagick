@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'rspec'
 require 'mocha/api'
+require 'pry'
 
 require 'mini_magick'
 
