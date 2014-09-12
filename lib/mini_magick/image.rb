@@ -144,12 +144,9 @@ module MiniMagick
         block.call(tempfile)
         tempfile.close
 
-        image = new(tempfile.path, tempfile)
-
-        fail MiniMagick::Invalid if validate && !image.valid?
-        return image
-      ensure
-        tempfile.close if tempfile
+        new(tempfile.path, tempfile).tap do |image|
+          fail MiniMagick::Invalid if validate && !image.valid?
+        end
       end
     end
 
