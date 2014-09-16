@@ -421,17 +421,18 @@ module MiniMagick
       @tempfile.unlink if @tempfile
     end
 
+    def run_queue
+      return if @command_builder.empty?
+      @command_builder << path
+      run(@command_builder)
+      @command_builder.clear
+    end
+
     private
 
     # Sometimes we get back a list of character values
     def read_character_data(string)
       string.scan(/\d+/).map(&:to_i).map(&:chr).join
-    end
-
-    def run_queue
-      @command_builder << path
-      run(@command_builder)
-      @command_builder.clear
     end
   end
 end
