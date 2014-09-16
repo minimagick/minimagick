@@ -9,7 +9,6 @@ module MiniMagick
     attr_writer :path
 
     def path
-      run_queue if @command_queued
       MiniMagick::Utilities.path(@path)
     end
 
@@ -164,20 +163,7 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile
       @info = {}
-      reset_queue
-    end
-
-    def reset_queue
-      @command_queued = false
-      @queue = MiniMagick::CommandBuilder.new('mogrify')
-      @info.clear
-    end
-
-    def run_queue
-      return nil unless @command_queued
-      @queue << MiniMagick::Utilities.path(@path)
-      run(@queue)
-      reset_queue
+      @command_builder = MiniMagick::CommandBuilder.new("mogrify")
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -213,9 +199,7 @@ module MiniMagick
     # @return [String, Numeric, Array, Time, Object] Depends on the method
     #   called! Defaults to String for unknown commands
     def [](value)
-      run_queue if @command_queued
       value = value.to_s
-
       # Why do I go to the trouble of putting in newlines? Because otherwise
       # animated gifs screw everything up
       @info[value] ||=
@@ -284,8 +268,6 @@ module MiniMagick
     #   will convert all pages.
     # @return [nil]
     def format(format, page = 0)
-      run_queue if @command_queued
-
       if @tempfile
         new_tempfile = Tempfile.new(["mini_magick", ".#{format}"])
         new_path = new_tempfile.path
@@ -324,8 +306,6 @@ module MiniMagick
     # @return [IOStream, Boolean] If you pass in a file location [String] then
     #   you get a success boolean. If its a stream, you get it back.
     def write(output_to)
-      run_queue if @command_queued
-
       if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
         FileUtils.copy_file path, output_to
         if MiniMagick.validate_on_write
@@ -347,8 +327,6 @@ module MiniMagick
     # Gives you raw image data back
     # @return [String] binary string
     def to_blob
-      run_queue if @command_queued
-
       f = File.new path
       f.binmode
       f.read
@@ -366,8 +344,12 @@ module MiniMagick
     #
     # @see http://www.imagemagick.org/script/mogrify.php
     def method_missing(symbol, *args)
-      @queue.send(symbol, *args)
-      @command_queued = true
+      if @command_builder.respond_to?(symbol)
+        @command_builder.send(symbol, *args)
+        run_queue
+      else
+        super
+      end
     end
 
     # You can use multiple commands together using this method. Very easy to
@@ -382,14 +364,11 @@ module MiniMagick
     #
     # @yieldparam command [CommandBuilder]
     def combine_options
-      if block_given?
-        yield @queue
-        @command_queued = true
-      end
+      yield @command_builder
+      run_queue if @command_builder.any?
     end
 
     def composite(other_image, output_extension = 'jpg', mask = nil, &block)
-      run_queue if @command_queued
       begin
         second_tempfile = Tempfile.new(output_extension)
         second_tempfile.binmode
@@ -409,8 +388,6 @@ module MiniMagick
     end
 
     def run_command(command, *args)
-      run_queue if @command_queued
-
       if command == 'identify'
         args.unshift '-ping'  # -ping "efficiently determine image characteristics."
         args.unshift '-quiet' if MiniMagick.mogrify? && !MiniMagick.debug # graphicsmagick has no -quiet option.
@@ -423,6 +400,8 @@ module MiniMagick
       command = command_builder.command
 
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+
+      @info.clear if command.start_with?("mogrify") # mogrify is destructive
 
       if sub.exitstatus != 0
         # Raise the appropriate error
@@ -447,6 +426,12 @@ module MiniMagick
     # Sometimes we get back a list of character values
     def read_character_data(string)
       string.scan(/\d+/).map(&:to_i).map(&:chr).join
+    end
+
+    def run_queue
+      @command_builder << path
+      run(@command_builder)
+      @command_builder.clear
     end
   end
 end

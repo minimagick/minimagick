@@ -231,8 +231,7 @@ describe MiniMagick::Image do
 
     it "raises error when imagemagick raised an error during processing" do
       image = described_class.open(SIMPLE_IMAGE_PATH)
-      image.rotate "invalid_value"
-      expect { image.run_queue }.to raise_error(MiniMagick::Error)
+      expect { image.rotate "invalid_value" }.to raise_error(MiniMagick::Error)
     end
 
     it 'inspects image meta info' do
@@ -278,6 +277,13 @@ describe MiniMagick::Image do
       expect(image[:width]).to be(20)
       expect(image[:height]).to be(30)
       expect(image[:format]).to match(/^gif$/i)
+    end
+
+    it "clears the info after destructive commands" do
+      image = described_class.open(SIMPLE_IMAGE_PATH)
+      old_width = image[:width]
+      image.resize '20x30!'
+      expect(image[:width]).not_to eq old_width
     end
 
     it 'resizes an image with minimum dimensions' do
