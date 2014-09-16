@@ -401,7 +401,7 @@ module MiniMagick
 
       sub = Subexec.run(command, :timeout => MiniMagick.timeout)
 
-      @info.clear if command.start_with?("mogrify") # mogrify is destructive
+      @info.clear if command.start_with?("mogrify", "gm") # these are destructive
 
       if sub.exitstatus != 0
         # Raise the appropriate error
