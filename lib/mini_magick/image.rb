@@ -398,22 +398,30 @@ module MiniMagick
 
     def run(command_builder)
       command = command_builder.command
-
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
+      output_tempfile = Tempfile.new(['mini_magick_subcmd_output', '.log'])
+      begin
+        sub = Subexec.run(command, :timeout => MiniMagick.timeout, :log_file => output_tempfile.path)
+        output_tempfile.rewind
+        cmd_output = IO.read(output_tempfile.path)
+        cmd_output << sub.output if sub.output
+      ensure
+        output_tempfile.close
+        output_tempfile.unlink
+      end
 
       @info.clear if command.start_with?("mogrify", "gm") # these are destructive
 
       if sub.exitstatus != 0
         # Raise the appropriate error
-        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          fail Invalid, sub.output
+        if cmd_output =~ /no decode delegate/i || cmd_output =~ /did not return an image/i
+          raise Invalid, cmd_output
         else
           # TODO: should we do something different if the command times out ...?
-          # its definitely better for logging.. Otherwise we don't really know
-          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
+          # its definitely better for logging.. otherwise we don't really know
+          raise Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{:status_code => sub.exitstatus, :output => cmd_output}.inspect}"
         end
       else
-        sub.output
+        cmd_output
       end
     end
 
