@@ -42,12 +42,6 @@ module MiniMagick
         create(ext) { |file| IO.copy_stream(stream, file) }
       end
 
-      # @deprecated Please use Image.read instead!
-      def from_blob(blob, ext = nil)
-        warn 'Warning: MiniMagick::Image.from_blob method is deprecated. Instead, please use Image.read'
-        create(ext) { |f| f.write(blob) }
-      end
-
       # Creates an image object from a binary string blob which contains raw
       # pixel data (i.e. no header data).
       #
@@ -99,12 +93,6 @@ module MiniMagick
         Kernel.open(path_or_url, "rb") do |file|
           read(file, ext)
         end
-      end
-
-      # @deprecated Please use MiniMagick::Image.open(file_or_url) now
-      def from_file(file, ext = nil)
-        warn 'Warning: MiniMagick::Image.from_file is now deprecated. Please use Image.open'
-        open(file, ext)
       end
 
       # Used to create a new Image object data-copy. Not used to "paint" or
