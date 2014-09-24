@@ -136,7 +136,7 @@ RSpec.describe MiniMagick::Image do
       expect(File.exist?(old_path)).to eq false
     end
 
-    it "changes the format of image with special characters", unless: MiniMagick::Utilities.windows? do
+    it "changes the format of image with special characters", :unless => MiniMagick::Utilities.windows? do
       tempfile = Tempfile.new(%(magick with special! "chars'))
       FileUtils.cp image_path, tempfile.path
 
@@ -281,8 +281,10 @@ RSpec.describe MiniMagick::Image do
   end
 
   describe "#composite" do
+    let(:other_image) { described_class.open(image_path) }
+    let(:mask) { described_class.open(image_path(:png)) }
+
     it "creates a composite of two images" do
-      other_image = described_class.open(image_path)
       result = subject.composite(other_image) do |c|
         c.gravity 'center'
       end
@@ -290,12 +292,18 @@ RSpec.describe MiniMagick::Image do
     end
 
     it "creates a composite of two images with mask" do
-      other_image = described_class.open(image_path)
-      mask = described_class.open(image_path(:png))
       result = subject.composite(other_image, 'jpg', mask) do |c|
         c.gravity 'center'
       end
       expect(File.exist?(result.path)).to be(true)
+    end
+
+    it "makes the composited image with the provided extension" do
+      result = subject.composite(other_image, 'png')
+      expect(File.extname(result.path)).to eq ".png"
+
+      result = subject.composite(other_image)
+      expect(File.extname(result.path)).to eq ".jpg"
     end
   end
 

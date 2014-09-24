@@ -370,7 +370,7 @@ module MiniMagick
 
     def composite(other_image, output_extension = 'jpg', mask = nil, &block)
       begin
-        second_tempfile = Tempfile.new(output_extension)
+        second_tempfile = Tempfile.new(["magick", ".#{output_extension}"])
         second_tempfile.binmode
       ensure
         second_tempfile.close
