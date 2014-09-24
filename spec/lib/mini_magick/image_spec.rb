@@ -172,18 +172,6 @@ RSpec.describe MiniMagick::Image do
       expect(described_class.read(output_stream.string)).to be_valid
     end
 
-    it "validates the image if validation is set" do
-      allow(MiniMagick).to receive(:validate_on_write).and_return(true)
-      image = described_class.new(image_path(:erroneous))
-      expect { image.write(random_path) }.to raise_error
-    end
-
-    it "doesn't validate the image if validation is disabled" do
-      allow(MiniMagick).to receive(:validate_on_write).and_return(false)
-      image = described_class.new(image_path(:erroneous))
-      expect { image.write(random_path) }.not_to raise_error
-    end
-
     it "accepts a Pathname" do
       output_path = Pathname(random_path)
       subject.write(output_path)

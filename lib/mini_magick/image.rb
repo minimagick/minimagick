@@ -2,6 +2,8 @@ require 'tempfile'
 require 'subexec'
 require 'stringio'
 require 'pathname'
+require 'uri'
+require 'open-uri'
 
 module MiniMagick
   class Image
@@ -35,21 +37,9 @@ module MiniMagick
       def read(stream, ext = nil)
         if stream.is_a?(String)
           stream = StringIO.new(stream)
-        elsif stream.is_a?(StringIO)
-          # Do nothing, we want a StringIO-object
-        elsif stream.respond_to? :path
-          if File.respond_to?(:binread)
-            stream = StringIO.new File.binread(stream.path.to_s)
-          else
-            stream = StringIO.new File.open(stream.path.to_s, 'rb') { |f| f.read }
-          end
         end
 
-        create(ext) do |f|
-          while chunk = stream.read(8192)
-            f.write(chunk)
-          end
-        end
+        create(ext) { |file| IO.copy_stream(stream, file) }
       end
 
       # @deprecated Please use Image.read instead!
@@ -89,32 +79,25 @@ module MiniMagick
       end
 
       # Opens a specific image file either on the local file system or at a URI.
-      #
       # Use this if you don't want to overwrite the image file.
       #
       # Extension is either guessed from the path or you can specify it as a
       # second parameter.
       #
-      # If you pass in what looks like a URL, we require 'open-uri' before
-      # opening it.
-      #
       # @param file_or_url [String] Either a local file path or a URL that
       #   open-uri can read
       # @param ext [String] Specify the extension you want to read it as
       # @return [Image] The loaded image
-      def open(file_or_url, ext = nil)
-        file_or_url = file_or_url.to_s # Force String... Hell or high water
-        if file_or_url.include?('://')
-          require 'open-uri'
-          ext ||= File.extname(URI.parse(file_or_url).path)
-          Kernel.open(file_or_url) do |f|
-            read(f, ext)
+      def open(path_or_url, ext = nil)
+        ext ||=
+          if path_or_url.to_s =~ URI.regexp
+            File.extname(URI(path_or_url).path)
+          else
+            File.extname(path_or_url)
           end
-        else
-          ext ||= File.extname(file_or_url)
-          File.open(file_or_url, 'rb') do |f|
-            read(f, ext)
-          end
+
+        Kernel.open(path_or_url, "rb") do |file|
+          read(file, ext)
         end
       end
 
@@ -140,7 +123,7 @@ module MiniMagick
       def create(ext = nil, validate = MiniMagick.validate_on_create, &block)
         tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
         tempfile.binmode
-        block.call(tempfile)
+        yield tempfile
         tempfile.close
 
         new(tempfile.path, tempfile).tap do |image|
@@ -306,37 +289,22 @@ module MiniMagick
     # @return [IOStream, Boolean] If you pass in a file location [String] then
     #   you get a success boolean. If its a stream, you get it back.
     def write(output_to)
-      if output_to.kind_of?(String) || output_to.kind_of?(Pathname) || !output_to.respond_to?(:write)
+      case output_to
+      when String, Pathname
         FileUtils.copy_file path, output_to
-        if MiniMagick.validate_on_write
-          run_command(
-            'identify', MiniMagick::Utilities.path(output_to.to_s)
-          ) # Verify that we have a good image
-        end
-      else # stream
-        File.open(path, 'rb') do |f|
-          f.binmode
-          while chunk = f.read(8192)
-            output_to.write(chunk)
-          end
-        end
-        output_to
+      else
+        IO.copy_stream File.open(path, "rb"), output_to
       end
     end
 
     # Gives you raw image data back
     # @return [String] binary string
     def to_blob
-      f = File.new path
-      f.binmode
-      f.read
-    ensure
-      f.close if f
+      File.binread(path)
     end
 
     def mime_type
-      format = self[:format]
-      'image/' + format.to_s.downcase
+      "image/#{self[:format].downcase}"
     end
 
     # If an unknown method is called then it is sent through the mogrify
