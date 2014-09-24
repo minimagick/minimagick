@@ -8,7 +8,7 @@ RSpec.describe MiniMagick::CommandBuilder do
     MiniMagick.processor = nil
   end
 
-  context "on windows", if: MiniMagick::Utilities.windows? do
+  context "on windows", :if => MiniMagick::Utilities.windows? do
     it "builds a complicated command" do
       subject.resize '30x40'
       subject.alpha '1 3 4'
@@ -27,7 +27,7 @@ RSpec.describe MiniMagick::CommandBuilder do
     end
   end
 
-  context "on unix", unless: MiniMagick::Utilities.windows? do
+  context "on unix", :unless => MiniMagick::Utilities.windows? do
     it "builds a complicated command" do
       subject.resize '30x40'
       subject.alpha '1 3 4'

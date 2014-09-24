@@ -7,6 +7,7 @@ require_relative "support/helpers"
 RSpec.configure do |config|
   config.disable_monkey_patching!
   config.formatter = "documentation"
+  config.color = true
 end
 
 MiniMagick.processor = :mogrify
