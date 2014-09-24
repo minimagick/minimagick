@@ -14,109 +14,105 @@ module MiniMagick
       MiniMagick::Utilities.path(@path)
     end
 
-    # Class Methods
-    # -------------
-    class << self
-      # This is the primary loading method used by all of the other class
-      # methods.
-      #
-      # Use this to pass in a stream object. Must respond to Object#read(size)
-      # or be a binary string object (BLOBBBB)
-      #
-      # As a change from the old API, please try and use IOStream objects. They
-      # are much, much better and more efficient!
-      #
-      # Probably easier to use the #open method if you want to open a file or a
-      # URL.
-      #
-      # @param stream [IOStream, String] Some kind of stream object that needs
-      #   to be read or is a binary String blob!
-      # @param ext [String] A manual extension to use for reading the file. Not
-      #   required, but if you are having issues, give this a try.
-      # @return [Image]
-      def read(stream, ext = nil)
-        if stream.is_a?(String)
-          stream = StringIO.new(stream)
-        end
-
-        create(ext) { |file| IO.copy_stream(stream, file) }
+    # This is the primary loading method used by all of the other class
+    # methods.
+    #
+    # Use this to pass in a stream object. Must respond to Object#read(size)
+    # or be a binary string object (BLOBBBB)
+    #
+    # As a change from the old API, please try and use IOStream objects. They
+    # are much, much better and more efficient!
+    #
+    # Probably easier to use the #open method if you want to open a file or a
+    # URL.
+    #
+    # @param stream [IOStream, String] Some kind of stream object that needs
+    #   to be read or is a binary String blob!
+    # @param ext [String] A manual extension to use for reading the file. Not
+    #   required, but if you are having issues, give this a try.
+    # @return [Image]
+    def self.read(stream, ext = nil)
+      if stream.is_a?(String)
+        stream = StringIO.new(stream)
       end
 
-      # Creates an image object from a binary string blob which contains raw
-      # pixel data (i.e. no header data).
-      #
-      # @param blob [String] Binary string blob containing raw pixel data.
-      # @param columns [Integer] Number of columns.
-      # @param rows [Integer] Number of rows.
-      # @param depth [Integer] Bit depth of the encoded pixel data.
-      # @param map [String] A code for the mapping of the pixel data. Example:
-      #   'gray' or 'rgb'.
-      # @param format [String] The file extension of the image format to be
-      #   used when creating the image object.
-      # Defaults to 'png'.
-      # @return [Image] The loaded image.
-      #
-      def import_pixels(blob, columns, rows, depth, map, format = 'png')
-        # Create an image object with the raw pixel data string:
-        image = create('.dat', false) { |f| f.write(blob) }
-        # Use ImageMagick to convert the raw data file to an image file of the
-        # desired format:
-        converted_image_path = image.path[0..-4] + format
-        arguments = ['-size', "#{columns}x#{rows}", '-depth', "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
-        # Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
-        cmd = CommandBuilder.new('convert', *arguments)
-        image.run(cmd)
-        # Update the image instance with the path of the properly formatted
-        # image, and return:
-        image.path = converted_image_path
-        image
-      end
+      create(ext) { |file| IO.copy_stream(stream, file) }
+    end
 
-      # Opens a specific image file either on the local file system or at a URI.
-      # Use this if you don't want to overwrite the image file.
-      #
-      # Extension is either guessed from the path or you can specify it as a
-      # second parameter.
-      #
-      # @param file_or_url [String] Either a local file path or a URL that
-      #   open-uri can read
-      # @param ext [String] Specify the extension you want to read it as
-      # @return [Image] The loaded image
-      def open(path_or_url, ext = nil)
-        ext ||=
-          if path_or_url.to_s =~ URI.regexp
-            File.extname(URI(path_or_url).path)
-          else
-            File.extname(path_or_url)
-          end
+    # Creates an image object from a binary string blob which contains raw
+    # pixel data (i.e. no header data).
+    #
+    # @param blob [String] Binary string blob containing raw pixel data.
+    # @param columns [Integer] Number of columns.
+    # @param rows [Integer] Number of rows.
+    # @param depth [Integer] Bit depth of the encoded pixel data.
+    # @param map [String] A code for the mapping of the pixel data. Example:
+    #   'gray' or 'rgb'.
+    # @param format [String] The file extension of the image format to be
+    #   used when creating the image object.
+    # Defaults to 'png'.
+    # @return [Image] The loaded image.
+    #
+    def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
+      # Create an image object with the raw pixel data string:
+      image = create('.dat', false) { |f| f.write(blob) }
+      # Use ImageMagick to convert the raw data file to an image file of the
+      # desired format:
+      converted_image_path = image.path[0..-4] + format
+      arguments = ['-size', "#{columns}x#{rows}", '-depth', "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
+      # Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
+      cmd = CommandBuilder.new('convert', *arguments)
+      image.run(cmd)
+      # Update the image instance with the path of the properly formatted
+      # image, and return:
+      image.path = converted_image_path
+      image
+    end
 
-        Kernel.open(path_or_url, "rb") do |file|
-          read(file, ext)
+    # Opens a specific image file either on the local file system or at a URI.
+    # Use this if you don't want to overwrite the image file.
+    #
+    # Extension is either guessed from the path or you can specify it as a
+    # second parameter.
+    #
+    # @param file_or_url [String] Either a local file path or a URL that
+    #   open-uri can read
+    # @param ext [String] Specify the extension you want to read it as
+    # @return [Image] The loaded image
+    def self.open(path_or_url, ext = nil)
+      ext ||=
+        if path_or_url.to_s =~ URI.regexp
+          File.extname(URI(path_or_url).path)
+        else
+          File.extname(path_or_url)
         end
+
+      Kernel.open(path_or_url, "rb") do |file|
+        read(file, ext)
       end
+    end
 
-      # Used to create a new Image object data-copy. Not used to "paint" or
-      # that kind of thing.
-      #
-      # Takes an extension in a block and can be used to build a new Image
-      # object. Used by both #open and #read to create a new object! Ensures we
-      # have a good tempfile!
-      #
-      # @param ext [String] Specify the extension you want to read it as
-      # @param validate [Boolean] If false, skips validation of the created
-      #   image. Defaults to true.
-      # @yield [IOStream] You can #write bits to this object to create the new
-      #   Image
-      # @return [Image] The created image
-      def create(ext = nil, validate = MiniMagick.validate_on_create, &block)
-        tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
-        tempfile.binmode
-        yield tempfile
-        tempfile.close
+    # Used to create a new Image object data-copy. Not used to "paint" or
+    # that kind of thing.
+    #
+    # Takes an extension in a block and can be used to build a new Image
+    # object. Used by both #open and #read to create a new object! Ensures we
+    # have a good tempfile!
+    #
+    # @param ext [String] Specify the extension you want to read it as
+    # @param validate [Boolean] If false, skips validation of the created
+    #   image. Defaults to true.
+    # @yield [IOStream] You can #write bits to this object to create the new
+    #   Image
+    # @return [Image] The created image
+    def self.create(ext = nil, validate = MiniMagick.validate_on_create, &block)
+      tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
+      tempfile.binmode
+      yield tempfile
+      tempfile.close
 
-        new(tempfile.path, tempfile).tap do |image|
-          fail MiniMagick::Invalid if validate && !image.valid?
-        end
+      new(tempfile.path, tempfile).tap do |image|
+        fail MiniMagick::Invalid if validate && !image.valid?
       end
     end
 
