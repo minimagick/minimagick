@@ -28,44 +28,44 @@ RSpec.describe MiniMagick::Tool do
 
   describe "#command" do
     it "includes the executable and the arguments" do
-      allow(subject).to receive(:args).and_return(%w[-list Command])
-      expect(subject.command).to eq "identify -list Command"
+      allow(subject).to receive(:args).and_return(%W[-list Command])
+      expect(subject.command).to eq %W[identify -list Command]
     end
   end
 
   describe "#executable" do
     it "prepends 'gm' to the command list when using GraphicsMagick" do
       allow(MiniMagick).to receive(:cli).and_return(:graphicsmagick)
-      expect(subject.executable).to eq "gm identify"
+      expect(subject.executable).to eq %W[gm identify]
     end
 
     it "respects #cli_path" do
       allow(MiniMagick).to receive(:cli_path).and_return("path/to/cli")
-      expect(subject.executable).to eq "path/to/cli/identify"
+      expect(subject.executable).to eq %W[path/to/cli/identify]
     end
   end
 
   describe "#<<" do
     it "adds argument to the args list" do
       subject << "foo" << "bar"
-      expect(subject.args).to eq %w[foo bar]
+      expect(subject.args).to eq %W[foo bar]
     end
   end
 
   describe "normal operator" do
     it "adds the operator to arguments" do
       subject.regard_warnings
-      expect(subject.args).to eq %w[-regard-warnings]
+      expect(subject.args).to eq %W[-regard-warnings]
     end
 
     it "adds the optional value" do
       subject.list("Command")
-      expect(subject.args).to eq %w[-list "Command"]
+      expect(subject.args).to eq %W[-list Command]
     end
 
     it "accepts numbers" do
       subject.depth(8)
-      expect(subject.args).to eq %w[-depth "8"]
+      expect(subject.args).to eq %W[-depth 8]
     end
   end
 
@@ -73,31 +73,31 @@ RSpec.describe MiniMagick::Tool do
     it "switches the last option to + form" do
       subject.list
       subject.+
-      expect(subject.args).to eq %w[+list]
+      expect(subject.args).to eq %W[+list]
     end
 
     it "adds the optional value" do
       subject.list
       subject.+ "Command"
-      expect(subject.args).to eq %w[+list "Command"]
+      expect(subject.args).to eq %W[+list Command]
     end
 
     it "accepts numbers" do
       subject.depth
       subject.+ 8
-      expect(subject.args).to eq %w[+depth "8"]
+      expect(subject.args).to eq %W[+depth 8]
     end
   end
 
   describe "creation operator" do
     it "is added with or without arguments" do
       subject.rose.canvas "khaki"
-      expect(subject.args).to eq %w[rose: canvas:khaki]
+      expect(subject.args).to eq %W[rose: canvas:khaki]
     end
 
     it "is added with dashes" do
       subject.radial_gradient
-      expect(subject.args).to eq %w[radial-gradient:]
+      expect(subject.args).to eq %W[radial-gradient:]
     end
   end
 end

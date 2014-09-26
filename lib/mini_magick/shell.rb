@@ -25,13 +25,15 @@ module MiniMagick
 
     def execute(command)
       stdout, stderr, status =
-        MiniMagick.logger.debug(command) do
+        MiniMagick.logger.debug(command.join(" ")) do
           Timeout.timeout(MiniMagick.timeout) do
-            Open3.capture3(command + ";")
+            Open3.capture3(*command)
           end
         end
 
       [stdout, stderr, status.exitstatus]
+    rescue Errno::ENOENT
+      ["", "executable not found: \"#{command.first}\"", 127]
     end
 
   end

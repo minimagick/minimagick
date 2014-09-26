@@ -58,7 +58,7 @@ module MiniMagick
           convert.size "#{columns}x#{rows}"
           convert.depth depth
           convert << "#{map}:#{image.path}"
-          convert << output_path.inspect
+          convert << output_path
         end
 
         image.path.replace output_path
@@ -159,7 +159,7 @@ module MiniMagick
     #
     # @raise [MiniMagick::Invalid]
     def validate!
-      MiniMagick::Tool::Identify.new { |b| b << path.inspect }
+      MiniMagick::Tool::Identify.new { |b| b << path }
     rescue MiniMagick::Error => error
       raise MiniMagick::Invalid, error.message
     end
@@ -320,10 +320,10 @@ module MiniMagick
 
       MiniMagick::Tool::Composite.new do |composite|
         yield composite if block_given?
-        composite << other_image.path.inspect
-        composite << path.inspect
-        composite << mask.path.inspect if mask
-        composite << second_tempfile.path.inspect
+        composite << other_image.path
+        composite << path
+        composite << mask.path if mask
+        composite << second_tempfile.path
       end
 
       Image.new(second_tempfile.path, second_tempfile)
@@ -338,7 +338,7 @@ module MiniMagick
     def mogrify(page = nil)
       MiniMagick::Tool::Mogrify.new do |builder|
         yield builder if block_given?
-        builder << (page ? "#{path}[#{page}]" : path).inspect
+        builder << (page ? "#{path}[#{page}]" : path)
       end
     end
 

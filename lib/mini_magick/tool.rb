@@ -44,14 +44,14 @@ module MiniMagick
     end
 
     def command
-      [executable, *args].join(" ")
+      [*executable, *args]
     end
 
     def executable
-      result = name
-      result = "gm #{result}" if MiniMagick.graphicsmagick?
-      result = File.join(MiniMagick.cli_path, result) if MiniMagick.cli_path
-      result
+      exe = [name]
+      exe.unshift "gm" if MiniMagick.graphicsmagick?
+      exe.unshift File.join(MiniMagick.cli_path, exe.shift) if MiniMagick.cli_path
+      exe
     end
 
     def <<(*args)
@@ -61,7 +61,7 @@ module MiniMagick
 
     def +(value = nil)
       args.last.sub!(/^-/, '+')
-      args << value.to_s.inspect if value
+      args << value.to_s if value
     end
 
     def self.inherited(child)
@@ -70,7 +70,7 @@ module MiniMagick
         #
         #   mogrify = MiniMagick::Tool.new("mogrify")
         #   mogrify.canvas("khaki")
-        #   mogrify.command #=> "mogrify canvas:khaki"
+        #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
         #
         IMAGE_CREATION_OPERATORS.each do |operator|
           operator_name = operator.gsub('-', '_')
@@ -87,7 +87,7 @@ module MiniMagick
         #  mogrify.antialias
         #  mogrify.depth(8)
         #  mogrify.resize("500x500")
-        #  mogirfy.command #=> "mogrify -antialias -depth "8" -resize "500x500""
+        #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
         #
         name = self.name.split("::").last.downcase
         help = (MiniMagick::Tool.new(name) << "-help").call(false)
@@ -96,7 +96,7 @@ module MiniMagick
           option_name = option[1..-1].gsub('-', '_')
           define_method(option_name) do |value = nil|
             args << option
-            args << value.to_s.inspect if value
+            args << value.to_s if value
             self
           end
         end

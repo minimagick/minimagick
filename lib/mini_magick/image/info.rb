@@ -96,7 +96,7 @@ module MiniMagick
       def identify
         MiniMagick::Tool::Identify.new do |builder|
           yield builder if block_given?
-          builder << "#{@path}[0]".inspect
+          builder << "#{@path}[0]"
         end
       end
 
