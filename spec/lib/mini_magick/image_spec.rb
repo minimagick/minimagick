@@ -99,7 +99,7 @@ RSpec.describe MiniMagick::Image do
     it "validates the image if validation is set" do
       allow(MiniMagick).to receive(:validate_on_create).and_return(true)
       expect { create(image_path(:erroneous)) }
-        .to raise_error(MiniMagick::Error)
+        .to raise_error(MiniMagick::Invalid)
     end
 
     it "doesn't validate image if validation is disabled" do
@@ -136,17 +136,6 @@ RSpec.describe MiniMagick::Image do
       expect(File.exist?(old_path)).to eq false
     end
 
-    it "changes the format of image with special characters", :unless => MiniMagick::Utilities.windows? do
-      tempfile = Tempfile.new(%(magick with special! "chars'))
-      FileUtils.cp image_path, tempfile.path
-
-      image = described_class.new(tempfile.path)
-      image.format('png')
-      expect(image).to be_valid
-
-      File.delete(image.path)
-    end
-
     it "reformats a PSD with a given a extension and all layers" do
       image = described_class.open(image_path(:psd))
       image.format('jpg', nil)
@@ -156,6 +145,11 @@ RSpec.describe MiniMagick::Image do
       image = described_class.open(image_path(:single_layer_psd))
       image.format('jpg', nil)
       expect(image).to be_valid
+    end
+
+    it "resets the info" do
+      expect { subject.format("png") }
+        .to change { subject[:format] }
     end
   end
 
@@ -175,7 +169,7 @@ RSpec.describe MiniMagick::Image do
     it "accepts a Pathname" do
       output_path = Pathname(random_path)
       subject.write(output_path)
-      expect(described_class.new(output_path)).to be_valid
+      expect(described_class.new(output_path.to_s)).to be_valid
     end
   end
 
@@ -191,36 +185,18 @@ RSpec.describe MiniMagick::Image do
     end
   end
 
-  describe "#run" do
-    it "runs the given command" do
-      command = MiniMagick::CommandBuilder.new("identify")
-      command.version
-      expect(subject.run(command)).to match("ImageMagick")
-    end
-
-    it "raises error when imagemagick raised an error during processing" do
-      expect { subject.rotate "invalid_value" }
-        .to raise_error(MiniMagick::Error)
-    end
-
-    it "clears the info after destructive commands" do
-      expect { subject.resize '20x30!' }
-        .to change { subject[:width] }
-    end
-  end
-
   describe "#[]" do
     it "inspects image meta info" do
-      expect(subject[:width]).to be(150)
-      expect(subject[:height]).to be(55)
+      expect(subject[:width]).to eq(150)
+      expect(subject[:height]).to eq(55)
       expect(subject[:dimensions]).to match_array [150, 55]
       expect(subject[:colorspace]).to be_an_instance_of(String)
       expect(subject[:format]).to match(/^gif$/i)
     end
 
     it "supports string keys for dimension attributes" do
-      expect(subject["width"]).to be(150)
-      expect(subject["height"]).to be(55)
+      expect(subject["width"]).to eq(150)
+      expect(subject["height"]).to eq(55)
       expect(subject["dimensions"]).to match_array [150, 55]
     end
 
@@ -276,14 +252,14 @@ RSpec.describe MiniMagick::Image do
       result = subject.composite(other_image) do |c|
         c.gravity 'center'
       end
-      expect(File.exist?(result.path)).to be(true)
+      expect(File.exist?(result.path)).to eq(true)
     end
 
     it "creates a composite of two images with mask" do
       result = subject.composite(other_image, 'jpg', mask) do |c|
         c.gravity 'center'
       end
-      expect(File.exist?(result.path)).to be(true)
+      expect(File.exist?(result.path)).to eq(true)
     end
 
     it "makes the composited image with the provided extension" do

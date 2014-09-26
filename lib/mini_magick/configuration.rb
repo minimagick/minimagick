@@ -7,6 +7,7 @@ module MiniMagick
     attr_accessor :cli_path, (:processor_path)
     attr_accessor :timeout
     attr_accessor :debug
+    attr_accessor :logger
     attr_accessor :validate_on_create
     attr_accessor :validate_on_write
 
@@ -26,11 +27,29 @@ module MiniMagick
     end
 
     def cli
-      @cli ||=
+      @cli ||
         case processor.to_s
         when "mogrify" then :imagemagick
         when "gm"      then :graphicsmagick
         end
+    end
+
+    def cli=(value)
+      @cli = value
+
+      unless [:imagemagick, :graphicsmagick].include?(@cli)
+        raise ArgumentError,
+          "CLI has to be set to either :imagemagick or :graphicsmagick" \
+          ", was set to #{@cli.inspect}"
+      end
+    end
+
+    def cli_path
+      @cli_path || @processor_path
+    end
+
+    def logger
+      @logger || MiniMagick::Logger.new($stdout)
     end
 
   end

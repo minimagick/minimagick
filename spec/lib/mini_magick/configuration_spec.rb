@@ -32,6 +32,13 @@ RSpec.describe MiniMagick::Configuration do
     end
   end
 
+  describe "#cli=" do
+    it "raises an error when set to an invalid value" do
+      expect { subject.cli = :grapicsmagick }
+        .to raise_error(ArgumentError)
+    end
+  end
+
   describe "#processor" do
     it "assigns :mogrify by default" do
       expect(subject.processor).to eq "mogrify"

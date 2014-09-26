@@ -30,7 +30,8 @@ module MiniMagick
   # === Returns
   # * [String]
   def self.cli_version
-    @cli_version ||= MiniMagick::Tool::Identify.new.version[/\d+\.\d+\.\d+(-\d+)?/]
+    output = MiniMagick::Tool::Identify.new.version.call
+    output[/\d+\.\d+\.\d+(-\d+)?/]
   end
 
   class Error < RuntimeError; end

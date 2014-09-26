@@ -1,5 +1,4 @@
 require 'tempfile'
-require 'subexec'
 require 'stringio'
 require 'pathname'
 require 'uri'
@@ -7,12 +6,6 @@ require 'open-uri'
 
 module MiniMagick
   class Image
-    # @return [String] The location of the current working file
-    attr_writer :path
-
-    def path
-      MiniMagick::Utilities.path(@path)
-    end
 
     # This is the primary loading method used by all of the other class
     # methods.
@@ -55,18 +48,19 @@ module MiniMagick
     #
     def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
       # Create an image object with the raw pixel data string:
-      image = create('.dat', false) { |f| f.write(blob) }
-      # Use ImageMagick to convert the raw data file to an image file of the
-      # desired format:
-      converted_image_path = image.path[0..-4] + format
-      arguments = ['-size', "#{columns}x#{rows}", '-depth', "#{depth}", "#{map}:#{image.path}", "#{converted_image_path}"]
-      # Example: convert -size 256x256 -depth 16 gray:blob.dat blob.png
-      cmd = CommandBuilder.new('convert', *arguments)
-      image.run(cmd)
-      # Update the image instance with the path of the properly formatted
-      # image, and return:
-      image.path = converted_image_path
-      image
+      create(".dat", false) { |f| f.write(blob) }.tap do |image|
+        output_path = image.path.sub(/\.\w+$/, ".#{format}")
+        # Use ImageMagick to convert the raw data file to an image file of the
+        # desired format:
+        MiniMagick::Tool::Convert.new do |convert|
+          convert.size "#{columns}x#{rows}"
+          convert.depth depth
+          convert << "#{map}:#{image.path}"
+          convert << output_path.inspect
+        end
+
+        image.path = output_path
+      end
     end
 
     # Opens a specific image file either on the local file system or at a URI.
@@ -112,9 +106,12 @@ module MiniMagick
       tempfile.close
 
       new(tempfile.path, tempfile).tap do |image|
-        fail MiniMagick::Invalid if validate && !image.valid?
+        image.validate! if validate
       end
     end
+
+    # @return [String] The location of the current working file
+    attr_accessor :path
 
     # Create a new MiniMagick::Image object
     #
@@ -130,7 +127,6 @@ module MiniMagick
       @path = input_path
       @tempfile = tempfile
       @info = {}
-      @command_builder = MiniMagick::CommandBuilder.new("mogrify")
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -141,10 +137,22 @@ module MiniMagick
     #
     # @return [Boolean]
     def valid?
-      run_command('identify', path)
+      validate!
       true
     rescue MiniMagick::Invalid
       false
+    end
+
+    # Runs `identify` on the current image, and raises an error if it doesn't
+    # pass.
+    #
+    # @raises [MiniMagick::Invalid]
+    def validate!
+      MiniMagick::Tool::Identify.new do |identify|
+        identify << path.inspect
+      end
+    rescue MiniMagick::Error => error
+      raise MiniMagick::Invalid, error.message
     end
 
     # A rather low-level way to interact with the "identify" command. No nice
@@ -167,19 +175,17 @@ module MiniMagick
     #   called! Defaults to String for unknown commands
     def [](value)
       value = value.to_s
+      identify = MiniMagick::Tool::Identify.new
       # Why do I go to the trouble of putting in newlines? Because otherwise
       # animated gifs screw everything up
       @info[value] ||=
         case value
         when 'colorspace'
-          run_command('identify', '-format', '%r\n', path).split("\n")[0].strip
+          (identify.format('%r\n') << path.inspect).call
         when 'format'
-          run_command('identify', '-format', '%m\n', path).split("\n")[0]
+          (identify.format('%m\n') << path.inspect).call.split("\n").first
         when 'dimensions', 'width', 'height'
-          dimensions = run_command(
-            'identify', '-format', MiniMagick::Utilities.windows? ? '"%w %h\n"' : '%w %h\n', path
-          ).split("\n")[0].split.map { |v| v.to_i }
-
+          dimensions = (identify.format('%w %h\n') << path.inspect).call.split.map(&:to_i)
           @info["dimensions"] = dimensions
           @info["width"], @info["height"] = @info["dimensions"]
           @info[value]
@@ -189,14 +195,14 @@ module MiniMagick
           # Get the EXIF original capture as a Time object
           Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
         when /^EXIF\:/i
-          result = run_command('identify', '-format', "%[#{value}]", path).chomp
+          result = (identify.format("%[#{value}]") << path).call
           if result.include?(',')
-            read_character_data(result)
+            result.scan(/\d+/).map(&:to_i).map(&:chr).join
           else
             result
           end
         else
-          run_command('identify', '-format', value, path).split("\n")[0]
+          (identify.format(value) << path).call
         end
     end
     alias info []
@@ -210,7 +216,12 @@ module MiniMagick
     # @return [String] Whatever the result from the command line is. May not be
     #   terribly useful.
     def <<(*args)
-      run_command('mogrify', *args << path)
+      @info.clear
+
+      MiniMagick::Tool::Mogrify.new do |mogrify|
+        mogrify.<<(*args)
+        mogrify << path
+      end
     end
 
     # This is used to change the format of the image. That is, from "tiff to
@@ -235,33 +246,41 @@ module MiniMagick
     #   will convert all pages.
     # @return [nil]
     def format(format, page = 0)
+      @info.clear
+
       if @tempfile
         new_tempfile = Tempfile.new(["mini_magick", ".#{format}"])
         new_path = new_tempfile.path
       else
-        new_path = File.basename(@path, ".*") + ".#{format}"
+        new_path = path.sub(/\.\w+$/, ".#{format}")
       end
 
-      cmd = CommandBuilder.new("convert", (page ? "#{@path}[#{page}]" : @path))
-      yield cmd if block_given?
-      cmd << new_path
-      run(cmd)
+      MiniMagick::Tool::Convert.new do |convert|
+        convert << (page ? "#{path}[#{page}]" : path)
+        yield convert if block_given?
+        convert << new_path
+      end
 
       if @tempfile
         @tempfile.unlink
         @tempfile = new_tempfile
         @tempfile.close
       else
-        File.delete(@path) unless @path == new_path
+        File.delete(path) unless path == new_path
       end
 
-      @path = new_path
+      self.path = new_path
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
     # preserve quality
     def collapse!
-      run_command('mogrify', '-quality', '100', "#{path}[0]")
+      @info.clear
+
+      MiniMagick::Tool::Mogrify.new do |mogrify|
+        mogrify.quality 100
+        mogrify << "#{path}[0]"
+      end
     end
 
     # Writes the temporary file out to either a file location (by passing in a
@@ -295,12 +314,12 @@ module MiniMagick
     # program.
     #
     # @see http://www.imagemagick.org/script/mogrify.php
-    def method_missing(symbol, *args)
-      if @command_builder.respond_to?(symbol)
-        @command_builder.send(symbol, *args)
-        run_queue
-      else
-        super
+    def method_missing(name, *args)
+      @info.clear
+
+      MiniMagick::Tool::Mogrify.new do |mogrify|
+        mogrify.send(name, *args)
+        mogrify << path.inspect
       end
     end
 
@@ -314,13 +333,17 @@ module MiniMagick
     #     c.background background
     #   end
     #
-    # @yieldparam command [CommandBuilder]
+    # @yieldparam command [MiniMagick::Tool::Mogrify
     def combine_options
-      yield @command_builder
-      run_queue if @command_builder.any?
+      @info.clear
+
+      MiniMagick::Tool::Mogrify.new do |mogrify|
+        yield mogrify
+        mogrify << path.inspect
+      end
     end
 
-    def composite(other_image, output_extension = 'jpg', mask = nil, &block)
+    def composite(other_image, output_extension = 'jpg', mask = nil)
       begin
         second_tempfile = Tempfile.new(["magick", ".#{output_extension}"])
         second_tempfile.binmode
@@ -328,63 +351,20 @@ module MiniMagick
         second_tempfile.close
       end
 
-      command = CommandBuilder.new('composite')
-      block.call(command) if block
-      command.push(other_image.path)
-      command.push(path)
-      command.push(mask.path) unless mask.nil?
-      command.push(second_tempfile.path)
+      MiniMagick::Tool::Composite.new do |composite|
+        yield composite if block_given?
+        composite << other_image.path.inspect
+        composite << path.inspect
+        composite << mask.path.inspect if mask
+        composite << second_tempfile.path.inspect
+      end
 
-      run(command)
       Image.new(second_tempfile.path, second_tempfile)
-    end
-
-    def run_command(command, *args)
-      if command == 'identify'
-        args.unshift '-ping'  # -ping "efficiently determine image characteristics."
-        args.unshift '-quiet' if MiniMagick.mogrify? && !MiniMagick.debug # graphicsmagick has no -quiet option.
-      end
-
-      run(CommandBuilder.new(command, *args))
-    end
-
-    def run(command_builder)
-      command = command_builder.command
-
-      sub = Subexec.run(command, :timeout => MiniMagick.timeout)
-
-      @info.clear if command.start_with?("mogrify", "gm") # these are destructive
-
-      if sub.exitstatus != 0
-        # Raise the appropriate error
-        if sub.output =~ /no decode delegate/i || sub.output =~ /did not return an image/i
-          fail Invalid, sub.output
-        else
-          # TODO: should we do something different if the command times out ...?
-          # its definitely better for logging.. Otherwise we don't really know
-          fail Error, "Command (#{command.inspect.gsub("\\", "")}) failed: #{{ :status_code => sub.exitstatus, :output => sub.output }.inspect}"
-        end
-      else
-        sub.output
-      end
     end
 
     def destroy!
       @tempfile.unlink if @tempfile
     end
 
-    def run_queue
-      return if @command_builder.empty?
-      @command_builder << path
-      run(@command_builder)
-      @command_builder.clear
-    end
-
-    private
-
-    # Sometimes we get back a list of character values
-    def read_character_data(string)
-      string.scan(/\d+/).map(&:to_i).map(&:chr).join
-    end
   end
 end
