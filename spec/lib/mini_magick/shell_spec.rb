@@ -22,7 +22,7 @@ RSpec.describe MiniMagick::Shell do
 
     it "raises an error when executable wasn't found" do
       expect { subject.run("foo") }
-        .to raise_error(MiniMagick::Error, /command not found/)
+        .to raise_error(MiniMagick::Error, /not found|not recognized/)
     end
   end
 
