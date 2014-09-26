@@ -22,14 +22,20 @@ module MiniMagick
 
     attr_reader :name, :args
 
+    def self.new(*args)
+      instance = super(*args)
+
+      if block_given?
+        yield instance
+        instance.call
+      else
+        instance
+      end
+    end
+
     def initialize(name)
       @name = name
       @args = []
-
-      if block_given?
-        yield self
-        self.call
-      end
     end
 
     def call(whiny = true)

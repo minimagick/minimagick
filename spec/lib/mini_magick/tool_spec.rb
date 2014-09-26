@@ -17,12 +17,12 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
-  describe "#initialize" do
-    it "accepts a block" do
-      expect_any_instance_of(described_class).to receive(:call)
-      described_class.new("identify") do |tool|
-        tool << image_path
+  describe ".new" do
+    it "accepts a block, and immediately executes the command" do
+      output = described_class.new("identify") do |builder|
+        builder << image_path(:gif)
       end
+      expect(output).to match("GIF")
     end
   end
 

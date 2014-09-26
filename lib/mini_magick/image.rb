@@ -148,9 +148,7 @@ module MiniMagick
     #
     # @raises [MiniMagick::Invalid]
     def validate!
-      MiniMagick::Tool::Identify.new do |identify|
-        identify << path.inspect
-      end
+      identify
     rescue MiniMagick::Error => error
       raise MiniMagick::Invalid, error.message
     end
@@ -217,11 +215,7 @@ module MiniMagick
     #   terribly useful.
     def <<(*args)
       @info.clear
-
-      MiniMagick::Tool::Mogrify.new do |mogrify|
-        mogrify.<<(*args)
-        mogrify << path
-      end
+      mogrify { |builder| builder.<<(*args) }
     end
 
     # This is used to change the format of the image. That is, from "tiff to
@@ -276,11 +270,7 @@ module MiniMagick
     # preserve quality
     def collapse!
       @info.clear
-
-      MiniMagick::Tool::Mogrify.new do |mogrify|
-        mogrify.quality 100
-        mogrify << "#{path}[0]"
-      end
+      mogrify(0) { |builder| builder.quality(100) }
     end
 
     # Writes the temporary file out to either a file location (by passing in a
@@ -316,11 +306,7 @@ module MiniMagick
     # @see http://www.imagemagick.org/script/mogrify.php
     def method_missing(name, *args)
       @info.clear
-
-      MiniMagick::Tool::Mogrify.new do |mogrify|
-        mogrify.send(name, *args)
-        mogrify << path.inspect
-      end
+      mogrify { |builder| builder.send(name, *args) }
     end
 
     # You can use multiple commands together using this method. Very easy to
@@ -334,13 +320,9 @@ module MiniMagick
     #   end
     #
     # @yieldparam command [MiniMagick::Tool::Mogrify
-    def combine_options
+    def combine_options(&block)
       @info.clear
-
-      MiniMagick::Tool::Mogrify.new do |mogrify|
-        yield mogrify
-        mogrify << path.inspect
-      end
+      mogrify(&block)
     end
 
     def composite(other_image, output_extension = 'jpg', mask = nil)
@@ -364,6 +346,17 @@ module MiniMagick
 
     def destroy!
       @tempfile.unlink if @tempfile
+    end
+
+    private
+
+    [:identify, :mogrify].each do |tool_name|
+      define_method(tool_name) do |page = nil, &block|
+        MiniMagick::Tool.const_get(tool_name.capitalize).new do |builder|
+          block.call(builder) if block
+          builder << (page ? "#{path}[#{page}]" : path).inspect
+        end
+      end
     end
 
   end
