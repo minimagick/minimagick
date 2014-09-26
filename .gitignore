@@ -6,3 +6,4 @@ coverage
 .rvmrc
 .rubocop.yml
 tags
+doc/

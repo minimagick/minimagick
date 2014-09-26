@@ -71,7 +71,7 @@ module MiniMagick
     # Extension is either guessed from the path or you can specify it as a
     # second parameter.
     #
-    # @param file_or_url [String] Either a local file path or a URL that
+    # @param path_or_url [String] Either a local file path or a URL that
     #   open-uri can read
     # @param ext [String] Specify the extension you want to read it as
     # @return [Image] The loaded image
@@ -157,7 +157,7 @@ module MiniMagick
     # Runs `identify` on the current image, and raises an error if it doesn't
     # pass.
     #
-    # @raises [MiniMagick::Invalid]
+    # @raise [MiniMagick::Invalid]
     def validate!
       MiniMagick::Tool::Identify.new { |b| b << path.inspect }
     rescue MiniMagick::Error => error

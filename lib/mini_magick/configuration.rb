@@ -3,8 +3,8 @@ require 'mini_magick/utilities'
 module MiniMagick
   module Configuration
 
-    attr_accessor :cli, (:processor)
-    attr_accessor :cli_path, (:processor_path)
+    attr_accessor :cli, :processor
+    attr_accessor :cli_path, :processor_path
     attr_accessor :timeout
     attr_accessor :debug
     attr_accessor :logger
