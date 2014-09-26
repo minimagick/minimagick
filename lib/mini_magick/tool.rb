@@ -60,6 +60,12 @@ module MiniMagick
 
     def self.inherited(child)
       child.class_eval do
+        # Create methods based on creation operators' name.
+        #
+        #   mogrify = MiniMagick::Tool.new("mogrify")
+        #   mogrify.canvas("khaki")
+        #   mogrify.command #=> "mogrify canvas:khaki"
+        #
         IMAGE_CREATION_OPERATORS.each do |operator|
           operator_name = operator.gsub('-', '_')
           define_method(operator_name) do |value = nil|
@@ -68,9 +74,19 @@ module MiniMagick
           end
         end
 
+        # Parse the help page for that specific ImageMagick tool, extract all
+        # the options, and make methods from them.
+        #
+        #  mogrify = MiniMagick::Tool.new("mogrify")
+        #  mogrify.antialias
+        #  mogrify.depth(8)
+        #  mogrify.resize("500x500")
+        #  mogirfy.command #=> "mogrify -antialias -depth "8" -resize "500x500""
+        #
         name = self.name.split("::").last.downcase
         help = (MiniMagick::Tool.new(name) << "-help").call(false)
-        help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip).each do |option|
+        options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
+        options.each do |option|
           option_name = option[1..-1].gsub('-', '_')
           define_method(option_name) do |value = nil|
             args << option
