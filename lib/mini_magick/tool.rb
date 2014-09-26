@@ -60,7 +60,7 @@ module MiniMagick
     end
 
     def +(value = nil)
-      args.last.sub!('-', '+')
+      args.last.sub!(/^-/, '+')
       args << value.to_s.inspect if value
     end
 
