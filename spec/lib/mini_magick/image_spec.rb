@@ -211,6 +211,7 @@ RSpec.describe MiniMagick::Image do
     expect(subject.dimensions).to all(be_a(Fixnum))
     expect(subject.size).to be_a(Fixnum).and be_nonzero
     expect(subject.colorspace).to be_a(String)
+    expect(subject.resolution).to all(be_a(Fixnum))
   end
 
   describe "#exif" do
@@ -218,6 +219,15 @@ RSpec.describe MiniMagick::Image do
 
     it "returns a hash of EXIF data" do
       expect(subject.exif["DateTimeOriginal"]).to be_a(String)
+    end
+  end
+
+  describe "#resolution" do
+    subject { described_class.open(image_path(:jpg)) }
+
+    it "accepts an optional parameter which specifies units" do
+      expect(subject.resolution("PixelsPerCentimeter"))
+        .not_to eq subject.resolution("PixelsPerInch")
     end
   end
 

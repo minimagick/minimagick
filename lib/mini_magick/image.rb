@@ -184,6 +184,14 @@ module MiniMagick
     attribute :colorspace
     # @return [Hash]
     attribute :exif
+    # Returns the resolution of the photo. You can optionally specify the
+    # units measurement.
+    #
+    # @example
+    #   image.resolution("PixelsPerInch") #=> [250, 250]
+    # @see http://www.imagemagick.org/script/command-line-options.php#units
+    # @return [Array<Integer>]
+    attribute :resolution
 
     # Use this method if you want to access raw Identify's format API.
     #

@@ -9,7 +9,7 @@ module MiniMagick
         @info = {}
       end
 
-      def [](value)
+      def [](value, *args)
         case value
         when "format", "width", "height", "dimensions", "size"
           cheap_info(value)
@@ -17,6 +17,8 @@ module MiniMagick
           colorspace
         when "mime_type"
           mime_type
+        when "resolution"
+          resolution(*args)
         when /^EXIF\:/i
           raw_exif(value)
         when "exif"
@@ -58,6 +60,14 @@ module MiniMagick
         "image/#{self["format"].downcase}"
       end
 
+      def resolution(unit = nil)
+        output = identify do |b|
+          b.units unit if unit
+          b.format "%x %y"
+        end
+        output.split(" ").map(&:to_i)
+      end
+
       def raw_exif(value)
         self["%[#{value}]"]
       end
@@ -80,8 +90,12 @@ module MiniMagick
       end
 
       def raw(value)
+        identify { |b| b.format(value) }
+      end
+
+      def identify
         MiniMagick::Tool::Identify.new do |builder|
-          builder.format value
+          yield builder if block_given?
           builder << "#{@path}[0]".inspect
         end
       end
