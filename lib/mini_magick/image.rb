@@ -4,6 +4,8 @@ require 'pathname'
 require 'uri'
 require 'open-uri'
 
+require 'mini_magick/image/info'
+
 module MiniMagick
   class Image
 
@@ -59,7 +61,7 @@ module MiniMagick
           convert << output_path.inspect
         end
 
-        image.path = output_path
+        image.path.replace output_path
       end
     end
 
@@ -110,8 +112,17 @@ module MiniMagick
       end
     end
 
+    # @private
+    # @!macro [attach] attribute
+    #   @!attribute [r] $1
+    def self.attribute(name, key = name.to_s)
+      define_method(name) do |*args|
+        @info[key, *args]
+      end
+    end
+
     # @return [String] The location of the current working file
-    attr_accessor :path
+    attr_reader :path
 
     # Create a new MiniMagick::Image object
     #
@@ -126,7 +137,7 @@ module MiniMagick
     def initialize(input_path, tempfile = nil)
       @path = input_path
       @tempfile = tempfile
-      @info = {}
+      @info = MiniMagick::Image::Info.new(@path)
     end
 
     # Checks to make sure that MiniMagick can read the file and understand it.
@@ -148,60 +159,43 @@ module MiniMagick
     #
     # @raises [MiniMagick::Invalid]
     def validate!
-      identify
+      MiniMagick::Tool::Identify.new { |b| b << path.inspect }
     rescue MiniMagick::Error => error
       raise MiniMagick::Invalid, error.message
     end
 
-    # A rather low-level way to interact with the "identify" command. No nice
-    # API here, just the crazy stuff you find in ImageMagick. See the examples
-    # listed!
+    # Returns the image format (e.g. "JPEG", "GIF").
+    #
+    # @return [String]
+    attribute :type, "format"
+    # @return [String]
+    attribute :mime_type
+    # @return [Integer]
+    attribute :width
+    # @return [Integer]
+    attribute :height
+    # @return [Array<Integer>]
+    attribute :dimensions
+    # Returns the file size of the image.
+    #
+    # @return [Integer]
+    attribute :size
+    # @return [String]
+    attribute :colorspace
+    # @return [Hash]
+    attribute :exif
+
+    # Use this method if you want to access raw Identify's format API.
     #
     # @example
-    #    image["format"]      #=> "TIFF"
-    #    image["height"]      #=> 41 (pixels)
-    #    image["width"]       #=> 50 (pixels)
-    #    image["colorspace"]  #=> "DirectClassRGB"
-    #    image["dimensions"]  #=> [50, 41]
-    #    image["size"]        #=> 2050 (bits)
-    #    image["original_at"] #=> 2005-02-23 23:17:24 +0000 (Read from Exif data)
-    #    image["EXIF:ExifVersion"] #=> "0220" (Can read anything from Exif)
+    #    image["%w %h"]       #=> "250 450"
+    #    image["%r"]          #=> "DirectClass sRGB"
     #
-    # @param format [String] A format for the "identify" command
-    # @see http://www.imagemagick.org/script/command-line-options.php#format
-    # @return [String, Numeric, Array, Time, Object] Depends on the method
-    #   called! Defaults to String for unknown commands
+    # @param value [String]
+    # @see http://www.imagemagick.org/script/escape.php
+    # @return [String]
     def [](value)
-      value = value.to_s
-      identify = MiniMagick::Tool::Identify.new
-      # Why do I go to the trouble of putting in newlines? Because otherwise
-      # animated gifs screw everything up
-      @info[value] ||=
-        case value
-        when 'colorspace'
-          (identify.format('%r\n') << path.inspect).call
-        when 'format'
-          (identify.format('%m\n') << path.inspect).call.split("\n").first
-        when 'dimensions', 'width', 'height'
-          dimensions = (identify.format('%w %h\n') << path.inspect).call.split.map(&:to_i)
-          @info["dimensions"] = dimensions
-          @info["width"], @info["height"] = @info["dimensions"]
-          @info[value]
-        when 'size'
-          File.size(path) # Do this because calling identify -format "%b" on an animated gif fails!
-        when 'original_at'
-          # Get the EXIF original capture as a Time object
-          Time.local(*self['EXIF:DateTimeOriginal'].split(/:|\s+/)) rescue nil
-        when /^EXIF\:/i
-          result = (identify.format("%[#{value}]") << path).call
-          if result.include?(',')
-            result.scan(/\d+/).map(&:to_i).map(&:chr).join
-          else
-            result
-          end
-        else
-          (identify.format(value) << path).call
-        end
+      @info[value.to_s]
     end
     alias info []
 
@@ -250,7 +244,7 @@ module MiniMagick
         File.delete(path) unless path == new_path
       end
 
-      self.path = new_path
+      path.replace new_path
     end
 
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
@@ -281,10 +275,6 @@ module MiniMagick
     # @return [String] binary string
     def to_blob
       File.binread(path)
-    end
-
-    def mime_type
-      "image/#{self[:format].downcase}"
     end
 
     # If an unknown method is called then it is sent through the mogrify
@@ -337,12 +327,10 @@ module MiniMagick
 
     private
 
-    [:identify, :mogrify].each do |tool_name|
-      define_method(tool_name) do |page = nil, &block|
-        MiniMagick::Tool.const_get(tool_name.capitalize).new do |builder|
-          block.call(builder) if block
-          builder << (page ? "#{path}[#{page}]" : path).inspect
-        end
+    def mogrify(page = nil)
+      MiniMagick::Tool::Mogrify.new do |builder|
+        yield builder if block_given?
+        builder << (page ? "#{path}[#{page}]" : path).inspect
       end
     end
 

@@ -29,35 +29,26 @@ RSpec.describe MiniMagick::Image do
   end
 
   describe ".import_pixels" do
+    let(:dimensions) { [325, 200] }
+    let(:depth)      { 16 } # 16 bits (2 bytes) per pixel
+    let(:map)        { 'gray' }
+    let(:pixels)     { Array.new(dimensions.inject(:*)) { |i| i } }
+    let(:blob)       { pixels.pack('S*') } # unsigned short, native byte order
+
     it "can import pixels with default format" do
-      columns = 325
-      rows    = 200
-      depth   = 16 # 16 bits (2 bytes) per pixel
-      map     = 'gray'
-      pixels  = Array.new(columns * rows) { |i| i }
-      blob    = pixels.pack('S*') # unsigned short, native byte order
-      image   = described_class.import_pixels(blob, columns, rows, depth, map)
+      image = described_class.import_pixels(blob, *dimensions, depth, map)
 
       expect(image).to be_valid
-      expect(image[:format].to_s.downcase).to eq 'png'
-      expect(image[:width]).to eq columns
-      expect(image[:height]).to eq rows
+      expect(image.type).to eq 'PNG'
+      expect(image.dimensions).to eq dimensions
     end
 
     it "can import pixels with custom format" do
-      columns = 325
-      rows    = 200
-      depth   = 16 # 16 bits (2 bytes) per pixel
-      map     = 'gray'
-      format  = 'jpeg'
-      pixels  = Array.new(columns * rows) { |i| i }
-      blob    = pixels.pack('S*') # unsigned short, native byte order
-      image   = described_class.import_pixels(blob, columns, rows, depth, map, format)
+      image = described_class.import_pixels(blob, *dimensions, depth, map, 'jpeg')
 
       expect(image).to be_valid
-      expect(image[:format].to_s.downcase).to eq format
-      expect(image[:width]).to eq columns
-      expect(image[:height]).to eq rows
+      expect(image.type).to eq 'JPEG'
+      expect(image.dimensions).to eq dimensions
     end
   end
 
@@ -131,7 +122,7 @@ RSpec.describe MiniMagick::Image do
 
     it "deletes the previous tempfile" do
       image = described_class.open(image_path)
-      old_path = image.path
+      old_path = image.path.dup
       image.format('png')
       expect(File.exist?(old_path)).to eq false
     end
@@ -149,7 +140,7 @@ RSpec.describe MiniMagick::Image do
 
     it "resets the info" do
       expect { subject.format("png") }
-        .to change { subject[:format] }
+        .to change { subject.type }
     end
   end
 
@@ -194,36 +185,46 @@ RSpec.describe MiniMagick::Image do
       expect(subject[:format]).to match(/^gif$/i)
     end
 
-    it "supports string keys for dimension attributes" do
+    it "supports string keys" do
       expect(subject["width"]).to eq(150)
       expect(subject["height"]).to eq(55)
       expect(subject["dimensions"]).to match_array [150, 55]
+      expect(subject["colorspace"]).to be_an_instance_of(String)
+      expect(subject["format"]).to match(/^gif$/i)
     end
 
-    it "inspects a gif with jpg format correctly" do
-      image = described_class.new(image_path(:gif_with_jpg_ext))
-      expect(image[:format].to_s.downcase).to eq 'gif'
+    it "reads exif" do
+      subject = described_class.new(image_path(:exif))
+      expect(subject["EXIF:ColorSpace"]).to eq "1"
     end
 
-    it "inspects the EXIF of an image" do
-      image = described_class.open(image_path(:exif))
-      expect(image['exif:ExifVersion']).to eq '0220'
-      image = described_class.open(image_path)
-      expect(image['EXIF:ExifVersion']).to be_empty
+    it "passes unknown values directly to -format" do
+      expect(subject["%w %h"].split.map(&:to_i)).to eq [subject[:width], subject[:height]]
     end
+  end
 
-    it "inspects the original at of an image" do
-      image = described_class.open(image_path(:exif))
-      expect(image[:original_at]).to eq Time.local('2005', '2', '23', '23', '17', '24')
-      image = described_class.open(image_path)
-      expect(image[:original_at]).to be_nil
+  it "has attributes" do
+    expect(subject.type).to match(/^[A-Z]+$/)
+    expect(subject.mime_type).to match(/^image\/[a-z]+$/)
+    expect(subject.width).to be_a(Fixnum).and be_nonzero
+    expect(subject.height).to be_a(Fixnum).and be_nonzero
+    expect(subject.dimensions).to all(be_a(Fixnum))
+    expect(subject.size).to be_a(Fixnum).and be_nonzero
+    expect(subject.colorspace).to be_a(String)
+  end
+
+  describe "#exif" do
+    subject { described_class.new(image_path(:exif)) }
+
+    it "returns a hash of EXIF data" do
+      expect(subject.exif["DateTimeOriginal"]).to be_a(String)
     end
   end
 
   describe "#method_missing" do
     it "executes the command correctly" do
       subject.resize '20x30!'
-      expect(subject[:dimensions]).to eq [20, 30]
+      expect(subject.dimensions).to eq [20, 30]
     end
   end
 
@@ -234,13 +235,13 @@ RSpec.describe MiniMagick::Image do
         c.blur '50'
       end
 
-      expect(subject[:dimensions]).to eq [20, 30]
+      expect(subject.dimensions).to eq [20, 30]
     end
 
     it "clears the info" do
       expect {
         subject.combine_options { |c| c.resize '20x30!' }
-      }.to change { subject[:width] }
+      }.to change { subject.width }
     end
   end
 
