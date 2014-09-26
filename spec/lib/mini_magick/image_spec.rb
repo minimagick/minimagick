@@ -276,13 +276,11 @@ RSpec.describe MiniMagick::Image do
       gif        = described_class.new(image_path(:gif))
       jpeg       = described_class.new(image_path(:jpg))
       png        = described_class.new(image_path(:png))
-      tiff       = described_class.new(image_path(:tiff))
       hidden_gif = described_class.new(image_path(:gif_with_jpg_ext))
 
       expect(gif.mime_type).to eq 'image/gif'
       expect(jpeg.mime_type).to eq 'image/jpeg'
       expect(png.mime_type).to eq 'image/png'
-      expect(tiff.mime_type).to eq 'image/tiff'
       expect(hidden_gif.mime_type).to eq 'image/gif'
     end
   end

@@ -4,7 +4,6 @@ module Helpers
   IMAGE_DIR = "spec/fixtures"
   IMAGE_PATHS = {
     gif:              "simple.gif",
-    tiff:             "leaves (spaced).tiff",
     not:              "not_an_image.php",
     gif_with_jpg_ext: "actually_a_gif.jpg",
     exif:             "trogdor.jpg",
