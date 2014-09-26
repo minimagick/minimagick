@@ -205,19 +205,6 @@ module MiniMagick
     end
     alias info []
 
-    # Sends raw commands to imagemagick's `mogrify` command. The image path is
-    # automatically appended to the command.
-    #
-    # Remember, we are always acting on this instance of the Image when messing
-    # with this.
-    #
-    # @return [String] Whatever the result from the command line is. May not be
-    #   terribly useful.
-    def <<(*args)
-      @info.clear
-      mogrify { |builder| builder.<<(*args) }
-    end
-
     # This is used to change the format of the image. That is, from "tiff to
     # jpg" or something like that. Once you run it, the instance is pointing to
     # a new file with a new extension!
