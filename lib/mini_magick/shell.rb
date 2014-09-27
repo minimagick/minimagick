@@ -15,7 +15,7 @@ module MiniMagick
 
       case code
       when 1
-        fail MiniMagick::Error, "`#{command}` failed with error:\n#{stderr}"
+        fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
       when 127
         fail MiniMagick::Error, stderr
       end if @whiny

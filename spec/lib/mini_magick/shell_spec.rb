@@ -18,7 +18,7 @@ RSpec.describe MiniMagick::Shell do
     it "uses stderr for error messages" do
       allow(subject).to receive(:execute).and_return(["", "stderr", 1])
       expect { subject.run(%W[foo]) }
-        .to raise_error(MiniMagick::Error, /stderr/)
+        .to raise_error(MiniMagick::Error, /`foo`.*stderr/m)
     end
 
     it "raises an error when executable wasn't found" do
