@@ -31,7 +31,7 @@ module MiniMagick
 
       unless ["mogrify", "gm"].include?(@processor)
         raise ArgumentError,
-          "processor has to be set to either \"mogirfy\" or \"gm\"" \
+          "processor has to be set to either \"mogrify\" or \"gm\"" \
           ", was set to #{@processor.inspect}"
       end
     end

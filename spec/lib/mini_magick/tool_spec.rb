@@ -65,7 +65,7 @@ RSpec.describe MiniMagick::Tool do
     expect(subject.args).to eq %W[-regard-warnings -list Command]
   end
 
-  it "doesn't just delegate to method_missing" do
+  it "doesn't just delegate to #method_missing" do
     expect(subject.class.instance_methods).to include(:help)
   end
 

@@ -9,8 +9,7 @@ module MiniMagick
   ##
   # Checks whether the CLI used is ImageMagick.
   #
-  # === Returns
-  # * [Boolean]
+  # @return [Boolean]
   def self.imagemagick?
     cli == :imagemagick
   end
@@ -18,8 +17,7 @@ module MiniMagick
   ##
   # Checks whether the CLI used is GraphicsMagick.
   #
-  # === Returns
-  # * [Boolean]
+  # @return [Boolean]
   def self.graphicsmagick?
     cli == :graphicsmagick
   end
@@ -27,10 +25,9 @@ module MiniMagick
   ##
   # Returns ImageMagick's/GraphicsMagick's version.
   #
-  # === Returns
-  # * [String]
+  # @return [String]
   def self.cli_version
-    output = MiniMagick::Tool::Identify.new.version.call
+    output = MiniMagick::Tool::Identify.new(&:version)
     output[/\d+\.\d+\.\d+(-\d+)?/]
   end
 

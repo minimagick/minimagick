@@ -140,6 +140,12 @@ module MiniMagick
       @info = MiniMagick::Image::Info.new(@path)
     end
 
+    # Gives you raw image data back
+    # @return [String] binary string
+    def to_blob
+      File.binread(path)
+    end
+
     # Checks to make sure that MiniMagick can read the file and understand it.
     #
     # This uses the 'identify' command line utility to check the file. If you
@@ -255,11 +261,30 @@ module MiniMagick
       path.replace new_path
     end
 
-    # Collapse images with sequences to the first frame (i.e. animated gifs) and
-    # preserve quality
-    def collapse!
+    # You can use multiple commands together using this method. Very easy to
+    # use!
+    #
+    # @example
+    #   image.combine_options do |c|
+    #     c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
+    #     c.thumbnail "300x500>"
+    #     c.background "blue"
+    #   end
+    #
+    # @yieldparam command [MiniMagick::Tool::Mogrify]
+    # @see http://www.imagemagick.org/script/mogrify.php
+    def combine_options(&block)
       @info.clear
-      mogrify(0) { |builder| builder.quality(100) }
+      mogrify(&block)
+    end
+
+    # If an unknown method is called then it is sent through the mogrify
+    # program.
+    #
+    # @see http://www.imagemagick.org/script/mogrify.php
+    def method_missing(name, *args)
+      @info.clear
+      mogrify { |builder| builder.send(name, *args) }
     end
 
     # Writes the temporary file out to either a file location (by passing in a
@@ -279,37 +304,6 @@ module MiniMagick
       end
     end
 
-    # Gives you raw image data back
-    # @return [String] binary string
-    def to_blob
-      File.binread(path)
-    end
-
-    # If an unknown method is called then it is sent through the mogrify
-    # program.
-    #
-    # @see http://www.imagemagick.org/script/mogrify.php
-    def method_missing(name, *args)
-      @info.clear
-      mogrify { |builder| builder.send(name, *args) }
-    end
-
-    # You can use multiple commands together using this method. Very easy to
-    # use!
-    #
-    # @example
-    #   image.combine_options do |c|
-    #     c.draw "image Over 0,0 10,10 '#{MINUS_IMAGE_PATH}'"
-    #     c.thumbnail "300x500>"
-    #     c.background background
-    #   end
-    #
-    # @yieldparam command [MiniMagick::Tool::Mogrify
-    def combine_options(&block)
-      @info.clear
-      mogrify(&block)
-    end
-
     def composite(other_image, output_extension = 'jpg', mask = nil)
       begin
         second_tempfile = Tempfile.new(["magick", ".#{output_extension}"])
@@ -327,6 +321,13 @@ module MiniMagick
       end
 
       Image.new(second_tempfile.path, second_tempfile)
+    end
+
+    # Collapse images with sequences to the first frame (i.e. animated gifs) and
+    # preserve quality
+    def collapse!
+      @info.clear
+      mogrify(0) { |builder| builder.quality(100) }
     end
 
     def destroy!

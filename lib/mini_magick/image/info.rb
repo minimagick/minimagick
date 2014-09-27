@@ -1,5 +1,3 @@
-require "delegate"
-
 module MiniMagick
   class Image
     class Info
