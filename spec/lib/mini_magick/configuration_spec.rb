@@ -56,4 +56,11 @@ RSpec.describe MiniMagick::Configuration do
       expect(subject.processor).to eq nil
     end
   end
+
+  describe "#processor=" do
+    it "raises an error when set to an invalid value" do
+      expect { subject.processor = "mogrfy" }
+        .to raise_error(ArgumentError)
+    end
+  end
 end
