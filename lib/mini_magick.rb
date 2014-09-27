@@ -9,7 +9,7 @@ module MiniMagick
   ##
   # You might want to execute only certain blocks of processing with a
   # different CLI, because for example that CLI does that particular thing
-  # faster.
+  # faster. After the block CLI resets to its previous value.
   #
   # @example
   #   MiniMagick.with_cli :graphicsmagick do

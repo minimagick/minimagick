@@ -152,6 +152,10 @@ require "stringio"
           subject.format('jpg')
           expect(subject).to be_valid
         end
+
+        it "returns self" do
+          expect(subject.format('png')).to eq subject
+        end
       end
 
       describe "#write" do
@@ -254,6 +258,10 @@ require "stringio"
           subject.resize '20x30!'
           expect(subject.dimensions).to eq [20, 30]
         end
+
+        it "returns self" do
+          expect(subject.resize '20x30!').to eq subject
+        end
       end
 
       describe "#combine_options" do
@@ -270,6 +278,10 @@ require "stringio"
           expect {
             subject.combine_options { |c| c.resize '20x30!' }
           }.to change { subject.width }
+        end
+
+        it "returns self" do
+          expect(subject.combine_options {}).to eq subject
         end
       end
 
@@ -297,6 +309,30 @@ require "stringio"
 
           result = subject.composite(other_image)
           expect(File.extname(result.path)).to eq ".jpg"
+        end
+      end
+
+      describe "#collapse!" do
+        subject { described_class.open(image_path(:animation)) }
+
+        it "collapses the image to one frame" do
+          subject.collapse!
+          expect(subject.identify.lines.count).to eq 1
+        end
+
+        it "keeps the extension" do
+          subject.collapse!
+          expect(subject.type).to eq "GIF"
+        end
+
+        it "returns self" do
+          expect(subject.collapse!).to eq subject
+        end
+      end
+
+      describe "#identify" do
+        it "returns the output of identify" do
+          expect(subject.identify).to match(subject.type)
         end
       end
     end

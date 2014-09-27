@@ -13,7 +13,7 @@ module Helpers
   end
 
   def image_url
-    "https://assets-cdn.github.com/images/modules/logos_page/Octocat.png"
+    "https://avatars2.githubusercontent.com/u/795488?v=2&s=40"
   end
 
   def random_path(basename = "")

@@ -1,5 +1,6 @@
 module MiniMagick
   class Image
+    # @private
     class Info
 
       def initialize(path)

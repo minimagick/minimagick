@@ -1,6 +1,13 @@
 require "benchmark"
 
 module MiniMagick
+  ##
+  # Responsible for logging commands to stdout (activated when
+  # `MiniMagick.debug` is set to `true`). Implements a simplified Logger
+  # interface.
+  #
+  # @private
+  #
   class Logger
 
     attr_accessor :format

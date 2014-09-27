@@ -1,7 +1,7 @@
 module MiniMagick
   ##
-  # Returns the version of the currently loaded MiniMagick as
-  # a <tt>Gem::Version</tt>.
+  # @return [Gem::Version]
+  #
   def self.version
     Gem::Version.new VERSION::STRING
   end

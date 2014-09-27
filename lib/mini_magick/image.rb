@@ -9,23 +9,22 @@ require 'mini_magick/image/info'
 module MiniMagick
   class Image
 
+    ##
     # This is the primary loading method used by all of the other class
     # methods.
     #
-    # Use this to pass in a stream object. Must respond to Object#read(size)
-    # or be a binary string object (BLOBBBB)
+    # Use this to pass in a stream object. Must respond to #read(size) or be a
+    # binary string object (BLOBBBB)
     #
-    # As a change from the old API, please try and use IOStream objects. They
-    # are much, much better and more efficient!
-    #
-    # Probably easier to use the #open method if you want to open a file or a
+    # Probably easier to use the {.open} method if you want to open a file or a
     # URL.
     #
-    # @param stream [IOStream, String] Some kind of stream object that needs
-    #   to be read or is a binary String blob!
+    # @param stream [#read, String] Some kind of stream object that needs
+    #   to be read or is a binary String blob
     # @param ext [String] A manual extension to use for reading the file. Not
     #   required, but if you are having issues, give this a try.
-    # @return [Image]
+    # @return [MiniMagick::Image]
+    #
     def self.read(stream, ext = nil)
       if stream.is_a?(String)
         stream = StringIO.new(stream)
@@ -34,6 +33,7 @@ module MiniMagick
       create(ext) { |file| IO.copy_stream(stream, file) }
     end
 
+    ##
     # Creates an image object from a binary string blob which contains raw
     # pixel data (i.e. no header data).
     #
@@ -46,7 +46,7 @@ module MiniMagick
     # @param format [String] The file extension of the image format to be
     #   used when creating the image object.
     # Defaults to 'png'.
-    # @return [Image] The loaded image.
+    # @return [MiniMagick::Image] The loaded image.
     #
     def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
       # Create an image object with the raw pixel data string:
@@ -65,6 +65,7 @@ module MiniMagick
       end
     end
 
+    ##
     # Opens a specific image file either on the local file system or at a URI.
     # Use this if you don't want to overwrite the image file.
     #
@@ -74,7 +75,8 @@ module MiniMagick
     # @param path_or_url [String] Either a local file path or a URL that
     #   open-uri can read
     # @param ext [String] Specify the extension you want to read it as
-    # @return [Image] The loaded image
+    # @return [MiniMagick::Image] The loaded image
+    #
     def self.open(path_or_url, ext = nil)
       ext ||=
         if path_or_url.to_s =~ URI.regexp
@@ -88,19 +90,21 @@ module MiniMagick
       end
     end
 
+    ##
     # Used to create a new Image object data-copy. Not used to "paint" or
     # that kind of thing.
     #
     # Takes an extension in a block and can be used to build a new Image
-    # object. Used by both #open and #read to create a new object! Ensures we
-    # have a good tempfile!
+    # object. Used by both {.open} and {.read} to create a new object. Ensures
+    # we have a good tempfile.
     #
     # @param ext [String] Specify the extension you want to read it as
     # @param validate [Boolean] If false, skips validation of the created
     #   image. Defaults to true.
-    # @yield [IOStream] You can #write bits to this object to create the new
+    # @yield [Tempfile] You can #write bits to this object to create the new
     #   Image
-    # @return [Image] The created image
+    # @return [MiniMagick::Image] The created image
+    #
     def self.create(ext = nil, validate = MiniMagick.validate_on_create, &block)
       tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
       tempfile.binmode
@@ -112,26 +116,33 @@ module MiniMagick
       end
     end
 
+    ##
     # @private
     # @!macro [attach] attribute
     #   @!attribute [r] $1
+    #
     def self.attribute(name, key = name.to_s)
       define_method(name) do |*args|
         @info[key, *args]
       end
     end
 
+    ##
     # @return [String] The location of the current working file
+    #
     attr_reader :path
 
-    # Create a new MiniMagick::Image object
+    ##
+    # Create a new {MiniMagick::Image} object.
     #
     # _DANGER_: The file location passed in here is the *working copy*. That
-    # is, it gets *modified*. you can either copy it yourself or use the
-    # MiniMagick::Image.open(path) method which creates a temporary file for
-    # you and protects your original!
+    # is, it gets *modified*. You can either copy it yourself or use {.open}
+    # which creates a temporary file for you and protects your original.
     #
     # @param input_path [String] The location of an image file
+    # @yield [MiniMagick::Tool::Mogrify] If block is given, {#combine_options}
+    #   is called.
+    #
     def initialize(input_path, tempfile = nil, &block)
       @path = input_path
       @tempfile = tempfile
@@ -140,12 +151,16 @@ module MiniMagick
       combine_options(&block) if block
     end
 
-    # Gives you raw image data back
-    # @return [String] binary string
+    ##
+    # Returns raw image data.
+    #
+    # @return [String] Binary string
+    #
     def to_blob
       File.binread(path)
     end
 
+    ##
     # Checks to make sure that MiniMagick can read the file and understand it.
     #
     # This uses the 'identify' command line utility to check the file. If you
@@ -153,6 +168,7 @@ module MiniMagick
     # 'identify' command and see if you can figure out what the issue is.
     #
     # @return [Boolean]
+    #
     def valid?
       validate!
       true
@@ -160,36 +176,55 @@ module MiniMagick
       false
     end
 
+    ##
     # Runs `identify` on the current image, and raises an error if it doesn't
     # pass.
     #
     # @raise [MiniMagick::Invalid]
+    #
     def validate!
-      MiniMagick::Tool::Identify.new { |b| b << path }
+      identify
     rescue MiniMagick::Error => error
       raise MiniMagick::Invalid, error.message
     end
 
+    ##
     # Returns the image format (e.g. "JPEG", "GIF").
     #
     # @return [String]
+    #
     attribute :type, "format"
+    ##
     # @return [String]
+    #
     attribute :mime_type
+    ##
     # @return [Integer]
+    #
     attribute :width
+    ##
     # @return [Integer]
+    #
     attribute :height
+    ##
     # @return [Array<Integer>]
+    #
     attribute :dimensions
+    ##
     # Returns the file size of the image.
     #
     # @return [Integer]
+    #
     attribute :size
+    ##
     # @return [String]
+    #
     attribute :colorspace
+    ##
     # @return [Hash]
+    #
     attribute :exif
+    ##
     # Returns the resolution of the photo. You can optionally specify the
     # units measurement.
     #
@@ -197,8 +232,10 @@ module MiniMagick
     #   image.resolution("PixelsPerInch") #=> [250, 250]
     # @see http://www.imagemagick.org/script/command-line-options.php#units
     # @return [Array<Integer>]
+    #
     attribute :resolution
 
+    ##
     # Use this method if you want to access raw Identify's format API.
     #
     # @example
@@ -208,11 +245,13 @@ module MiniMagick
     # @param value [String]
     # @see http://www.imagemagick.org/script/escape.php
     # @return [String]
+    #
     def [](value)
       @info[value.to_s]
     end
     alias info []
 
+    ##
     # This is used to change the format of the image. That is, from "tiff to
     # jpg" or something like that. Once you run it, the instance is pointing to
     # a new file with a new extension!
@@ -233,7 +272,10 @@ module MiniMagick
     # @param page [Integer] If this is an animated gif, say which 'page' you
     #   want with an integer. Default 0 will convert only the first page; 'nil'
     #   will convert all pages.
-    # @return [nil]
+    # @yield [MiniMagick::Tool::Convert] It optionally yields the command,
+    #   if you want to add something.
+    # @return [self]
+    #
     def format(format, page = 0)
       @info.clear
 
@@ -259,8 +301,11 @@ module MiniMagick
       end
 
       path.replace new_path
+
+      self
     end
 
+    ##
     # You can use multiple commands together using this method. Very easy to
     # use!
     #
@@ -273,28 +318,33 @@ module MiniMagick
     #
     # @yieldparam command [MiniMagick::Tool::Mogrify]
     # @see http://www.imagemagick.org/script/mogrify.php
+    # @return [self]
+    #
     def combine_options(&block)
       @info.clear
       mogrify(&block)
     end
 
+    ##
     # If an unknown method is called then it is sent through the mogrify
     # program.
     #
     # @see http://www.imagemagick.org/script/mogrify.php
+    # @return [self]
+    #
     def method_missing(name, *args)
       @info.clear
       mogrify { |builder| builder.send(name, *args) }
     end
 
+    ##
     # Writes the temporary file out to either a file location (by passing in a
     # String) or by passing in a Stream that you can #write(chunk) to
     # repeatedly
     #
-    # @param output_to [IOStream, String] Some kind of stream object that needs
-    #   to be read or a file path as a String
-    # @return [IOStream, Boolean] If you pass in a file location [String] then
-    #   you get a success boolean. If its a stream, you get it back.
+    # @param output_to [String, Pathname, #read] Some kind of stream object
+    #   that needs to be read or a file path as a String
+    #
     def write(output_to)
       case output_to
       when String, Pathname
@@ -304,6 +354,18 @@ module MiniMagick
       end
     end
 
+    ##
+    # @example
+    #  first_image = MiniMagick::Image.open "first.jpg"
+    #  second_image = MiniMagick::Image.open "second.jpg"
+    #  result = first_image.composite(second_image) do |c|
+    #    c.compose "Over" # OverCompositeOp
+    #    c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
+    #  end
+    #  result.write "output.jpg"
+    #
+    # @see http://www.imagemagick.org/script/composite.php
+    #
     def composite(other_image, output_extension = 'jpg', mask = nil)
       begin
         second_tempfile = Tempfile.new(["magick", ".#{output_extension}"])
@@ -323,15 +385,32 @@ module MiniMagick
       Image.new(second_tempfile.path, second_tempfile)
     end
 
+    ##
     # Collapse images with sequences to the first frame (i.e. animated gifs) and
-    # preserve quality
-    def collapse!
+    # preserve quality.
+    #
+    # @param frame [Integer] The frame to which to collapse to, defaults to `0`.
+    # @return [self]
+    #
+    def collapse!(frame = 0)
       @info.clear
-      mogrify(0) { |builder| builder.quality(100) }
+      mogrify(frame) { |builder| builder.quality(100) }
     end
 
+    ##
+    # Destroys the tempfile (created by {.open}) if it exists.
+    #
     def destroy!
       @tempfile.unlink if @tempfile
+    end
+
+    ##
+    # Runs `identify` on itself.
+    #
+    # @return [String] Output from `identify`
+    #
+    def identify
+      MiniMagick::Tool::Identify.new { |b| b << path }
     end
 
     private
@@ -341,6 +420,7 @@ module MiniMagick
         yield builder if block_given?
         builder << (page ? "#{path}[#{page}]" : path)
       end
+      self
     end
 
   end

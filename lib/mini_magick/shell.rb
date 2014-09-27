@@ -4,6 +4,12 @@ require "open3"
 require "timeout"
 
 module MiniMagick
+  ##
+  # Sends commands to the shell (more precisely, it sends commands directly to
+  # the operating system).
+  #
+  # @private
+  #
   class Shell
 
     def initialize(whiny = true)
