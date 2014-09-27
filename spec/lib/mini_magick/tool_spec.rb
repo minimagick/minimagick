@@ -29,7 +29,7 @@ RSpec.describe MiniMagick::Tool do
   describe "#command" do
     it "includes the executable and the arguments" do
       allow(subject).to receive(:args).and_return(%W[-list Command])
-      expect(subject.command).to eq %W[identify -list Command]
+      expect(subject.command).to include(*%W[identify -list Command])
     end
   end
 
@@ -40,6 +40,7 @@ RSpec.describe MiniMagick::Tool do
     end
 
     it "respects #cli_path" do
+      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
       allow(MiniMagick).to receive(:cli_path).and_return("path/to/cli")
       expect(subject.executable).to eq %W[path/to/cli/identify]
     end
@@ -54,9 +55,9 @@ RSpec.describe MiniMagick::Tool do
 
   describe "#+" do
     it "switches the last option to + form" do
-      subject.list.+
-      subject.depth.+ 8
-      expect(subject.args).to eq %W[+list +depth 8]
+      subject.help.+
+      subject.debug.+ 8
+      expect(subject.args).to eq %W[+help +debug 8]
     end
   end
 
