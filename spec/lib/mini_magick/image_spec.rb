@@ -91,13 +91,13 @@ require "stringio"
 
         it "validates the image if validation is set" do
           allow(MiniMagick).to receive(:validate_on_create).and_return(true)
-          expect { create(image_path(:erroneous)) }
+          expect { create(image_path(:not)) }
             .to raise_error(MiniMagick::Invalid)
         end
 
         it "doesn't validate image if validation is disabled" do
           allow(MiniMagick).to receive(:validate_on_create).and_return(false)
-          expect { create(image_path(:erroneous)) }
+          expect { create(image_path(:not)) }
             .not_to raise_error
         end
       end
@@ -118,39 +118,39 @@ require "stringio"
       end
 
       describe "#format" do
+        subject { described_class.open(image_path(:jpg)) }
+
+        it "changes the format of the photo" do
+          expect { subject.format("png") }
+            .to change { subject.type }
+        end
+
         it "reformats an image with a given extension" do
-          image = described_class.open(image_path(:capitalized_ext))
-          image.format 'jpg'
-          expect(image.path).to match /\.jpg$/
+          expect { subject.format 'png' }
+            .to change { File.extname(subject.path) }.to ".png"
         end
 
         it "creates the file with new extension" do
-          image = described_class.open(image_path)
-          image.format('png')
-          expect(File.exist?(image.path)).to eq true
+          subject.format('png')
+          expect(File.exist?(subject.path)).to eq true
         end
 
         it "deletes the previous tempfile" do
-          image = described_class.open(image_path)
-          old_path = image.path.dup
-          image.format('png')
+          old_path = subject.path.dup
+          subject.format('png')
           expect(File.exist?(old_path)).to eq false
         end
 
-        it "reformats a PSD with a given a extension and all layers" do
-          image = described_class.open(image_path(:psd))
-          image.format('jpg', nil)
+        it "reformats multi-image formats to multiple images" do
+          subject = described_class.open(image_path(:animation))
+          subject.format('jpg', nil)
+          expect(Dir[subject.path.sub('.', '*.')]).not_to be_empty
         end
 
-        it "can flatten single layer PSD's", skip_cli: :graphicsmagick do
-          image = described_class.open(image_path(:single_layer_psd))
-          image.format('jpg', nil)
-          expect(image).to be_valid
-        end
-
-        it "resets the info" do
-          expect { subject.format("png") }
-            .to change { subject.type }
+        it "reformats multi-image formats to a single image" do
+          subject = described_class.open(image_path(:animation))
+          subject.format('jpg')
+          expect(subject).to be_valid
         end
       end
 
@@ -188,19 +188,19 @@ require "stringio"
 
       describe "#[]" do
         it "inspects image meta info" do
-          expect(subject[:width]).to eq(150)
-          expect(subject[:height]).to eq(55)
-          expect(subject[:dimensions]).to match_array [150, 55]
-          expect(subject[:colorspace]).to be_an_instance_of(String)
-          expect(subject[:format]).to match(/^gif$/i)
+          expect(subject[:width]).to be_a(Fixnum)
+          expect(subject[:height]).to be_a(Fixnum)
+          expect(subject[:dimensions]).to all(be_a(Fixnum))
+          expect(subject[:colorspace]).to be_a(String)
+          expect(subject[:format]).to match(/[A-Z]/)
         end
 
         it "supports string keys" do
-          expect(subject["width"]).to eq(150)
-          expect(subject["height"]).to eq(55)
-          expect(subject["dimensions"]).to match_array [150, 55]
-          expect(subject["colorspace"]).to be_an_instance_of(String)
-          expect(subject["format"]).to match(/^gif$/i)
+          expect(subject["width"]).to be_a(Fixnum)
+          expect(subject["height"]).to be_a(Fixnum)
+          expect(subject["dimensions"]).to all(be_a(Fixnum))
+          expect(subject["colorspace"]).to be_a(String)
+          expect(subject["format"]).to match(/[A-Z]/)
         end
 
         it "reads exif" do
@@ -233,11 +233,19 @@ require "stringio"
       end
 
       describe "#resolution" do
-        subject { described_class.open(image_path(:jpg)) }
-
         it "accepts units", skip_cli: :graphicsmagick do
           expect(subject.resolution("PixelsPerCentimeter"))
             .not_to eq subject.resolution("PixelsPerInch")
+        end
+      end
+
+      describe "#mime_type" do
+        it "returns the correct mime type" do
+          jpg = described_class.new(image_path(:jpg))
+          gif = described_class.new(image_path(:gif))
+
+          expect(jpg.mime_type).to eq 'image/jpeg'
+          expect(gif.mime_type).to eq 'image/gif'
         end
       end
 
@@ -267,7 +275,7 @@ require "stringio"
 
       describe "#composite" do
         let(:other_image) { described_class.open(image_path) }
-        let(:mask) { described_class.open(image_path(:png)) }
+        let(:mask) { described_class.open(image_path) }
 
         it "creates a composite of two images" do
           result = subject.composite(other_image) do |c|
@@ -290,31 +298,6 @@ require "stringio"
           result = subject.composite(other_image)
           expect(File.extname(result.path)).to eq ".jpg"
         end
-      end
-
-      describe "#mime_type" do
-        it "returns the correct mime type" do
-          gif        = described_class.new(image_path(:gif))
-          jpeg       = described_class.new(image_path(:jpg))
-          png        = described_class.new(image_path(:png))
-          hidden_gif = described_class.new(image_path(:gif_with_jpg_ext))
-
-          expect(gif.mime_type).to eq 'image/gif'
-          expect(jpeg.mime_type).to eq 'image/jpeg'
-          expect(png.mime_type).to eq 'image/png'
-          expect(hidden_gif.mime_type).to eq 'image/gif'
-        end
-      end
-
-      # https://github.com/minimagick/minimagick/issues/37
-      it "doesn't break when parsing different language" do
-        original_lang = ENV['LANG']
-        ENV['LANG'] = 'fr_FR.UTF-8'
-
-        expect { image = described_class.open(image_path(:not)) }.
-          to raise_error(MiniMagick::Invalid)
-
-        ENV['LANG'] = original_lang
       end
     end
   end
