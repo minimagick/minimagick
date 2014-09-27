@@ -72,8 +72,15 @@ module MiniMagick
         plasma tile pattern label caption text
       ]
 
+      def self.instances
+        @instances ||= []
+      end
+
       def self.for(tool_name)
         mod = Module.new
+
+        # Much nicer and descriptive representation when users will be looking
+        # at MiniMagick::Tool's ancestors chain.
         mod.module_eval(%Q{
           def self.to_s
             "#{self.name}(#{tool_name})"
@@ -85,45 +92,51 @@ module MiniMagick
         })
 
         mod.module_eval do
-          # Create methods based on creation operators' name.
-          #
-          #   mogrify = MiniMagick::Tool.new("mogrify")
-          #   mogrify.canvas("khaki")
-          #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
-          #
-          IMAGE_CREATION_OPERATORS.each do |operator|
-            define_method(operator.gsub('-', '_')) do |value = nil|
-              args << [operator, value].join(':')
-              self
+          define_singleton_method(:reload_methods) do
+            instance_methods(false).each do |method_name|
+              undef_method(method_name)
+            end
+
+            # Create methods based on creation operators' name.
+            #
+            #   mogrify = MiniMagick::Tool.new("mogrify")
+            #   mogrify.canvas("khaki")
+            #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
+            #
+            IMAGE_CREATION_OPERATORS.each do |operator|
+              define_method(operator.gsub('-', '_')) do |value = nil|
+                args << [operator, value].join(':')
+                self
+              end
+            end
+
+            # Parse the help page for that specific ImageMagick tool, extract all
+            # the options, and make methods from them.
+            #
+            #  mogrify = MiniMagick::Tool.new("mogrify")
+            #  mogrify.antialias
+            #  mogrify.depth(8)
+            #  mogrify.resize("500x500")
+            #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
+            #
+            help = (MiniMagick::Tool.new(tool_name) << "-help").call(false)
+            options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
+            options.each do |option|
+              define_method(option[1..-1].gsub('-', '_')) do |value = nil|
+                args << option
+                args << value.to_s if value
+                self
+              end
             end
           end
         end
 
-        mod.module_eval do
-          # Parse the help page for that specific ImageMagick tool, extract all
-          # the options, and make methods from them.
-          #
-          #  mogrify = MiniMagick::Tool.new("mogrify")
-          #  mogrify.antialias
-          #  mogrify.depth(8)
-          #  mogrify.resize("500x500")
-          #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
-          #
-          help = (MiniMagick::Tool.new(tool_name) << "-help").call(false)
-          options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
-          options.each do |option|
-            define_method(option[1..-1].gsub('-', '_')) do |value = nil|
-              args << option
-              args << value.to_s if value
-              self
-            end
-          end
-        end
+        mod.reload_methods
+        instances << mod
 
         mod
       end
     end
-    private_constant :Operators
 
   end
 end

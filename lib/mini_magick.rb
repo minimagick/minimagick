@@ -7,6 +7,22 @@ module MiniMagick
   extend MiniMagick::Configuration
 
   ##
+  # You might want to execute only certain blocks of processing with a
+  # different CLI, because for example that CLI does that particular thing
+  # faster.
+  #
+  # @example
+  #   MiniMagick.with_cli :graphicsmagick do
+  #     # operations that are better done with GraphicsMagick
+  #   end
+  def self.with_cli(cli)
+    old_cli = self.cli
+    self.cli = cli
+    yield
+    self.cli = old_cli
+  end
+
+  ##
   # Checks whether the CLI used is ImageMagick.
   #
   # @return [Boolean]

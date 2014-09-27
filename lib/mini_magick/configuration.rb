@@ -34,6 +34,8 @@ module MiniMagick
           "processor has to be set to either \"mogrify\" or \"gm\"" \
           ", was set to #{@processor.inspect}"
       end
+
+      reload_tools
     end
 
     def cli
@@ -52,6 +54,8 @@ module MiniMagick
           "CLI has to be set to either :imagemagick or :graphicsmagick" \
           ", was set to #{@cli.inspect}"
       end
+
+      reload_tools
     end
 
     def cli_path
@@ -60,6 +64,12 @@ module MiniMagick
 
     def logger
       @logger || MiniMagick::Logger.new($stdout)
+    end
+
+    private
+
+    def reload_tools
+      MiniMagick::Tool::Operators.instances.each(&:reload_methods)
     end
 
   end

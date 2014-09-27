@@ -73,4 +73,13 @@ RSpec.describe MiniMagick::Tool do
     subject.radial_gradient.canvas "khaki"
     expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
   end
+
+  it "resets the dynamically generated operator methods on CLI change" do
+    MiniMagick.cli = :imagemagick
+    expect(subject).to respond_to(:quiet)
+
+    MiniMagick.cli = :graphicsmagick
+    expect(subject).not_to respond_to(:quiet)
+    expect(subject).to respond_to(:ping)
+  end
 end
