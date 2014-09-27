@@ -132,12 +132,12 @@ module MiniMagick
     # you and protects your original!
     #
     # @param input_path [String] The location of an image file
-    # @todo Allow this to accept a block that can pass off to
-    #   Image#combine_options
-    def initialize(input_path, tempfile = nil)
+    def initialize(input_path, tempfile = nil, &block)
       @path = input_path
       @tempfile = tempfile
       @info = MiniMagick::Image::Info.new(@path)
+
+      combine_options(&block) if block
     end
 
     # Gives you raw image data back

@@ -107,6 +107,14 @@ require "stringio"
           image = described_class.new(image_path)
           expect(image).to be_valid
         end
+
+        it "accepts a block which it passes on to #combine_options" do
+          copy = described_class.open(image_path)
+          image = described_class.new(copy.path) do |b|
+            b.resize "100x100!"
+          end
+          expect(image.dimensions).to eq [100, 100]
+        end
       end
 
       describe "#format" do
