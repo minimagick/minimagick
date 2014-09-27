@@ -52,52 +52,25 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
-  describe "normal operator" do
-    it "adds the operator to arguments" do
-      subject.regard_warnings
-      expect(subject.args).to eq %W[-regard-warnings]
-    end
-
-    it "adds the optional value" do
-      subject.list("Command")
-      expect(subject.args).to eq %W[-list Command]
-    end
-
-    it "accepts numbers" do
-      subject.depth(8)
-      expect(subject.args).to eq %W[-depth 8]
-    end
-  end
-
   describe "#+" do
     it "switches the last option to + form" do
-      subject.list
-      subject.+
-      expect(subject.args).to eq %W[+list]
-    end
-
-    it "adds the optional value" do
-      subject.list
-      subject.+ "Command"
-      expect(subject.args).to eq %W[+list Command]
-    end
-
-    it "accepts numbers" do
-      subject.depth
-      subject.+ 8
-      expect(subject.args).to eq %W[+depth 8]
+      subject.list.+
+      subject.depth.+ 8
+      expect(subject.args).to eq %W[+list +depth 8]
     end
   end
 
-  describe "creation operator" do
-    it "is added with or without arguments" do
-      subject.rose.canvas "khaki"
-      expect(subject.args).to eq %W[rose: canvas:khaki]
-    end
+  it "adds dynamically generated operator methods" do
+    subject.regard_warnings.list("Command")
+    expect(subject.args).to eq %W[-regard-warnings -list Command]
+  end
 
-    it "is added with dashes" do
-      subject.radial_gradient
-      expect(subject.args).to eq %W[radial-gradient:]
-    end
+  it "doesn't just delegate to method_missing" do
+    expect(subject.class.instance_methods).to include(:help)
+  end
+
+  it "adds dynamically generated creation operator methods" do
+    subject.radial_gradient.canvas "khaki"
+    expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
   end
 end

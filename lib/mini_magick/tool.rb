@@ -15,12 +15,10 @@ module MiniMagick
     autoload :Montage,   "mini_magick/tool/montage"
     autoload :Stream,    "mini_magick/tool/stream"
 
-    IMAGE_CREATION_OPERATORS = %w[
-      xc canvas logo rose gradient radial-gradient
-      plasma tile pattern label caption text
-    ]
-
-    attr_reader :name, :args
+    def self.inherited(child)
+      child_name = child.name.split("::").last.downcase
+      child.send :include, Operators.for(child_name)
+    end
 
     def self.new(*args)
       instance = super(*args)
@@ -32,6 +30,8 @@ module MiniMagick
         instance
       end
     end
+
+    attr_reader :name, :args
 
     def initialize(name)
       @name = name
@@ -64,44 +64,66 @@ module MiniMagick
       args << value.to_s if value
     end
 
-    def self.inherited(child)
-      child.class_eval do
-        # Create methods based on creation operators' name.
-        #
-        #   mogrify = MiniMagick::Tool.new("mogrify")
-        #   mogrify.canvas("khaki")
-        #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
-        #
-        IMAGE_CREATION_OPERATORS.each do |operator|
-          operator_name = operator.gsub('-', '_')
-          define_method(operator_name) do |value = nil|
-            args << [operator, value].join(':')
-            self
+    private
+
+    class Operators
+      IMAGE_CREATION_OPERATORS = %w[
+        xc canvas logo rose gradient radial-gradient
+        plasma tile pattern label caption text
+      ]
+
+      def self.for(tool_name)
+        mod = Module.new
+        mod.module_eval(%Q{
+          def self.to_s
+            "#{self.name}(#{tool_name})"
+          end
+
+          def self.inspect
+            "#{self.name}(#{tool_name})"
+          end
+        })
+
+        mod.module_eval do
+          # Create methods based on creation operators' name.
+          #
+          #   mogrify = MiniMagick::Tool.new("mogrify")
+          #   mogrify.canvas("khaki")
+          #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
+          #
+          IMAGE_CREATION_OPERATORS.each do |operator|
+            define_method(operator.gsub('-', '_')) do |value = nil|
+              args << [operator, value].join(':')
+              self
+            end
           end
         end
 
-        # Parse the help page for that specific ImageMagick tool, extract all
-        # the options, and make methods from them.
-        #
-        #  mogrify = MiniMagick::Tool.new("mogrify")
-        #  mogrify.antialias
-        #  mogrify.depth(8)
-        #  mogrify.resize("500x500")
-        #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
-        #
-        name = self.name.split("::").last.downcase
-        help = (MiniMagick::Tool.new(name) << "-help").call(false)
-        options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
-        options.each do |option|
-          option_name = option[1..-1].gsub('-', '_')
-          define_method(option_name) do |value = nil|
-            args << option
-            args << value.to_s if value
-            self
+        mod.module_eval do
+          # Parse the help page for that specific ImageMagick tool, extract all
+          # the options, and make methods from them.
+          #
+          #  mogrify = MiniMagick::Tool.new("mogrify")
+          #  mogrify.antialias
+          #  mogrify.depth(8)
+          #  mogrify.resize("500x500")
+          #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
+          #
+          help = (MiniMagick::Tool.new(tool_name) << "-help").call(false)
+          options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
+          options.each do |option|
+            define_method(option[1..-1].gsub('-', '_')) do |value = nil|
+              args << option
+              args << value.to_s if value
+              self
+            end
           end
         end
+
+        mod
       end
     end
+    private_constant :Operators
 
   end
 end
