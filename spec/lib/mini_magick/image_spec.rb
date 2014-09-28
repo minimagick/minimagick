@@ -259,6 +259,11 @@ require "stringio"
           expect(subject.dimensions).to eq [20, 30]
         end
 
+        it "doesn't try to call a method on mogrify if it doesn't exist" do
+          expect { subject.foo }
+            .to raise_error(NoMethodError, /MiniMagick::Image/)
+        end
+
         it "returns self" do
           expect(subject.resize '20x30!').to eq subject
         end

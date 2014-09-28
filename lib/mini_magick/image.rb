@@ -334,7 +334,13 @@ module MiniMagick
     #
     def method_missing(name, *args)
       @info.clear
-      mogrify { |builder| builder.send(name, *args) }
+      mogrify do |builder|
+        if builder.respond_to?(name)
+          builder.send(name, *args)
+        else
+          super
+        end
+      end
     end
 
     ##
