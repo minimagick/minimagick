@@ -1,12 +1,49 @@
 # MiniMagick
 
-A ruby wrapper for ImageMagick or GraphicsMagick command line.
+A ruby wrapper for [ImageMagick](http://imagemagick.org/) or
+[GraphicsMagick](http://www.graphicsmagick.org/) command line.
 
-Tested on the following Rubies: MRI 1.8.7, 1.9.2, 1.9.3, 2.0.0, 2.1.1, REE, JRuby, Rubinius.
+## Why?
 
-[![Build Status](https://secure.travis-ci.org/minimagick/minimagick.png)](http://travis-ci.org/minimagick/minimagick)
-[![Code Climate](https://codeclimate.com/github/minimagick/minimagick.png)](https://codeclimate.com/github/minimagick/minimagick)
-[![Inline docs](http://inch-ci.org/github/minimagick/minimagick.png)](http://inch-ci.org/github/minimagick/minimagick)
+I was using [RMagick](https://github.com/rmagick/rmagick) and loving it, but it
+was eating up huge amounts of memory. Even a simple script would use over 100MB
+of RAM. On my local machine this wasn't a problem, but on my hosting server the
+ruby apps would crash because of their 100MB memory limit.
+
+## Solution!
+
+Using MiniMagick the ruby processes memory remains small (it spawns
+ImageMagick's command line program mogrify which takes up some memory as well,
+but is much smaller compared to RMagick). See [Thinking of switching from
+RMagick?](#thinking-of-switching-from-rmagick) below.
+
+MiniMagick gives you access to all the command line options ImageMagick has
+(found [here](http://www.imagemagick.org/script/command-line-options.php)).
+
+## Requirements
+
+ImageMagick or GraphicsMagick command-line tool has to be installed. You can
+check if you have it installed by running
+
+```sh
+$ convert -version
+Version: ImageMagick 6.8.9-7 Q16 x86_64 2014-09-11 http://www.imagemagick.org
+Copyright: Copyright (C) 1999-2014 ImageMagick Studio LLC
+Features: DPC Modules
+Delegates: bzlib fftw freetype jng jpeg lcms ltdl lzma png tiff xml zlib
+```
+
+MiniMagick has been tested on following Rubies:
+
+* MRI 1.9.2
+* MRI 1.9.3
+* MRI 2.0.0
+* MRI 2.1.3
+* Rubinius
+* JRuby
+
+[![Build Status](https://travis-ci.org/minimagick/minimagick.svg?branch=master)](http://travis-ci.org/minimagick/minimagick)
+[![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
 
 ## Installation
 
@@ -18,154 +55,183 @@ gem "mini_magick"
 
 ## Information
 
-* [Rdoc](http://rubydoc.info/github/minimagick/minimagick)
+* [API documentation](http://rubydoc.info/github/minimagick/minimagick)
 
+## Usage
 
-## Why?
-
-I was using RMagick and loving it, but it was eating up huge amounts
-of memory. Even a simple script would use over 100MB of Ram. On my
-local machine this wasn't a problem, but on my hosting server the
-ruby apps would crash because of their 100MB memory limit.
-
-## Solution!
-
-Using MiniMagick the ruby processes memory remains small (it spawns
-ImageMagick's command line program mogrify which takes up some memory
-as well, but is much smaller compared to RMagick)
-
-MiniMagick gives you access to all the command line options ImageMagick
-has (Found here http://www.imagemagick.org/script/mogrify.php)
-
-
-## Examples
-
-Want to make a thumbnail from a file...
+Let's first see a basic example of resizing an image.
 
 ```ruby
 image = MiniMagick::Image.open("input.jpg")
+image.path #=> "/var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/magick20140921-75881-1yho3zc.jpg"
 image.resize "100x100"
-image.write  "output.jpg"
+image.format "png"
+image.write "output.png"
 ```
 
-Want to make a thumbnail from a blob...
+`MiniMagick::Image.open` makes a copy of the image, and further methods modify
+that copy (the original stays untouched). We then
+[resize](http://www.imagemagick.org/script/command-line-options.php#resize)
+the image, and write it to a file. The writing part is necessary because
+the copy is just temporary, it gets garbage collected when we lose reference
+to the image.
+
+`MiniMagick::Image.open` also accepts URLs.
 
 ```ruby
-image = MiniMagick::Image.read(blob)
-image.resize "100x100"
-image.write  "output.jpg"
+image = MiniMagick::Image.open("http://example.com/image.jpg")
+image.contrast
+image.write("from_internets.jpg")
 ```
 
-Got an incoming IOStream?
-
-```ruby
-image = MiniMagick::Image.read(stream)
-```
-
-Want to make a thumbnail of a remote image?
-
-```ruby
-image = MiniMagick::Image.open("http://www.google.com/images/logos/logo.png")
-image.resize "5x5"
-image.format "gif"
-image.write "localcopy.gif"
-```
-
-Need to combine several options?
-
-```ruby
-image = MiniMagick::Image.open("input.jpg")
-image.combine_options do |c|
-  c.sample "50%"
-  c.rotate "-90>"
-end
-image.write "output.jpg"
-```
-
-Want to manipulate an image at its source (You won't have to write it
-out because the transformations are done on that file)
+On the other hand, if we want the original image to actually *get* modified,
+we can use `MiniMagick::Image.new`.
 
 ```ruby
 image = MiniMagick::Image.new("input.jpg")
+image.path #=> "input.jpg"
 image.resize "100x100"
+# No calling #write, because it's no a copy
 ```
 
-Want to get some meta-information out?
+### Combine options
+
+While using methods like `#resize` directly is convenient, if we use more
+methods in this way, it quickly becomes inefficient, because it calls the
+command on each methods call. `MiniMagick::Image#combine_options` takes
+multiple options and from them builds one single command.
 
 ```ruby
-image = MiniMagick::Image.open("input.jpg")
-image[:width]               # will get the width (you can also use :height and :format)
-image["EXIF:BitsPerSample"] # It also can get all the EXIF tags
-image["%m:%f %wx%h"]        # Or you can use one of the many options of the format command
+image.combine_options do |b|
+  b.resize "250x200>"
+  b.rotate "-90"
+  b.flip
+end # the command gets executed
 ```
 
-For more on the format command see
-http://www.imagemagick.org/script/command-line-options.php#format
+### Attributes
 
-Want to composite (merge) two images?
+A `MiniMagick::Image` has various handy attributes.
 
 ```ruby
-first_image = MiniMagick::Image.open "first.jpg"
-second_image = MiniMagick::Image.open "second.jpg"
+image.type        #=> "JPEG"
+image.mime_type   #=> "image/jpeg"
+image.width       #=> 250
+image.height      #=> 300
+image.dimensions  #=> [250, 300]
+image.size        #=> 3451 (in bytes)
+image.colorspace  #=> "DirectClass sRGB"
+image.exif        #=> {"DateTimeOriginal" => "2013:09:04 08:03:39", ...}
+image.resolution  #=> [75, 75]
+```
+
+If you need more control, and want to access [raw image
+attributes](http://www.imagemagick.org/script/escape.php), you can use `#[]`.
+
+```ruby
+image["%[gamma]"] # "0.9"
+```
+
+### Configuration
+
+```ruby
+MiniMagick.configure do |config|
+  config.cli = :graphicsmagick
+  config.timeout = 5
+end
+```
+
+For a complete list of configuration options, see
+[Configuration](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Configuration).
+
+### Composite
+
+MiniMagick also alows you to
+[composite](http://www.imagemagick.org/script/composite.php) images:
+
+```ruby
+first_image  = MiniMagick::Image.new("first.jpg")
+second_image = MiniMagick::Image.new("second.jpg")
 result = first_image.composite(second_image) do |c|
-  c.compose "Over" # OverCompositeOp
+  c.compose "Over"    # OverCompositeOp
   c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
 end
 result.write "output.jpg"
 ```
 
+### Image validation
+
+By default, MiniMagick validates images each time it's opening then. It
+validates them by running `identify` on them, and see if ImageMagick finds
+them valid. This adds slight overhead to the whole processing. Sometimes it's
+safe to assume that all input and output images are valid by default and turn
+off validation:
+
+```ruby
+MiniMagick.configure do |config|
+  configure.validate_on_create = false
+  configure.validate_on_write = false
+end
+```
+
+You can test whether an image is valid:
+
+```ruby
+image.valid?
+image.validate! # raises MiniMagick::Invalid if image is invalid
+```
+
+### Debugging
+
+When things go wrong and commands start failing, you can set the debug mode:
+
+```ruby
+MiniMagick.configure do |config|
+  config.debug = true
+end
+```
+
+In this mode every command that gets executed in the shell will be written
+to stdout.
+
+### Switching CLIs
+
+If you're a real ImageMagick guru, you might want to use GraphicsMagick for
+certain processing blocks (because it's more efficient), or vice versa. You
+can acomplish this with `.with_cli`:
+
+```ruby
+MiniMagick.with_cli(:graphicsmagick) do
+  # Some processing that GraphicsMagick is better at
+end
+```
+
+### Metal
+
+If you want to be close to the metal, you can use ImageMagick's command-line
+tools directly.
+
+```ruby
+MiniMagick::Tool::Mogrify.new do |mogrify|
+  mogrify.resize "100x100"
+  mogrify.antialias.+
+  mogrify << "image.jpg"
+end
+# executes `mogrify -resize 100x100 +antialias image.jpg`
+```
+
+See [MiniMagick::Tool](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Tool).
+
 ## Thinking of switching from RMagick?
 
-Unlike [RMagick](http://rmagick.rubyforge.org), MiniMagick is a much thinner wrapper around ImageMagick.
+Unlike RMagick, MiniMagick is a much thinner wrapper around ImageMagick.
 
-* To piece together MiniMagick commands refer to the [Mogrify Documentation](http://www.imagemagick.org/script/mogrify.php). For instance you can use the `-flop` option as `image.flop`.
-* Operations on a MiniMagick image tend to happen in-place as `image.trim`, whereas RMagick has both copying and in-place methods like `image.trim` and `image.trim!`.
-* To open files with MiniMagick you use `MiniMagick::Image.open` as you would `Magick::Image.read`. To open a file and directly edit it, use `MiniMagick::Image.new`.
-
-## Windows Users
-
-When passing in a blob or IOStream, Windows users need to make sure they read the file in as binary.
-
-```ruby
-# This way works on Windows
-buffer = StringIO.new(File.open(IMAGE_PATH,"rb") { |f| f.read })
-MiniMagick::Image.read(buffer)
-
-# You may run into problems doing it this way
-buffer = StringIO.new(File.read(IMAGE_PATH))
-```
-
-Also, there has been cases where processing would fail silently, so in that
-case try increasing the timeout and/or turn on the debug mode:
-
-```ruby
-MiniMagick.timeout = 10
-MiniMagick.debug = true
-```
-
-## Using GraphicsMagick
-
-Simply set
-
-```ruby
-MiniMagick.processor = :gm
-```
-
-And you are sorted.
-
-## Optional image validation
-
-By default, MiniMagick validates image each time it's opening or writing it. Validation means executing `identify -quiet -ping` command on target image. This adds additional overhead to the whole processing. Sometimes it's safe to assume that all input and output images are valid by default and turn off validation:
-
-```ruby
-MiniMagick.validate_on_create = false
-MiniMagick.validate_on_write = false
-```
-
-# Requirements
-
-You must have ImageMagick or GraphicsMagick installed.
-
-# Caveats
-
-Version 3.5 doesn't work in Ruby 1.9.2-p180. If you are running this Ruby version use the 3.4 version of this gem.
+* To piece together MiniMagick commands refer to the [Mogrify
+  Documentation](http://www.imagemagick.org/script/mogrify.php). For instance
+  you can use the `-flop` option as `image.flop`.
+* Operations on a MiniMagick image tend to happen in-place as `image.trim`,
+  whereas RMagick has both copying and in-place methods like `image.trim` and
+  `image.trim!`.
+* To open files with MiniMagick you use `MiniMagick::Image.open` as you would
+  `Magick::Image.read`. To open a file and directly edit it, use
+  `MiniMagick::Image.new`.
