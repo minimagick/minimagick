@@ -280,6 +280,11 @@ require "stringio"
           }.to change { subject.width }
         end
 
+        it "doesn't allow calling of #format" do
+          expect { subject.combine_options { |c| c.format("png") } }
+            .to raise_error(NoMethodError)
+        end
+
         it "returns self" do
           expect(subject.combine_options {}).to eq subject
         end
