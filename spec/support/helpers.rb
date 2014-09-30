@@ -2,14 +2,22 @@ require "tmpdir"
 
 module Helpers
   def image_path(type = :default)
-    File.join("spec/fixtures",
-      case type
-      when :default, :jpg   then "default.jpg"
-      when :animation, :gif then "animation.gif"
-      when :exif            then "exif.jpg"
-      when :not             then "not_an_image.rb"
-      end
-    )
+    if type != :without_extension
+      File.join("spec/fixtures",
+        case type
+        when :default, :jpg   then "default.jpg"
+        when :animation, :gif then "animation.gif"
+        when :exif            then "exif.jpg"
+        when :not             then "not_an_image.rb"
+        else
+          fail "image #{type.inspect} doesn't exist"
+        end
+      )
+    else
+      path = random_path
+      FileUtils.cp image_path, path
+      path
+    end
   end
 
   def image_url

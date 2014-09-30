@@ -192,7 +192,7 @@ module MiniMagick
             #
             IMAGE_CREATION_OPERATORS.each do |operator|
               define_method(operator.gsub('-', '_')) do |value = nil|
-                args << [operator, value].join(':')
+                self << [operator, value].join(':')
                 self
               end
             end
@@ -210,8 +210,8 @@ module MiniMagick
             options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
             options.each do |option|
               define_method(option[1..-1].gsub('-', '_')) do |value = nil|
-                args << option
-                args << value.to_s if value
+                self << option
+                self << value.to_s if value
                 self
               end
             end

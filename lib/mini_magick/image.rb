@@ -316,7 +316,7 @@ module MiniMagick
     #     c.background "blue"
     #   end
     #
-    # @yieldparam command [MiniMagick::Tool::Mogrify]
+    # @yield [MiniMagick::Tool::Mogrify]
     # @see http://www.imagemagick.org/script/mogrify.php
     # @return [self]
     #
@@ -411,12 +411,22 @@ module MiniMagick
     end
 
     ##
-    # Runs `identify` on itself.
+    # Runs `identify` on itself. Accepts an optional block for adding more
+    # options to `identify`.
     #
+    # @example
+    #   image = MiniMagick::Image.open("image.jpg")
+    #   image.identify do |b|
+    #     b.verbose
+    #   end # runs `identify -verbose image.jpg`
     # @return [String] Output from `identify`
+    # @yield [MiniMagick::Tool::Identify]
     #
     def identify
-      MiniMagick::Tool::Identify.new { |b| b << path }
+      MiniMagick::Tool::Identify.new do |builder|
+        yield builder if block_given?
+        builder << path
+      end
     end
 
     private

@@ -67,8 +67,11 @@ require "stringio"
         end
 
         it "loads a remote image" do
-          image = described_class.open(image_url)
-          expect(image).to be_valid
+          begin
+            image = described_class.open(image_url)
+            expect(image).to be_valid
+          rescue SocketError
+          end
         end
 
         it "validates the image" do
@@ -109,8 +112,7 @@ require "stringio"
         end
 
         it "accepts a block which it passes on to #combine_options" do
-          copy = described_class.open(image_path)
-          image = described_class.new(copy.path) do |b|
+          image = described_class.new(subject.path) do |b|
             b.resize "100x100!"
           end
           expect(image.dimensions).to eq [100, 100]
@@ -126,7 +128,7 @@ require "stringio"
         end
 
         it "reformats an image with a given extension" do
-          expect { subject.format 'png' }
+          expect { subject.format('png') }
             .to change { File.extname(subject.path) }.to ".png"
         end
 
@@ -135,10 +137,29 @@ require "stringio"
           expect(File.exist?(subject.path)).to eq true
         end
 
+        it "accepts a block of additional commands" do
+          expect {
+            subject.format("png") do |b|
+              b.resize("100x100!")
+            end
+          }.to change { subject.dimensions }.to [100, 100]
+        end
+
+        it "works without an extension" do
+          subject = described_class.open(image_path(:without_extension))
+          expect { subject.format("png") }
+            .to change { File.extname(subject.path) }.from("").to(".png")
+        end
+
         it "deletes the previous tempfile" do
           old_path = subject.path.dup
           subject.format('png')
           expect(File.exist?(old_path)).to eq false
+        end
+
+        it "doesn't delete itself when formatted to the same format" do
+          subject.format(subject.type.downcase)
+          expect(File.exists?(subject.path)).to eq true
         end
 
         it "reformats multi-image formats to multiple images" do
@@ -255,34 +276,25 @@ require "stringio"
 
       describe "#method_missing" do
         it "executes the command correctly" do
-          subject.resize '20x30!'
-          expect(subject.dimensions).to eq [20, 30]
+          expect { subject.resize '20x30!' }
+            .to change { subject.dimensions }.to [20, 30]
         end
 
-        it "doesn't try to call a method on mogrify if it doesn't exist" do
+        it "fails with a correct NoMethodError" do
           expect { subject.foo }
             .to raise_error(NoMethodError, /MiniMagick::Image/)
         end
 
         it "returns self" do
-          expect(subject.resize '20x30!').to eq subject
+          expect(subject.resize('20x30!')).to eq subject
         end
       end
 
       describe "#combine_options" do
         it "chains multiple options and executes them in one command" do
-          subject.combine_options do |c|
-            c.resize '20x30!'
-            c.blur '50'
-          end
-
-          expect(subject.dimensions).to eq [20, 30]
-        end
-
-        it "clears the info" do
           expect {
             subject.combine_options { |c| c.resize '20x30!' }
-          }.to change { subject.width }
+          }.to change { subject.dimensions }.to [20, 30]
         end
 
         it "doesn't allow calling of #format" do
@@ -300,25 +312,26 @@ require "stringio"
         let(:mask) { described_class.open(image_path) }
 
         it "creates a composite of two images" do
-          result = subject.composite(other_image) do |c|
-            c.gravity 'center'
-          end
-          expect(File.exist?(result.path)).to eq(true)
+          image = subject.composite(other_image)
+          expect(image).to be_valid
         end
 
         it "creates a composite of two images with mask" do
-          result = subject.composite(other_image, 'jpg', mask) do |c|
-            c.gravity 'center'
-          end
-          expect(File.exist?(result.path)).to eq(true)
+          image = subject.composite(other_image, 'jpg', mask)
+          expect(image).to be_valid
+        end
+
+        it "yields an optional block" do
+          expect { |b| subject.composite(other_image, &b) }
+            .to yield_with_args(an_instance_of(MiniMagick::Tool::Composite))
         end
 
         it "makes the composited image with the provided extension" do
           result = subject.composite(other_image, 'png')
-          expect(File.extname(result.path)).to eq ".png"
+          expect(result.path).to end_with ".png"
 
           result = subject.composite(other_image)
-          expect(File.extname(result.path)).to eq ".jpg"
+          expect(result.path).to end_with ".jpg"
         end
       end
 
@@ -331,8 +344,13 @@ require "stringio"
         end
 
         it "keeps the extension" do
-          subject.collapse!
-          expect(subject.type).to eq "GIF"
+          expect { subject.collapse! }
+            .not_to change { subject.type }
+        end
+
+        it "clears the info" do
+          expect { subject.collapse! }
+            .to change { subject.size }
         end
 
         it "returns self" do
@@ -343,6 +361,13 @@ require "stringio"
       describe "#identify" do
         it "returns the output of identify" do
           expect(subject.identify).to match(subject.type)
+        end
+
+        it "yields an optional block" do
+          output = subject.identify do |b|
+            b.verbose
+          end
+          expect(output).to match("Format:")
         end
       end
     end
