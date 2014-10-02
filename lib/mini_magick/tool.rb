@@ -30,7 +30,7 @@ module MiniMagick
     # @private
     def self.inherited(child)
       child_name = child.name.split("::").last.downcase
-      child.send :include, Operators.for(child_name)
+      child.send :include, MiniMagick::Tool::OptionMethods.new(child_name)
     end
 
     ##
@@ -148,81 +148,85 @@ module MiniMagick
     private
 
     ##
-    # Dynamically generates modules with dynamically generated operator methods
+    # Dynamically generates modules with dynamically generated option methods
     # for each command-line tool. It uses the `-help` page of a command-line
     # tool and generates methods from it. It then includes the generated
     # module into the tool class.
     #
-    class Operators
-      IMAGE_CREATION_OPERATORS = %w[
-        xc canvas logo rose gradient radial-gradient
-        plasma tile pattern label caption text
-      ]
+    # @private
+    #
+    class OptionMethods < Module
 
       def self.instances
         @instances ||= []
       end
 
-      def self.for(tool_name)
-        mod = Module.new
+      def self.new(*args, &block)
+        super.tap do |instance|
+          self.instances << instance
+        end
+      end
 
-        # Much nicer and descriptive representation when users will be looking
-        # at MiniMagick::Tool's ancestors chain.
-        mod.module_eval(%Q{
-          def self.to_s
-            "#{self.name}(#{tool_name})"
-          end
+      def initialize(tool_name)
+        super() do
+          @tool_name = tool_name
+          reload_methods
+        end
+      end
 
-          def self.inspect
-            "#{self.name}(#{tool_name})"
-          end
-        })
+      ##
+      # Dynamically generates operator methods from the "-help" page.
+      #
+      def reload_methods
+        instance_methods(false).each { |method| undef_method(method) }
 
-        mod.module_eval do
-          define_singleton_method(:reload_methods) do
-            instance_methods(false).each do |method_name|
-              undef_method(method_name)
-            end
+        self.creation_operator *%w[xc canvas logo rose gradient radial-gradient
+                                   plasma tile pattern label caption text]
 
-            # Create methods based on creation operators' name.
-            #
-            #   mogrify = MiniMagick::Tool.new("mogrify")
-            #   mogrify.canvas("khaki")
-            #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
-            #
-            IMAGE_CREATION_OPERATORS.each do |operator|
-              define_method(operator.gsub('-', '_')) do |value = nil|
-                self << [operator, value].join(':')
-                self
-              end
-            end
+        help = (MiniMagick::Tool.new(@tool_name) << "-help").call(false)
+        cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
+        self.option *cli_options
+      end
 
-            # Parse the help page for that specific ImageMagick tool, extract all
-            # the options, and make methods from them.
-            #
-            #  mogrify = MiniMagick::Tool.new("mogrify")
-            #  mogrify.antialias
-            #  mogrify.depth(8)
-            #  mogrify.resize("500x500")
-            #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
-            #
-            help = (MiniMagick::Tool.new(tool_name) << "-help").call(false)
-            options = help.scan(/^\s*-(?:[a-z]|-)+/).map(&:strip)
-            options.each do |option|
-              define_method(option[1..-1].gsub('-', '_')) do |value = nil|
-                self << option
-                self << value.to_s if value
-                self
-              end
-            end
+      ##
+      # Creates method based on command-line option's name.
+      #
+      #  mogrify = MiniMagick::Tool.new("mogrify")
+      #  mogrify.antialias
+      #  mogrify.depth(8)
+      #  mogrify.resize("500x500")
+      #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
+      #
+      def option(*options)
+        options.each do |option|
+          define_method(option[1..-1].gsub('-', '_')) do |value = nil|
+          self << option
+          self << value.to_s if value
+          self
           end
         end
-
-        mod.reload_methods
-        instances << mod
-
-        mod
       end
+
+      ##
+      # Creates method based on creation operator's name.
+      #
+      #   mogrify = MiniMagick::Tool.new("mogrify")
+      #   mogrify.canvas("khaki")
+      #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
+      #
+      def creation_operator(*operators)
+        operators.each do |operator|
+          define_method(operator.gsub('-', '_')) do |value = nil|
+            self << "#{operator}:#{value}"
+            self
+          end
+        end
+      end
+
+      def to_s
+        "OptionMethods(#{@tool_name})"
+      end
+
     end
 
   end

@@ -61,18 +61,22 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
-  it "adds dynamically generated operator methods" do
-    subject.regard_warnings.list("Command")
-    expect(subject.args).to eq %W[-regard-warnings -list Command]
-  end
+  ["ImageMagick", "GraphicsMagick"].each do |cli|
+    context "with #{cli}", cli: cli.downcase.to_sym do
+      it "adds dynamically generated operator methods" do
+        subject.help.depth(8)
+        expect(subject.args).to eq %W[-help -depth 8]
+      end
 
-  it "doesn't just delegate to #method_missing" do
-    expect(subject.class.instance_methods).to include(:help)
-  end
+      it "doesn't just delegate to #method_missing" do
+        expect(subject.class.instance_methods).to include(:help)
+      end
 
-  it "adds dynamically generated creation operator methods" do
-    subject.radial_gradient.canvas "khaki"
-    expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
+      it "adds dynamically generated creation operator methods" do
+        subject.radial_gradient.canvas "khaki"
+        expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
+      end
+    end
   end
 
   it "resets the dynamically generated operator methods on CLI change" do

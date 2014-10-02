@@ -129,7 +129,7 @@ module MiniMagick
     private
 
     def reload_tools
-      MiniMagick::Tool::Operators.instances.each(&:reload_methods)
+      MiniMagick::Tool::OptionMethods.instances.each(&:reload_methods)
     end
 
   end
