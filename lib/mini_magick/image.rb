@@ -429,6 +429,15 @@ module MiniMagick
       end
     end
 
+    # @private
+    def run_command(tool_name, *args)
+      MiniMagick::Tool.const_get(tool_name.capitalize).new do |builder|
+        args.each do |arg|
+          builder << arg
+        end
+      end
+    end
+
     private
 
     def mogrify(page = nil)

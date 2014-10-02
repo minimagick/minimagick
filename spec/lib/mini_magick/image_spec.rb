@@ -370,6 +370,13 @@ require "stringio"
           expect(output).to match("Format:")
         end
       end
+
+      describe "#run_command" do
+        it "runs the given command" do
+          output = subject.run_command("identify", "-format", "%w", subject.path)
+          expect(output).to eq subject.width.to_s
+        end
+      end
     end
   end
 end
