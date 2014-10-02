@@ -252,6 +252,26 @@ module MiniMagick
     alias info []
 
     ##
+    # Returns layers of the image. For example, JPEGs are 1-layered, but
+    # formats like PSDs, GIFs and PDFs can have multiple layers/frames/pages.
+    #
+    # @example
+    #   image = MiniMagick::Image.new("document.pdf")
+    #   image.pages.each_with_index do |page, idx|
+    #     page.write("page#{idx}.pdf")
+    #   end
+    # @return [Array<MiniMagick::Image>]
+    #
+    def layers
+      layers_count = identify.lines.count
+      layers_count.times.map do |idx|
+        MiniMagick::Image.new("#{path}[#{idx}]")
+      end
+    end
+    alias pages layers
+    alias frames layers
+
+    ##
     # This is used to change the format of the image. That is, from "tiff to
     # jpg" or something like that. Once you run it, the instance is pointing to
     # a new file with a new extension!
@@ -354,7 +374,10 @@ module MiniMagick
     def write(output_to)
       case output_to
       when String, Pathname
-        FileUtils.copy_file path, output_to
+        MiniMagick::Tool::Convert.new do |builder|
+          builder << path
+          builder << output_to
+        end
       else
         IO.copy_stream File.open(path, "rb"), output_to
       end

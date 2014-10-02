@@ -192,6 +192,20 @@ require "stringio"
           expect(described_class.read(output_stream.string)).to be_valid
         end
 
+        it "writes layers" do
+          output_path = random_path(["", ".#{subject.type.downcase}"])
+          subject = described_class.new(image_path(:gif))
+          subject.frames.first.write(output_path)
+          expect(described_class.new(output_path)).to be_valid
+        end
+
+        it "changes format" do
+          output_path = random_path(["", ".png"])
+          subject = described_class.new(image_path(:jpg))
+          subject.write(output_path)
+          expect(described_class.new(output_path).type).to eq "PNG"
+        end
+
         it "accepts a Pathname" do
           output_path = Pathname(random_path)
           subject.write(output_path)
@@ -267,10 +281,30 @@ require "stringio"
       describe "#mime_type" do
         it "returns the correct mime type" do
           jpg = described_class.new(image_path(:jpg))
-          gif = described_class.new(image_path(:gif))
-
           expect(jpg.mime_type).to eq 'image/jpeg'
-          expect(gif.mime_type).to eq 'image/gif'
+        end
+      end
+
+      describe "#layers" do
+        it "returns a list of images" do
+          expect(subject.layers).to all(be_a(MiniMagick::Image))
+          expect(subject.layers.first).to be_valid
+        end
+
+        it "returns multiple images for GIFs, PDFs and PSDs" do
+          gif = described_class.new(image_path(:gif))
+          pdf = described_class.new(image_path(:pdf))
+          psd = described_class.new(image_path(:psd))
+
+          expect(gif.frames.count).to be > 1
+          expect(pdf.pages.count).to  be > 1
+          expect(psd.layers.count).to be > 1 unless MiniMagick.graphicsmagick?
+        end
+
+        it "returns one image for other formats" do
+          jpg = described_class.new(image_path(:jpg))
+
+          expect(jpg.layers.count).to eq 1
         end
       end
 
