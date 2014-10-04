@@ -220,6 +220,9 @@ end
 # executes `mogrify -resize 100x100 +antialias image.jpg`
 ```
 
+I would highly recommend this if you want to maximize performance of your image
+processing.
+
 See [MiniMagick::Tool](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Tool).
 
 ## Thinking of switching from RMagick?
