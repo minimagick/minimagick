@@ -208,10 +208,19 @@ end
 In this mode every command that gets executed in the shell will be written
 to stdout.
 
-### Switching CLIs
+### Switching CLIs (ImageMagick \<=\> GraphicsMagick)
 
-If you're a real ImageMagick guru, you might want to use GraphicsMagick for
-certain processing blocks (because it's more efficient), or vice versa. You
+Default CLI is ImageMagick, but if you want to use GraphicsMagick, you can
+specify it in configuration:
+
+```rb
+MiniMagick.configure do |config|
+  config.cli = :graphicsmagick
+end
+```
+
+If you're a real ImageMagick guru, you might want to use GraphicsMagick only
+for certain processing blocks (because it's more efficient), or vice versa. You
 can acomplish this with `.with_cli`:
 
 ```ruby
