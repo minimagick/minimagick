@@ -7,10 +7,10 @@ module MiniMagick
   end
 
   module VERSION
-    MAJOR = 3
-    MINOR = 8
-    TINY  = 1
-    PRE   = nil
+    MAJOR = 4
+    MINOR = 0
+    TINY  = 0
+    PRE   = "rc"
 
     STRING = [MAJOR, MINOR, TINY, PRE].compact.join('.')
   end
