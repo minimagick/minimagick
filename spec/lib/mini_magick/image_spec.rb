@@ -293,11 +293,9 @@ require "stringio"
 
         it "returns multiple images for GIFs, PDFs and PSDs" do
           gif = described_class.new(image_path(:gif))
-          pdf = described_class.new(image_path(:pdf))
           psd = described_class.new(image_path(:psd))
 
           expect(gif.frames.count).to be > 1
-          expect(pdf.pages.count).to  be > 1
           expect(psd.layers.count).to be > 1 unless MiniMagick.graphicsmagick?
         end
 

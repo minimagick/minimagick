@@ -159,6 +159,20 @@ end
 result.write "output.jpg"
 ```
 
+### Layers/Frames/Pages
+
+For multilayered images you can access its layers.
+
+```rb
+gif.frames #=> [...]
+pdf.pages  #=> [...]
+psd.layers #=> [...]
+
+gif.frames.each_with_index do |frame, idx|
+  frame.write("frame#{idx}.jpg")
+end
+```
+
 ### Image validation
 
 By default, MiniMagick validates images each time it's opening then. It
