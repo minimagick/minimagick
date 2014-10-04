@@ -199,13 +199,6 @@ require "stringio"
           expect(described_class.new(output_path)).to be_valid
         end
 
-        it "changes format" do
-          output_path = random_path(["", ".png"])
-          subject = described_class.new(image_path(:jpg))
-          subject.write(output_path)
-          expect(described_class.new(output_path).type).to eq "PNG"
-        end
-
         it "accepts a Pathname" do
           output_path = Pathname(random_path)
           subject.write(output_path)

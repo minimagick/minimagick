@@ -369,9 +369,13 @@ module MiniMagick
     def write(output_to)
       case output_to
       when String, Pathname
-        MiniMagick::Tool::Convert.new do |builder|
-          builder << path
-          builder << output_to
+        if layer?
+          MiniMagick::Tool::Convert.new do |builder|
+            builder << path
+            builder << output_to
+          end
+        else
+          FileUtils.cp path, output_to
         end
       else
         IO.copy_stream File.open(path, "rb"), output_to
@@ -467,6 +471,10 @@ module MiniMagick
       end
 
       self
+    end
+
+    def layer?
+      path =~ /\[\d+\]$/
     end
 
   end
