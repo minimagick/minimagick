@@ -5,6 +5,7 @@ require 'uri'
 require 'open-uri'
 
 require 'mini_magick/image/info'
+require 'mini_magick/utilities'
 
 module MiniMagick
   class Image
@@ -106,10 +107,7 @@ module MiniMagick
     # @return [MiniMagick::Image] The created image
     #
     def self.create(ext = nil, validate = MiniMagick.validate_on_create, &block)
-      tempfile = Tempfile.new(['mini_magick', ext.to_s.downcase])
-      tempfile.binmode
-      yield tempfile
-      tempfile.close
+      tempfile = MiniMagick::Utilities.tempfile(ext.to_s.downcase, &block)
 
       new(tempfile.path, tempfile).tap do |image|
         image.validate! if validate
@@ -300,7 +298,7 @@ module MiniMagick
       @info.clear
 
       if @tempfile
-        new_tempfile = Tempfile.new(["mini_magick", ".#{format}"])
+        new_tempfile = MiniMagick::Utilities.tempfile(format)
         new_path = new_tempfile.path
       else
         new_path = path.sub(/\.\w+$/, ".#{format}")
@@ -315,7 +313,6 @@ module MiniMagick
       if @tempfile
         @tempfile.unlink
         @tempfile = new_tempfile
-        @tempfile.close
       else
         File.delete(path) unless path == new_path
       end
@@ -341,7 +338,6 @@ module MiniMagick
     # @return [self]
     #
     def combine_options(&block)
-      @info.clear
       mogrify(&block)
     end
 
@@ -353,7 +349,6 @@ module MiniMagick
     # @return [self]
     #
     def method_missing(name, *args)
-      @info.clear
       mogrify do |builder|
         if builder.respond_to?(name)
           builder.send(name, *args)
@@ -396,22 +391,17 @@ module MiniMagick
     # @see http://www.imagemagick.org/script/composite.php
     #
     def composite(other_image, output_extension = 'jpg', mask = nil)
-      begin
-        second_tempfile = Tempfile.new(["magick", ".#{output_extension}"])
-        second_tempfile.binmode
-      ensure
-        second_tempfile.close
-      end
+      output_tempfile = MiniMagick::Utilities.tempfile(output_extension)
 
       MiniMagick::Tool::Composite.new do |composite|
         yield composite if block_given?
         composite << other_image.path
         composite << path
         composite << mask.path if mask
-        composite << second_tempfile.path
+        composite << output_tempfile.path
       end
 
-      Image.new(second_tempfile.path, second_tempfile)
+      Image.new(output_tempfile.path, output_tempfile)
     end
 
     ##
@@ -422,7 +412,6 @@ module MiniMagick
     # @return [self]
     #
     def collapse!(frame = 0)
-      @info.clear
       mogrify(frame) { |builder| builder.quality(100) }
     end
 
@@ -464,15 +453,19 @@ module MiniMagick
     private
 
     def mogrify(page = nil)
+      @info.clear
+
       MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do
           def format(*)
-            fail NoMethodError, "You must call #format on a MiniMagick::Image directly"
+            fail NoMethodError,
+              "you must call #format on a MiniMagick::Image directly"
           end
         end
         yield builder if block_given?
         builder << (page ? "#{path}[#{page}]" : path)
       end
+
       self
     end
 
