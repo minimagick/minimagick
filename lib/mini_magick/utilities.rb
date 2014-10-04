@@ -24,7 +24,7 @@ module MiniMagick
     end
 
     def tempfile(extension)
-      Tempfile.new(["mini_magick", ".#{extension}"]).tap do |tempfile|
+      Tempfile.new(["mini_magick", extension]).tap do |tempfile|
         tempfile.binmode
         yield tempfile if block_given?
         tempfile.close

@@ -27,7 +27,8 @@ module Helpers
   end
 
   def random_path(basename = "")
-    Tempfile.open(basename).path
+    @tempfile = Tempfile.open(basename)
+    @tempfile.path
   end
 end
 

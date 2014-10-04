@@ -298,7 +298,7 @@ module MiniMagick
       @info.clear
 
       if @tempfile
-        new_tempfile = MiniMagick::Utilities.tempfile(format)
+        new_tempfile = MiniMagick::Utilities.tempfile(".#{format}")
         new_path = new_tempfile.path
       else
         new_path = path.sub(/\.\w+$/, ".#{format}")
@@ -375,7 +375,7 @@ module MiniMagick
             builder << output_to
           end
         else
-          FileUtils.cp path, output_to
+          FileUtils.copy_file path, output_to
         end
       else
         IO.copy_stream File.open(path, "rb"), output_to
@@ -395,7 +395,7 @@ module MiniMagick
     # @see http://www.imagemagick.org/script/composite.php
     #
     def composite(other_image, output_extension = 'jpg', mask = nil)
-      output_tempfile = MiniMagick::Utilities.tempfile(output_extension)
+      output_tempfile = MiniMagick::Utilities.tempfile(".#{output_extension}")
 
       MiniMagick::Tool::Composite.new do |composite|
         yield composite if block_given?
