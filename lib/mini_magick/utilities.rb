@@ -1,3 +1,4 @@
+require "mini_magick/utilities/array_methods"
 require "tempfile"
 
 module MiniMagick
@@ -29,6 +30,13 @@ module MiniMagick
         yield tempfile if block_given?
         tempfile.close
       end
+    end
+
+    ##
+    # Returns a module that provides array methods
+    #
+    def array_methods(delegate_to)
+      MiniMagick::Utilities::ArrayMethods.new(delegate_to)
     end
 
   end

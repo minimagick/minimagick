@@ -295,7 +295,7 @@ module MiniMagick
     # @return [self]
     #
     def format(format, page = 0)
-      @info.clear
+      clear_info
 
       if @tempfile
         new_tempfile = MiniMagick::Utilities.tempfile(format)
@@ -450,10 +450,15 @@ module MiniMagick
       end
     end
 
+    # @private
+    def clear_info
+      @info.clear
+    end
+
     private
 
     def mogrify(page = nil)
-      @info.clear
+      clear_info
 
       MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do

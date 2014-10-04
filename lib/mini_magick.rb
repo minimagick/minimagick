@@ -1,6 +1,7 @@
 require 'mini_magick/configuration'
 require 'mini_magick/tool'
 require 'mini_magick/image'
+require 'mini_magick/image_list'
 
 module MiniMagick
 
