@@ -1,5 +1,8 @@
 # MiniMagick
 
+[![Build Status](https://travis-ci.org/minimagick/minimagick.svg?branch=master)](http://travis-ci.org/minimagick/minimagick)
+[![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
+
 A ruby wrapper for [ImageMagick](http://imagemagick.org/) or
 [GraphicsMagick](http://www.graphicsmagick.org/) command line.
 
@@ -45,9 +48,6 @@ MiniMagick has been tested on following Rubies:
 
 The latest version (4.0.0) doesn't work on JRuby (because of a bug in JRuby),
 so if you need JRuby support, use the 3.x versions.
-
-[![Build Status](https://travis-ci.org/minimagick/minimagick.svg?branch=master)](http://travis-ci.org/minimagick/minimagick)
-[![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
 
 ## Installation
 
