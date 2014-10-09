@@ -6,6 +6,12 @@
 A ruby wrapper for [ImageMagick](http://imagemagick.org/) or
 [GraphicsMagick](http://www.graphicsmagick.org/) command line.
 
+**NOTE**: This readme reflects the latest version – `4.0.0.rc`.
+
+```rb
+gem "mini_magick", "~> 4.0.0.rc"
+```
+
 ## Why?
 
 I was using [RMagick](https://github.com/rmagick/rmagick) and loving it, but it
