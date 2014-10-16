@@ -158,23 +158,20 @@ module MiniMagick
     #
     # @private
     #
-    class OptionMethods < Module
+    class OptionMethods < Module # think about it for a minute
 
       def self.instances
         @instances ||= []
       end
 
-      def self.new(*args, &block)
-        super.tap do |instance|
-          self.instances << instance
-        end
+      def initialize(tool_name)
+        @tool_name = tool_name
+        reload_methods
+        self.class.instances << self
       end
 
-      def initialize(tool_name)
-        super() do
-          @tool_name = tool_name
-          reload_methods
-        end
+      def to_s
+        "OptionMethods(#{@tool_name})"
       end
 
       ##
@@ -182,14 +179,11 @@ module MiniMagick
       #
       def reload_methods
         instance_methods(false).each { |method| undef_method(method) }
-
-        self.creation_operator *%w[xc canvas logo rose gradient radial-gradient
-                                   plasma tile pattern label caption text]
-
-        help = MiniMagick::Tool.new(@tool_name, false) { |b| b << "-help" }
-        cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
-        self.option *cli_options
+        creation_operator *creation_operators
+        option *cli_options
       end
+
+      private
 
       ##
       # Creates method based on command-line option's name.
@@ -203,9 +197,9 @@ module MiniMagick
       def option(*options)
         options.each do |option|
           define_method(option[1..-1].gsub('-', '_')) do |value = nil|
-          self << option
-          self << value.to_s if value
-          self
+            self << option
+            self << value.to_s if value
+            self
           end
         end
       end
@@ -226,8 +220,14 @@ module MiniMagick
         end
       end
 
-      def to_s
-        "OptionMethods(#{@tool_name})"
+      def creation_operators
+        %w[xc canvas logo rose gradient radial-gradient
+           plasma tile pattern label caption text]
+      end
+
+      def cli_options
+        help = MiniMagick::Tool.new(@tool_name, false) { |b| b << "-help" }
+        cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
       end
 
     end
