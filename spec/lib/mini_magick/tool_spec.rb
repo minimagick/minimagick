@@ -55,9 +55,10 @@ RSpec.describe MiniMagick::Tool do
 
   describe "#+" do
     it "switches the last option to + form" do
+      subject.help
       subject.help.+
       subject.debug.+ 8
-      expect(subject.args).to eq %W[+help +debug 8]
+      expect(subject.args).to eq %W[-help +help +debug 8]
     end
   end
 
