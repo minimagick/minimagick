@@ -140,7 +140,7 @@ module MiniMagick
     # @return [self]
     #
     def +(value = nil)
-      args.last.sub!(/^-/, '+')
+      args[-1] = args[-1].sub(/^-/, '+')
       args << value.to_s if value
       self
     end
