@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Identify < MiniMagick::Tool
 
-      def initialize
-        super("identify")
+      def initialize(*args)
+        super("identify", *args)
       end
 
     end

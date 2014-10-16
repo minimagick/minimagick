@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Conjure < MiniMagick::Tool
 
-      def initialize
-        super("conjure")
+      def initialize(*args)
+        super("conjure", *args)
       end
 
     end

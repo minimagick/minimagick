@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Animate < MiniMagick::Tool
 
-      def initialize
-        super("animate")
+      def initialize(*args)
+        super("animate", *args)
       end
 
     end

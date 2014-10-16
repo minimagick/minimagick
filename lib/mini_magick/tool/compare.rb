@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Compare < MiniMagick::Tool
 
-      def initialize
-        super("compare")
+      def initialize(*args)
+        super("compare", *args)
       end
 
     end

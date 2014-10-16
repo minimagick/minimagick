@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Stream < MiniMagick::Tool
 
-      def initialize
-        super("stream")
+      def initialize(*args)
+        super("stream", *args)
       end
 
     end

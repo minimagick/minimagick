@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Display < MiniMagick::Tool
 
-      def initialize
-        super("display")
+      def initialize(*args)
+        super("display", *args)
       end
 
     end

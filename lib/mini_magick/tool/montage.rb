@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Montage < MiniMagick::Tool
 
-      def initialize
-        super("montage")
+      def initialize(*args)
+        super("montage", *args)
       end
 
     end

@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Convert < MiniMagick::Tool
 
-      def initialize
-        super("convert")
+      def initialize(*args)
+        super("convert", *args)
       end
 
     end

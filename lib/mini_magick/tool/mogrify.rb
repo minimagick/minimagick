@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Mogrify < MiniMagick::Tool
 
-      def initialize
-        super("mogrify")
+      def initialize(*args)
+        super("mogrify", *args)
       end
 
     end

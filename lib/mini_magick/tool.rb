@@ -59,9 +59,12 @@ module MiniMagick
     # @private
     attr_reader :name, :args
 
-    def initialize(name)
-      @name = name
-      @args = []
+    # @param whiny [Boolean] Whether to raise errors on exit codes different
+    #   than 0.
+    def initialize(name, whiny = true)
+      @name  = name
+      @whiny = whiny
+      @args  = []
     end
 
     ##
@@ -80,7 +83,7 @@ module MiniMagick
     #
     # @return [String] Output of the command
     #
-    def call(whiny = true)
+    def call(whiny = @whiny)
       shell = MiniMagick::Shell.new(whiny)
       shell.run(command).strip
     end
@@ -183,7 +186,7 @@ module MiniMagick
         self.creation_operator *%w[xc canvas logo rose gradient radial-gradient
                                    plasma tile pattern label caption text]
 
-        help = (MiniMagick::Tool.new(@tool_name) << "-help").call(false)
+        help = MiniMagick::Tool.new(@tool_name, false) { |b| b << "-help" }
         cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
         self.option *cli_options
       end

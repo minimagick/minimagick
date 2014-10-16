@@ -88,4 +88,11 @@ RSpec.describe MiniMagick::Tool do
     expect(subject).not_to respond_to(:quiet)
     expect(subject).to respond_to(:ping)
   end
+
+  it "doesn't raise errors when false is passed to the constructor" do
+    subject.help
+    subject.call(false)
+
+    MiniMagick::Tool::Identify.new(false, &:help)
+  end
 end

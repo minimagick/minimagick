@@ -258,6 +258,21 @@ processing.
 
 See [MiniMagick::Tool](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Tool).
 
+## Troubleshooting
+
+### Errors being raised when they shouldn't
+
+This gem raises an error when ImageMagick returns a nonzero exit code.
+Sometimes, however, ImageMagick returns nonzero exit codes when the command
+actually went ok. In these cases, to avoid raising errors, you can pass `false`
+to `MiniMagick::Tool`'s constructor.
+
+```rb
+MiniMagick::Tool::Identify.new(false) do |b|
+  b.help
+end
+```
+
 ## Thinking of switching from RMagick?
 
 Unlike RMagick, MiniMagick is a much thinner wrapper around ImageMagick.

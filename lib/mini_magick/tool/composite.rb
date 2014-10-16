@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Composite < MiniMagick::Tool
 
-      def initialize
-        super("composite")
+      def initialize(*args)
+        super("composite", *args)
       end
 
     end

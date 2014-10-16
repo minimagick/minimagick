@@ -5,8 +5,8 @@ module MiniMagick
     #
     class Import < MiniMagick::Tool
 
-      def initialize
-        super("import")
+      def initialize(*args)
+        super("import", *args)
       end
 
     end
