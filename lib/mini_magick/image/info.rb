@@ -89,7 +89,10 @@ module MiniMagick
       end
 
       def raw(value)
-        identify { |b| b.format(value) }
+        key = "raw:#{value}"
+        @info.fetch(key) do
+          @info[key] = identify { |b| b.format(value) }
+        end
       end
 
       def identify
