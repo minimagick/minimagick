@@ -48,8 +48,16 @@ RSpec.describe MiniMagick::Tool do
 
   describe "#<<" do
     it "adds argument to the args list" do
-      subject << "foo" << "bar"
-      expect(subject.args).to eq %W[foo bar]
+      subject << "foo" << "bar" << 123
+      expect(subject.args).to eq %W[foo bar 123]
+    end
+  end
+
+  describe "#merge!" do
+    it "adds arguments to the args list" do
+      subject << "pre-existing"
+      subject.merge! ["foo", 123]
+      expect(subject.args).to eq %W[pre-existing foo 123]
     end
   end
 
@@ -57,8 +65,9 @@ RSpec.describe MiniMagick::Tool do
     it "switches the last option to + form" do
       subject.help
       subject.help.+
-      subject.debug.+ 8
-      expect(subject.args).to eq %W[-help +help +debug 8]
+      subject.debug.+ "foo"
+      subject.debug.+ 8, "bar"
+      expect(subject.args).to eq %W[-help +help +debug foo +debug 8 bar]
     end
   end
 

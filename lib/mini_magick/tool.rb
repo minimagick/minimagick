@@ -132,6 +132,16 @@ module MiniMagick
     end
 
     ##
+    # Merges a list of raw options.
+    #
+    # @return [self]
+    #
+    def merge!(new_args)
+      new_args.each { |arg| self << arg }
+      self
+    end
+
+    ##
     # Changes the last operator to its "plus" form.
     #
     # @example
@@ -142,9 +152,9 @@ module MiniMagick
     #
     # @return [self]
     #
-    def +(value = nil)
+    def +(*values)
       args[-1] = args[-1].sub(/^-/, '+')
-      args << value.to_s if value
+      self.merge!(values)
       self
     end
 
@@ -196,9 +206,9 @@ module MiniMagick
       #
       def option(*options)
         options.each do |option|
-          define_method(option[1..-1].gsub('-', '_')) do |value = nil|
+          define_method(option[1..-1].gsub('-', '_')) do |*values|
             self << option
-            self << value.to_s if value
+            self.merge!(values)
             self
           end
         end
