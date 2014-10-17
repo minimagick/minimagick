@@ -33,7 +33,7 @@ module MiniMagick
       stdout, stderr, status =
         MiniMagick.logger.debug(command.join(" ")) do
           Timeout.timeout(MiniMagick.timeout) do
-            Open3.capture3(*command)
+            Open3.capture3(command.shelljoin)
           end
         end
 
