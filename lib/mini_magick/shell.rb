@@ -26,6 +26,8 @@ module MiniMagick
         fail MiniMagick::Error, stderr
       end if @whiny
 
+      $stderr.print(stderr)
+
       stdout
     end
 

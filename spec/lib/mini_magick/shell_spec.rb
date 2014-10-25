@@ -32,6 +32,12 @@ RSpec.describe MiniMagick::Shell do
       allow(subject).to receive(:execute).and_return(["stdout", "", 127])
       expect(subject.run(%W[foo])).to eq "stdout"
     end
+
+    it "prints to stderr output to $stderr in non-whiny mode" do
+      subject = described_class.new(false)
+      allow(subject).to receive(:execute).and_return(["", "stderr", 1])
+      expect { subject.run(%W[foo]) }.to output("stderr").to_stderr
+    end
   end
 
   describe "#execute" do
