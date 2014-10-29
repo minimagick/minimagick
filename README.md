@@ -185,7 +185,7 @@ end
 
 ### Image validation
 
-By default, MiniMagick validates images each time it's opening then. It
+By default, MiniMagick validates images each time it's opening them. It
 validates them by running `identify` on them, and see if ImageMagick finds
 them valid. This adds slight overhead to the whole processing. Sometimes it's
 safe to assume that all input and output images are valid by default and turn
