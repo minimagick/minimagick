@@ -193,8 +193,8 @@ off validation:
 
 ```ruby
 MiniMagick.configure do |config|
-  configure.validate_on_create = false
-  configure.validate_on_write = false
+  config.validate_on_create = false
+  config.validate_on_write = false
 end
 ```
 
