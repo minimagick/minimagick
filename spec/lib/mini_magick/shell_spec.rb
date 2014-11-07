@@ -47,7 +47,7 @@ RSpec.describe MiniMagick::Shell do
     end
 
     it "timeouts afer a period of time" do
-      allow(MiniMagick).to receive(:timeout).and_return(0.001)
+      allow(MiniMagick).to receive(:timeout).and_return(10 ** -6)
       expect { subject.execute(%W[identify -format %[EXIF:*] #{image_path(:exif)}]) }
         .to raise_error(Timeout::Error)
     end
