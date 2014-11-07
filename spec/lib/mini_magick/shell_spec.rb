@@ -46,12 +46,6 @@ RSpec.describe MiniMagick::Shell do
       expect(stdout).to match("GIF")
     end
 
-    it "timeouts afer a period of time" do
-      allow(MiniMagick).to receive(:timeout).and_return(10 ** -6)
-      expect { subject.execute(%W[identify -format %[EXIF:*] #{image_path(:exif)}]) }
-        .to raise_error(Timeout::Error)
-    end
-
     it "logs the command and execution time in debug mode" do
       allow(MiniMagick).to receive(:debug).and_return(true)
       expect { subject.execute(%W[identify #{image_path(:gif)}]) }.
