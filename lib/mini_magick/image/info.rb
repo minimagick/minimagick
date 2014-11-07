@@ -10,7 +10,7 @@ module MiniMagick
 
       def [](value, *args)
         case value
-        when "format", "width", "height", "dimensions", "size"
+        when "format", "width", "height", "dimensions", "size", "signature"
           cheap_info(value)
         when "colorspace"
           colorspace
@@ -35,7 +35,7 @@ module MiniMagick
 
       def cheap_info(value)
         @info.fetch(value) do
-          format, width, height, size = self["%m %w %h %b"].split(" ")
+          format, width, height, size, signature = self["%m %w %h %b %#"].split(" ")
 
           @info.update(
             "format"     => format,
@@ -43,6 +43,7 @@ module MiniMagick
             "height"     => Integer(height),
             "dimensions" => [Integer(width), Integer(height)],
             "size"       => size.to_i,
+            "signature"  => signature,
           )
 
           @info.fetch(value)

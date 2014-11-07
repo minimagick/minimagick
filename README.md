@@ -144,6 +144,7 @@ image.size        #=> 3451 (in bytes)
 image.colorspace  #=> "DirectClass sRGB"
 image.exif        #=> {"DateTimeOriginal" => "2013:09:04 08:03:39", ...}
 image.resolution  #=> [75, 75]
+image.signature   #=> "60a7848c4ca6e36b8e2c5dea632ecdc29e9637791d2c59ebf7a54c0c6a74ef7e"
 ```
 
 If you need more control, and want to access [raw image

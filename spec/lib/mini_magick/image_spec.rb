@@ -225,6 +225,7 @@ require "stringio"
           expect(subject[:dimensions]).to all(be_a(Fixnum))
           expect(subject[:colorspace]).to be_a(String)
           expect(subject[:format]).to match(/[A-Z]/)
+          expect(subject[:signature]).to match(/[[:alnum:]]{64}/)
         end
 
         it "supports string keys" do
@@ -233,6 +234,7 @@ require "stringio"
           expect(subject["dimensions"]).to all(be_a(Fixnum))
           expect(subject["colorspace"]).to be_a(String)
           expect(subject["format"]).to match(/[A-Z]/)
+          expect(subject['signature']).to match(/[[:alnum:]]{64}/)
         end
 
         it "reads exif" do
@@ -254,6 +256,7 @@ require "stringio"
         expect(subject.size).to be_a(Fixnum).and be_nonzero
         expect(subject.colorspace).to be_a(String)
         expect(subject.resolution).to all(be_a(Fixnum))
+        expect(subject.signature).to match(/[[:alnum:]]{64}/)
       end
 
       describe "#exif" do
