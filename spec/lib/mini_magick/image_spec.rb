@@ -299,19 +299,31 @@ require "stringio"
         end
       end
 
-      describe "#method_missing" do
-        it "executes the command correctly" do
-          expect { subject.resize '20x30!' }
-            .to change { subject.dimensions }.to [20, 30]
+      describe "missing methods" do
+        context "for a known method" do
+          it "is executed by #method_missing" do
+            expect { subject.resize '20x30!' }
+              .to change { subject.dimensions }.to [20, 30]
+          end
+
+          it "returns self" do
+            expect(subject.resize('20x30!')).to eq subject
+          end
+
+          it "can be responed to" do
+            expect(subject.respond_to?(:resize)).to eq true
+          end
         end
 
-        it "fails with a correct NoMethodError" do
-          expect { subject.foo }
-            .to raise_error(NoMethodError, /MiniMagick::Image/)
-        end
+        context "for an unknown method" do
+          it "fails with a NoMethodError" do
+            expect { subject.foo }
+              .to raise_error(NoMethodError, /MiniMagick::Image/)
+          end
 
-        it "returns self" do
-          expect(subject.resize('20x30!')).to eq subject
+          it "cannot be responded to" do
+            expect(subject.respond_to?(:foo)).to eq false
+          end
         end
       end
 

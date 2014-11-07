@@ -358,6 +358,10 @@ module MiniMagick
       end
     end
 
+    def respond_to_missing?(method_name, include_private = false)
+      MiniMagick::Tool::Mogrify.new.respond_to?(method_name, include_private)
+    end
+
     ##
     # Writes the temporary file out to either a file location (by passing in a
     # String) or by passing in a Stream that you can #write(chunk) to
