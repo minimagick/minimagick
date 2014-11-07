@@ -119,6 +119,17 @@ image.combine_options do |b|
 end # the command gets executed
 ```
 
+As a handy shortcut, `MiniMagick::Image.new` also accepts an optional block
+which is used to `combine_options`.
+
+```ruby
+image = MiniMagick::Image.new("input.jpg") do |b|
+  b.resize "250x200>"
+  b.rotate "-90"
+  b.flip
+end # the command gets executed
+```
+
 ### Attributes
 
 A `MiniMagick::Image` has various handy attributes.
