@@ -149,6 +149,16 @@ module MiniMagick
       combine_options(&block) if block
     end
 
+    def eql?(other)
+      self.class.equal?(other.class) &&
+        signature == other.signature
+    end
+    alias == eql?
+
+    def hash
+      signature.hash
+    end
+
     ##
     # Returns raw image data.
     #
