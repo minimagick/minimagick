@@ -18,6 +18,8 @@ module MiniMagick
           mime_type
         when "resolution"
           resolution(*args)
+        when "signature"
+          signature
         when /^EXIF\:/i
           raw_exif(value)
         when "exif"
@@ -92,6 +94,12 @@ module MiniMagick
         key = "raw:#{value}"
         @info.fetch(key) do
           @info[key] = identify { |b| b.format(value) }
+        end
+      end
+
+      def signature
+        @info.fetch("signature") do
+          @info["signature"] = self["%#"]
         end
       end
 

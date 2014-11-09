@@ -119,6 +119,35 @@ require "stringio"
         end
       end
 
+      describe "equivalence" do
+        subject(:image) { described_class.new(image_path) }
+        let(:same_image) { described_class.new(image_path) }
+        let(:other_image) { described_class.new(image_path(:exif)) }
+
+        it "is #== and #eql? to itself" do
+          expect(image).to eq(image)
+          expect(image).to eql(image)
+        end
+
+        it "is #== and #eql? to an instance of the same image" do
+          expect(image).to eq(same_image)
+          expect(image).to eql(same_image)
+        end
+
+        it "is not #== nor #eql? to an instance of a different image" do
+          expect(image).not_to eq(other_image)
+          expect(image).not_to eql(other_image)
+        end
+
+        it "generates the same hash code for an instance of the same image" do
+          expect(image.hash).to eq(same_image.hash)
+        end
+
+        it "generates different same hash codes for a different image" do
+          expect(image.hash).not_to eq(other_image.hash)
+        end
+      end
+
       describe "#format" do
         subject { described_class.open(image_path(:jpg)) }
 
@@ -225,6 +254,7 @@ require "stringio"
           expect(subject[:dimensions]).to all(be_a(Fixnum))
           expect(subject[:colorspace]).to be_a(String)
           expect(subject[:format]).to match(/[A-Z]/)
+          expect(subject[:signature]).to match(/[[:alnum:]]{64}/)
         end
 
         it "supports string keys" do
@@ -233,6 +263,7 @@ require "stringio"
           expect(subject["dimensions"]).to all(be_a(Fixnum))
           expect(subject["colorspace"]).to be_a(String)
           expect(subject["format"]).to match(/[A-Z]/)
+          expect(subject['signature']).to match(/[[:alnum:]]{64}/)
         end
 
         it "reads exif" do
@@ -254,6 +285,7 @@ require "stringio"
         expect(subject.size).to be_a(Fixnum).and be_nonzero
         expect(subject.colorspace).to be_a(String)
         expect(subject.resolution).to all(be_a(Fixnum))
+        expect(subject.signature).to match(/[[:alnum:]]{64}/)
       end
 
       describe "#exif" do

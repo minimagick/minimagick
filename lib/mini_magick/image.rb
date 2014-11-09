@@ -149,6 +149,16 @@ module MiniMagick
       combine_options(&block) if block
     end
 
+    def eql?(other)
+      self.class.equal?(other.class) &&
+        signature == other.signature
+    end
+    alias == eql?
+
+    def hash
+      signature.hash
+    end
+
     ##
     # Returns raw image data.
     #
@@ -232,6 +242,18 @@ module MiniMagick
     # @return [Array<Integer>]
     #
     attribute :resolution
+    ##
+    # Returns the message digest of this image as a SHA-256, hexidecimal
+    # encoded string. This signature uniquely identifies the image and is
+    # convenient for determining if an image has been modified or whether two
+    # images are identical.
+    #
+    # @example
+    #   image.signature #=> "60a7848c4ca6e36b8e2c5dea632ecdc29e9637791d2c59ebf7a54c0c6a74ef7e"
+    # @see http://www.imagemagick.org/api/signature.php
+    # @return [String]
+    #
+    attribute :signature
 
     ##
     # Use this method if you want to access raw Identify's format API.
