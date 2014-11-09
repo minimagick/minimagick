@@ -10,7 +10,7 @@ module MiniMagick
 
       def [](value, *args)
         case value
-        when "format", "width", "height", "dimensions", "size", "signature"
+        when "format", "width", "height", "dimensions", "size"
           cheap_info(value)
         when "colorspace"
           colorspace
@@ -18,6 +18,8 @@ module MiniMagick
           mime_type
         when "resolution"
           resolution(*args)
+        when "signature"
+          signature
         when /^EXIF\:/i
           raw_exif(value)
         when "exif"
@@ -35,7 +37,7 @@ module MiniMagick
 
       def cheap_info(value)
         @info.fetch(value) do
-          format, width, height, size, signature = self["%m %w %h %b %#"].split(" ")
+          format, width, height, size = self["%m %w %h %b"].split(" ")
 
           @info.update(
             "format"     => format,
@@ -43,7 +45,6 @@ module MiniMagick
             "height"     => Integer(height),
             "dimensions" => [Integer(width), Integer(height)],
             "size"       => size.to_i,
-            "signature"  => signature,
           )
 
           @info.fetch(value)
@@ -93,6 +94,12 @@ module MiniMagick
         key = "raw:#{value}"
         @info.fetch(key) do
           @info[key] = identify { |b| b.format(value) }
+        end
+      end
+
+      def signature
+        @info.fetch("signature") do
+          @info["signature"] = self["%#"]
         end
       end
 
