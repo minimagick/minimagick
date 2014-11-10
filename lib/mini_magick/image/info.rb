@@ -2,6 +2,7 @@ module MiniMagick
   class Image
     # @private
     class Info
+      ASCII_ENCODED_EXIF_KEYS = %w[ExifVersion FlashPixVersion]
 
       def initialize(path)
         @path = path
@@ -78,11 +79,11 @@ module MiniMagick
           output = self["%[EXIF:*]"]
           pairs = output.gsub(/^exif:/, "").split("\n").map { |line| line.split("=") }
           exif = Hash[pairs].tap do |hash|
-            hash.each do |key, value|
-              if value.include?(",")
-                # Sometimes exif comes in a comma-separated list of character values
-                hash[key] = value.scan(/\d+/).map(&:to_i).map(&:chr).join
-              end
+            ASCII_ENCODED_EXIF_KEYS.each do |key|
+              next unless hash.has_key?(key)
+
+              value = hash[key]
+              hash[key] = decode_comma_separated_ascii_characters(value)
             end
           end
 
@@ -108,6 +109,12 @@ module MiniMagick
           yield builder if block_given?
           builder << "#{@path}[0]"
         end
+      end
+
+      def decode_comma_separated_ascii_characters(encoded_value)
+        return encoded_value unless encoded_value.include?(',')
+
+        encoded_value.scan(/\d+/).map(&:to_i).map(&:chr).join
       end
 
     end
