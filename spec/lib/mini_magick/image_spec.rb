@@ -268,7 +268,12 @@ require "stringio"
 
         it "reads exif" do
           subject = described_class.new(image_path(:exif))
+          gps_latitude = subject.exif["GPSLatitude"].split(/\s*,\s*/)
+          gps_longitude = subject.exif["GPSLongitude"].split(/\s*,\s*/)
+
           expect(subject["EXIF:ColorSpace"]).to eq "1"
+          expect(gps_latitude.size).to eq 3
+          expect(gps_longitude.size).to eq 3
         end
 
         it "passes unknown values directly to -format" do
@@ -293,6 +298,10 @@ require "stringio"
 
         it "returns a hash of EXIF data" do
           expect(subject.exif["DateTimeOriginal"]).to be_a(String)
+        end
+
+        it "decodes the ExifVersion" do
+          expect(subject.exif["ExifVersion"]).to eq("0221")
         end
       end
 
