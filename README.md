@@ -6,12 +6,6 @@
 A ruby wrapper for [ImageMagick](http://imagemagick.org/) or
 [GraphicsMagick](http://www.graphicsmagick.org/) command line.
 
-**NOTE**: This readme reflects the latest version – `4.0.0.rc`.
-
-```rb
-gem "mini_magick", "~> 4.0.0.rc"
-```
-
 ## Why?
 
 I was using [RMagick](https://github.com/rmagick/rmagick) and loving it, but it
@@ -47,7 +41,7 @@ MiniMagick has been tested on following Rubies:
 * MRI 1.9.2
 * MRI 1.9.3
 * MRI 2.0.0
-* MRI 2.1.3
+* MRI 2.1.x
 * Rubinius
 
 ### JRuby
