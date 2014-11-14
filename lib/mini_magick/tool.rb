@@ -61,6 +61,10 @@ module MiniMagick
 
     # @param whiny [Boolean] Whether to raise errors on exit codes different
     #   than 0.
+    # @example
+    #   MiniMagick::Tool::Identify.new(false) do |identify|
+    #     identify.help # returns exit status 1, which would otherwise throw an error
+    #   end
     def initialize(name, whiny = true)
       @name  = name
       @whiny = whiny
