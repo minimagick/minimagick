@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/minimagick/minimagick'
 
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
-  s.test_files   = Dir['spec/**/*']
   s.require_paths = ['lib']
 
   s.add_development_dependency 'rake'
