@@ -121,7 +121,11 @@ module MiniMagick
     #
     def self.attribute(name, key = name.to_s)
       define_method(name) do |*args|
-        @info[key, *args]
+        if args.any? && MiniMagick::Tool::Mogrify.instance_methods.include?(name)
+          mogrify { |b| b.send(name, *args) }
+        else
+          @info[key, *args]
+        end
       end
     end
 

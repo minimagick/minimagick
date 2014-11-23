@@ -293,6 +293,16 @@ require "stringio"
         expect(subject.signature).to match(/[[:alnum:]]{64}/)
       end
 
+      it "changes colorspace when called with an argument" do
+        expect_any_instance_of(MiniMagick::Tool::Mogrify).to receive(:call)
+        subject.colorspace("Gray")
+      end
+
+      it "changes size when called with an argument" do
+        expect_any_instance_of(MiniMagick::Tool::Mogrify).to receive(:call)
+        subject.size("20x20")
+      end
+
       describe "#exif" do
         subject { described_class.new(image_path(:exif)) }
 
