@@ -1,3 +1,3 @@
 require 'mini_magick'
 
-MiniMagick.processor = :graphicsmagick
+MiniMagick.processor = :gm
