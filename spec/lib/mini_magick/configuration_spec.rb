@@ -28,7 +28,7 @@ RSpec.describe MiniMagick::Configuration do
 
     it "returns nil of #processor is nil" do
       allow(subject).to receive(:processor).and_return(nil)
-      expect(subject.cli).to eq nil
+      expect(subject.cli).to be_nil
     end
   end
 
@@ -53,7 +53,7 @@ RSpec.describe MiniMagick::Configuration do
     it "returns nil if neither ImageMagick nor GraphicsMagick are available" do
       allow(MiniMagick::Utilities).to receive(:which).with("mogrify").and_return(nil)
       allow(MiniMagick::Utilities).to receive(:which).with("gm").and_return(nil)
-      expect(subject.processor).to eq nil
+      expect(subject.processor).to be_nil
     end
   end
 

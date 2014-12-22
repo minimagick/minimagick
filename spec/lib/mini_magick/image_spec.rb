@@ -89,7 +89,7 @@ require "stringio"
 
         it "creates an image" do
           image = create
-          expect(File.exists?(image.path)).to eq true
+          expect(File.exists?(image.path)).to be_truthy
         end
 
         it "validates the image if validation is set" do
@@ -163,7 +163,7 @@ require "stringio"
 
         it "creates the file with new extension" do
           subject.format('png')
-          expect(File.exist?(subject.path)).to eq true
+          expect(File.exist?(subject.path)).to be_truthy
         end
 
         it "accepts a block of additional commands" do
@@ -183,12 +183,12 @@ require "stringio"
         it "deletes the previous tempfile" do
           old_path = subject.path.dup
           subject.format('png')
-          expect(File.exist?(old_path)).to eq false
+          expect(File.exist?(old_path)).to be_falsy
         end
 
         it "doesn't delete itself when formatted to the same format" do
           subject.format(subject.type.downcase)
-          expect(File.exists?(subject.path)).to eq true
+          expect(File.exists?(subject.path)).to be_truthy
         end
 
         it "reformats multi-image formats to multiple images" do
@@ -362,7 +362,7 @@ require "stringio"
           end
 
           it "can be responed to" do
-            expect(subject.respond_to?(:resize)).to eq true
+            expect(subject.respond_to?(:resize)).to be_truthy
           end
         end
 
@@ -373,7 +373,7 @@ require "stringio"
           end
 
           it "cannot be responded to" do
-            expect(subject.respond_to?(:foo)).to eq false
+            expect(subject.respond_to?(:foo)).to be_falsy
           end
         end
       end

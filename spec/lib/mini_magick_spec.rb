@@ -4,24 +4,24 @@ RSpec.describe MiniMagick do
   describe ".imagemagick?" do
     it "returns true if CLI is minimagick" do
       allow(described_class).to receive(:cli).and_return(:imagemagick)
-      expect(described_class.imagemagick?).to eq true
+      expect(described_class).to be_imagemagick
     end
 
     it "returns false if CLI isn't minimagick" do
       allow(described_class).to receive(:cli).and_return(:graphicsmagick)
-      expect(described_class.imagemagick?).to eq false
+      expect(described_class).not_to be_imagemagick
     end
   end
 
   describe ".graphicsmagick?" do
     it "returns true if CLI is graphicsmagick" do
       allow(described_class).to receive(:cli).and_return(:graphicsmagick)
-      expect(described_class.graphicsmagick?).to eq true
+      expect(described_class).to be_graphicsmagick
     end
 
     it "returns false if CLI isn't graphicsmagick" do
       allow(described_class).to receive(:cli).and_return(:imagemagick)
-      expect(described_class.graphicsmagick?).to eq false
+      expect(described_class).not_to be_graphicsmagick
     end
   end
 
