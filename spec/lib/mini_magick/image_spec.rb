@@ -233,6 +233,11 @@ require "stringio"
           subject.write(output_path)
           expect(described_class.new(output_path.to_s)).to be_valid
         end
+
+        it "works when writing to the same path" do
+          subject.write(subject.path)
+          expect(File.read(subject.path)).not_to be_empty
+        end
       end
 
       describe "#valid?" do

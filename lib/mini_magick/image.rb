@@ -405,7 +405,7 @@ module MiniMagick
             builder << output_to
           end
         else
-          FileUtils.copy_file path, output_to
+          FileUtils.copy_file path, output_to unless path == output_to.to_s
         end
       else
         IO.copy_stream File.open(path, "rb"), output_to
