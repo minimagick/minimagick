@@ -26,9 +26,9 @@ RSpec.describe MiniMagick::Configuration do
       expect(subject.cli).to eq :graphicsmagick
     end
 
-    it "returns nil of #processor is nil" do
+    it "raises an error if #processor could not be found" do
       allow(subject).to receive(:processor).and_return(nil)
-      expect(subject.cli).to eq nil
+      expect { subject.cli }.to raise_error(MiniMagick::Error)
     end
   end
 

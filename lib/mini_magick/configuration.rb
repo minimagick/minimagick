@@ -103,6 +103,8 @@ module MiniMagick
         case processor.to_s
         when "mogrify" then :imagemagick
         when "gm"      then :graphicsmagick
+        else
+          raise MiniMagick::Error, "ImageMagick/GraphicsMagick is not installed"
         end
     end
 
