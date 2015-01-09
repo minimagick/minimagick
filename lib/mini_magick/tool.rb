@@ -65,7 +65,7 @@ module MiniMagick
     #   MiniMagick::Tool::Identify.new(false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
-    def initialize(name, whiny = true)
+    def initialize(name, whiny = MiniMagick.whiny)
       @name  = name
       @whiny = whiny
       @args  = []

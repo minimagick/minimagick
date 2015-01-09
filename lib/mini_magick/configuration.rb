@@ -63,9 +63,18 @@ module MiniMagick
     #
     attr_accessor :validate_on_write
 
+    ##
+    # If set to `false`, it will not raise errors when ImageMagick returns
+    # status code different than 0. Defaults to `true`.
+    #
+    # @return [Boolean]
+    #
+    attr_accessor :whiny
+
     def self.extended(base)
       base.validate_on_create = true
       base.validate_on_write = true
+      base.whiny = true
     end
 
     ##

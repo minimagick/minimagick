@@ -270,8 +270,17 @@ See [MiniMagick::Tool](http://rubydoc.info/github/minimagick/minimagick/MiniMagi
 
 This gem raises an error when ImageMagick returns a nonzero exit code.
 Sometimes, however, ImageMagick returns nonzero exit codes when the command
-actually went ok. In these cases, to avoid raising errors, you can pass `false`
-to `MiniMagick::Tool`'s constructor.
+actually went ok. In these cases, to avoid raising errors, you can add the
+following configuration:
+
+```rb
+MiniMagick.configure do |config|
+  config.whiny = false
+end
+```
+
+If you're using the metal version, you can pass the `whiny` value to the
+constructor:
 
 ```rb
 MiniMagick::Tool::Identify.new(false) do |b|
