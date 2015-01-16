@@ -7,9 +7,10 @@ rvm:
   - 2.2
   - rbx
   - jruby
+  - ruby-head
 matrix:
   allow_failures:
-    - rvm: jruby
+    - rvm: ruby-head
 before_install:
   - sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev
   - sudo apt-get install -qq graphicsmagick
