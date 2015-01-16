@@ -40,7 +40,7 @@ module MiniMagick
         end
 
       [stdout, stderr, status.exitstatus]
-    rescue Errno::ENOENT
+    rescue Errno::ENOENT, IOError
       ["", "executable not found: \"#{command.first}\"", 127]
     end
 
