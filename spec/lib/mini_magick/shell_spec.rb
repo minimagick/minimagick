@@ -41,26 +41,39 @@ RSpec.describe MiniMagick::Shell do
   end
 
   describe "#execute" do
-    it "executes the command in the shell" do
-      stdout, * = subject.execute(%W[identify #{image_path(:gif)}])
-      expect(stdout).to match("GIF")
-    end
+    ["open3", "posix-spawn"].each do |shell_api|
+      context "with #{shell_api}", shell_api: shell_api do
+        it "executes the command in the shell" do
+          stdout, stderr, status = subject.execute(%W[identify #{image_path(:gif)}])
 
-    it "logs the command and execution time in debug mode" do
-      allow(MiniMagick).to receive(:debug).and_return(true)
-      expect { subject.execute(%W[identify #{image_path(:gif)}]) }.
-        to output(/\[\d+.\d+s\] identify #{image_path(:gif)}/).to_stdout
-    end
+          expect(stdout).to match("GIF")
+          expect(stderr).to eq ""
+          expect(status).to eq 0
 
-    it "returns an appropriate response when command wasn't found" do
-      stdout, stderr, code = subject.execute(%W[unexisting command])
-      expect(code).to eq 127
-      expect(stderr).to match(/not found/)
-    end
+          stdout, stderr, status = subject.execute(%W[identify foo])
 
-    it "doesn't break on spaces" do
-      stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
-      expect(stdout).to match(/\d+ \d+/)
+          expect(stdout).to eq ""
+          expect(stderr).to match("No such file or directory")
+          expect(status).to eq 1
+        end
+
+        it "returns an appropriate response when command wasn't found" do
+          stdout, stderr, code = subject.execute(%W[unexisting command])
+          expect(code).to eq 127
+          expect(stderr).to match(/not found/)
+        end
+
+        it "logs the command and execution time in debug mode" do
+          allow(MiniMagick).to receive(:debug).and_return(true)
+          expect { subject.execute(%W[identify #{image_path(:gif)}]) }.
+            to output(/\[\d+.\d+s\] identify #{image_path(:gif)}/).to_stdout
+        end
+
+        it "doesn't break on spaces" do
+          stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
+          expect(stdout).to match(/\d+ \d+/)
+        end
+      end
     end
   end
 end

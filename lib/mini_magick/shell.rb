@@ -1,6 +1,4 @@
 require "mini_magick/logger"
-
-require "open3"
 require "timeout"
 
 module MiniMagick
@@ -35,13 +33,28 @@ module MiniMagick
       stdout, stderr, status =
         MiniMagick.logger.debug(command.join(" ")) do
           Timeout.timeout(MiniMagick.timeout) do
-            Open3.capture3(*command)
+            send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", *command)
           end
         end
 
       [stdout, stderr, status.exitstatus]
     rescue Errno::ENOENT, IOError
       ["", "executable not found: \"#{command.first}\"", 127]
+    end
+
+    private
+
+    def execute_open3(*command)
+      require "open3"
+      Open3.capture3(*command)
+    end
+
+    def execute_posix_spawn(*command)
+      require "posix-spawn"
+      pid, stdin, stdout, stderr = POSIX::Spawn.popen4(*command)
+      Process.waitpid(pid)
+
+      [stdout.read, stderr.read, $?]
     end
 
   end

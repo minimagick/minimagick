@@ -11,11 +11,17 @@ RSpec.configure do |config|
   config.fail_fast = true unless ENV["CI"]
 
   [:imagemagick, :graphicsmagick].each do |cli|
-    config.around(cli: cli) do |example|
-      MiniMagick.with_cli(cli) { example.run }
+    config.before(cli: cli) do |example|
+      allow(MiniMagick).to receive(:cli).and_return(cli)
     end
     config.around(skip_cli: cli) do |example|
       example.run unless example.metadata[:cli] == cli
+    end
+  end
+
+  ["open3", "posix-spawn"].each do |shell_api|
+    config.before(shell_api: shell_api) do |example|
+      allow(MiniMagick).to receive(:shell_api).and_return(shell_api)
     end
   end
 end
