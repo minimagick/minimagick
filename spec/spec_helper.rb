@@ -25,3 +25,6 @@ RSpec.configure do |config|
     end
   end
 end
+
+SHELL_APIS = ["open3"]
+SHELL_APIS << "posix-spawn" unless RUBY_PLATFORM == "java"

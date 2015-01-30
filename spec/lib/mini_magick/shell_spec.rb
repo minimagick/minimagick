@@ -41,7 +41,7 @@ RSpec.describe MiniMagick::Shell do
   end
 
   describe "#execute" do
-    ["open3", "posix-spawn"].each do |shell_api|
+    SHELL_APIS.each do |shell_api|
       context "with #{shell_api}", shell_api: shell_api do
         it "executes the command in the shell" do
           stdout, stderr, status = subject.execute(%W[identify #{image_path(:gif)}])
@@ -53,14 +53,13 @@ RSpec.describe MiniMagick::Shell do
           stdout, stderr, status = subject.execute(%W[identify foo])
 
           expect(stdout).to eq ""
-          expect(stderr).to match("No such file or directory")
+          expect(stderr).to match("unable to open image `foo'")
           expect(status).to eq 1
         end
 
         it "returns an appropriate response when command wasn't found" do
           stdout, stderr, code = subject.execute(%W[unexisting command])
           expect(code).to eq 127
-          expect(stderr).to match(/not found/)
         end
 
         it "logs the command and execution time in debug mode" do
