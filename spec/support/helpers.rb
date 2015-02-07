@@ -11,6 +11,7 @@ module Helpers
         when :psd             then "image.psd"
         when :exif            then "exif.jpg"
         when :not             then "not_an_image.rb"
+        when :colon           then "with:colon.jpg"
         else
           fail "image #{type.inspect} doesn't exist"
         end
