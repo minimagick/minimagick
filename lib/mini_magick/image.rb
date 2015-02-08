@@ -80,10 +80,10 @@ module MiniMagick
     #
     def self.open(path_or_url, ext = nil)
       ext ||=
-        if path_or_url.to_s =~ URI.regexp
-          File.extname(URI(path_or_url).path)
-        else
+        if File.exist?(path_or_url)
           File.extname(path_or_url)
+        else
+          File.extname(URI(path_or_url).path)
         end
 
       Kernel.open(path_or_url, "rb") do |file|

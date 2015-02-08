@@ -78,6 +78,11 @@ require "stringio"
           expect { described_class.open(image_path(:not)) }
             .to raise_error(MiniMagick::Invalid)
         end
+
+        it "does not mistake a path with a colon for a URI schema" do
+          expect { described_class.open(image_path(:colon)) }
+            .not_to raise_error
+        end
       end
 
       describe ".create" do
