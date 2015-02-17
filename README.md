@@ -273,11 +273,13 @@ performance of your image processing. Here are some of the features.
 
 The most basic way of building a command is appending strings:
 
+```rb
 MiniMagick::Tool::Convert.new do |convert|
   convert << "input.jpg"
   convert.merge! ["-resize", "500x500", "-negate"]
   convert << "output.jpg"
 end
+```
 
 Note that it's important that everything that in the command-line you would
 with a space you pass here as a separate argument
