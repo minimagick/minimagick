@@ -162,6 +162,27 @@ module MiniMagick
       self
     end
 
+    ##
+    # Create an ImageMagick stack in the command (surround.
+    #
+    # @example
+    #   MiniMagick::Tool::Convert.new do |convert|
+    #     convert << "wand.gif"
+    #     convert.stack do |stack|
+    #       stack << "wand.gif"
+    #       stack.rotate(30)
+    #     end
+    #     convert.append.+
+    #     convert << "images.gif"
+    #   end
+    #   # executes `convert wand.gif \( wizard.gif -rotate 30 \) +append images.gif`
+    #
+    def stack
+      self << "("
+      yield self
+      self << ")"
+    end
+
     private
 
     ##

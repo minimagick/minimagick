@@ -71,6 +71,16 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
+  describe "#stack" do
+    it "it surrounds added arguments with parantheses" do
+      subject.stack do |stack|
+        stack << "foo"
+        stack << "bar"
+      end
+      expect(subject.args).to eq %W[( foo bar )]
+    end
+  end
+
   ["ImageMagick", "GraphicsMagick"].each do |cli|
     context "with #{cli}", cli: cli.downcase.to_sym do
       it "adds dynamically generated operator methods" do
