@@ -254,8 +254,7 @@ MiniMagick::Tool::Mogrify.new do |mogrify|
   mogrify.resize("100x100")
   mogrify.negate
   mogrify << "image.jpg"
-end
-#=> `mogrify -resize 100x100 -negate image.jpg`
+end #=> `mogrify -resize 100x100 -negate image.jpg`
 
 # OR
 
@@ -286,8 +285,7 @@ with a space you pass here as a separate argument
 
 ```ruby
 # GOOD
-convert << "-resize"
-convert << "500x500"
+convert << "-resize" << "500x500"
 
 # BAD
 convert << "-resize 500x500"
@@ -315,8 +313,8 @@ convert.rotate(90)
 convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
 ```
 
-One advantage to this way is that you will get a `NoMethodError` if you
-mispelled an option.
+MiniMagick knows which options each tool has, so you will get an explicit
+`NoMethodError` if you happen to have mispelled an option.
 
 #### Chaining
 
