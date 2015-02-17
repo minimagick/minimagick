@@ -149,10 +149,11 @@ module MiniMagick
     # Changes the last operator to its "plus" form.
     #
     # @example
-    #   mogrify = MiniMagick::Tool::Mogrify.new
-    #   mogrify.antialias.+
-    #   mogrify.distort.+("Perspective '0,0,4,5'")
-    #   mogrify.command #=> ["mogrify", "+antialias", "+distort", "Perspective '0,0,4,5'"]
+    #   MiniMagick::Tool::Mogrify.new do |mogrify|
+    #     mogrify.antialias.+
+    #     mogrify.distort.+("Perspective", "0,0,4,5 89,0,45,46")
+    #   end
+    #   # executes `mogrify +antialias +distort Perspective '0,0,4,5 89,0,45,46'`
     #
     # @return [self]
     #
@@ -223,11 +224,12 @@ module MiniMagick
       ##
       # Creates method based on command-line option's name.
       #
-      #  mogrify = MiniMagick::Tool.new("mogrify")
-      #  mogrify.antialias
-      #  mogrify.depth(8)
-      #  mogrify.resize("500x500")
-      #  mogirfy.command.join(" ") #=> "mogrify -antialias -depth "8" -resize "500x500""
+      #   mogrify = MiniMagick::Tool.new("mogrify")
+      #   mogrify.antialias
+      #   mogrify.depth(8)
+      #   mogrify.resize("500x500")
+      #   mogirfy.command.join(" ")
+      #   #=> "mogrify -antialias -depth 8 -resize 500x500"
       #
       def option(*options)
         options.each do |option|

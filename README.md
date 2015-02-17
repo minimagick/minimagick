@@ -120,6 +120,9 @@ image = MiniMagick::Image.new("input.jpg") do |b|
 end # the command gets executed
 ```
 
+The yieled builder is an instance of `MiniMagick::Tool::Mogrify`. To learn more
+about its interface, see [Metal](#metal) below.
+
 ### Attributes
 
 A `MiniMagick::Image` has various handy attributes.
@@ -248,17 +251,112 @@ tools directly.
 
 ```ruby
 MiniMagick::Tool::Mogrify.new do |mogrify|
-  mogrify.resize "100x100"
-  mogrify.antialias.+
+  mogrify.resize("100x100")
+  mogrify.negate
   mogrify << "image.jpg"
 end
-# executes `mogrify -resize 100x100 +antialias image.jpg`
+#=> `mogrify -resize 100x100 -negate image.jpg`
+
+# OR
+
+mogrify = MiniMagick::Tool::Mogrify.new
+mogrify.resize("100x100")
+mogrify.negate
+mogrify << "image.jpg"
+mogrify.call #=> `mogrify -resize 100x100 -negate image.jpg`
 ```
 
-I would highly recommend this if you want to maximize performance of your image
-processing.
+This way of using MiniMagick is highly recommended if you want to maximize
+performance of your image processing. Here are some of the features.
 
-See [MiniMagick::Tool](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Tool).
+#### Appending
+
+The most basic way of building a command is appending strings:
+
+MiniMagick::Tool::Convert.new do |convert|
+  convert << "input.jpg"
+  convert.merge! ["-resize", "500x500", "-negate"]
+  convert << "output.jpg"
+end
+
+Note that it's important that everything that in the command-line you would
+with a space you pass here as a separate argument
+
+```ruby
+# GOOD
+convert << "-resize"
+convert << "500x500"
+
+# BAD
+convert << "-resize 500x500"
+```
+
+Shell escaping is also handled for you. If an option has a value that has
+spaces inside it, just pass it as a regular string.
+
+```ruby
+convert << "-distort"
+convert << "Perspective"
+convert << "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35"
+```
+```
+convert -distort Perspective '0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35'
+```
+
+#### Methods
+
+Instead of passing in options directly, you can use Ruby methods:
+
+```ruby
+convert.resize("500x500")
+convert.rotate(90)
+convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
+```
+
+One advantage to this way is that you will get a `NoMethodError` if you
+mispelled an option.
+
+#### Chaining
+
+Every method call returns `self`, so you can chain them to create logical groups.
+
+```ruby
+MiniMagick::Tool::Convert.new do |convert|
+  convert << "input.jpg"
+  convert.clone(0).background('gray').shadow('80x5+5+5')
+  convert.negate
+  convert << "output.jpg"
+end
+```
+
+#### "Plus" options
+
+```ruby
+MiniMagick::Tool::Convert.new do |convert|
+  convert << "input.jpg"
+  convert.repage.+
+  convert.distort.+("Perspective", "more args")
+end
+```
+```
+convert input.jpg +repage +distort Perspective 'more args'
+```
+
+#### Stacks
+
+```ruby
+MiniMagick::Tool::Convert.new do |convert|
+  convert << "wand.gif"
+  convert.stack do |stack|
+    stack << "wand.gif"
+    stack.rotate(30)
+  end
+  convert << "images.gif"
+end
+```
+```
+convert wand.gif \( wand.gif -rotate 90 \) images.gif
+```
 
 ## Troubleshooting
 
