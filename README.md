@@ -140,8 +140,8 @@ image.resolution  #=> [75, 75]
 image.signature   #=> "60a7848c4ca6e36b8e2c5dea632ecdc29e9637791d2c59ebf7a54c0c6a74ef7e"
 ```
 
-If you need more control, and want to access [raw image
-attributes](http://www.imagemagick.org/script/escape.php), you can use `#[]`.
+If you need more control, you can also access [raw image
+attributes](http://www.imagemagick.org/script/escape.php):
 
 ```ruby
 image["%[gamma]"] # "0.9"
