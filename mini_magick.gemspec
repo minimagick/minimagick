@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.requirements << 'You must have ImageMagick or GraphicsMagick installed'
   s.licenses    = ['MIT']
 
-  s.authors     = ['Corey Johnson', 'Hampton Catlin', 'Peter Kieltyka', 'James Miller', 'Thiago Fernandes Massa']
-  s.email       = ['probablycorey@gmail.com', 'hcatlin@gmail.com', 'peter@nulayer.com', 'bensie@gmail.com', 'thiagown@gmail.com']
+  s.authors     = ['Corey Johnson',           'Hampton Catlin',    'Peter Kieltyka',    'James Miller',     'Thiago Fernandes Massa', 'Janko Marohnić']
+  s.email       = ['probablycorey@gmail.com', 'hcatlin@gmail.com', 'peter@nulayer.com', 'bensie@gmail.com', 'thiagown@gmail.com',     'janko.marohnic@gmail.com']
   s.homepage    = 'https://github.com/minimagick/minimagick'
 
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
