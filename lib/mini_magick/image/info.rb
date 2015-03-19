@@ -53,9 +53,7 @@ module MiniMagick
       end
 
       def colorspace
-        @info.fetch("colorspace") do
-          @info["colorspace"] = self["%r"]
-        end
+        @info["colorspace"] ||= self["%r"]
       end
 
       def mime_type
@@ -75,10 +73,10 @@ module MiniMagick
       end
 
       def exif
-        @info.fetch("exif") do
+        @info["exif"] ||= (
           output = self["%[EXIF:*]"]
           pairs = output.gsub(/^exif:/, "").split("\n").map { |line| line.split("=") }
-          exif = Hash[pairs].tap do |hash|
+          Hash[pairs].tap do |hash|
             ASCII_ENCODED_EXIF_KEYS.each do |key|
               next unless hash.has_key?(key)
 
@@ -86,22 +84,15 @@ module MiniMagick
               hash[key] = decode_comma_separated_ascii_characters(value)
             end
           end
-
-          @info["exif"] = exif
-        end
+        )
       end
 
       def raw(value)
-        key = "raw:#{value}"
-        @info.fetch(key) do
-          @info[key] = identify { |b| b.format(value) }
-        end
+        @info["raw:#{value}"] ||= identify { |b| b.format(value) }
       end
 
       def signature
-        @info.fetch("signature") do
-          @info["signature"] = self["%#"]
-        end
+        @info["signature"] ||= self["%#"]
       end
 
       def identify
