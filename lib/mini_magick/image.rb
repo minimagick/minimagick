@@ -424,7 +424,7 @@ module MiniMagick
     #
     # @see http://www.imagemagick.org/script/composite.php
     #
-    def composite(other_image, output_extension = 'jpg', mask = nil)
+    def composite(other_image, output_extension = type.downcase, mask = nil)
       output_tempfile = MiniMagick::Utilities.tempfile(".#{output_extension}")
 
       MiniMagick::Tool::Composite.new do |composite|

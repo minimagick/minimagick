@@ -427,9 +427,16 @@ require "stringio"
         it "makes the composited image with the provided extension" do
           result = subject.composite(other_image, 'png')
           expect(result.path).to end_with ".png"
+        end
 
+        it "defaults the extension to the extension of the base image" do
+          subject = described_class.open(image_path(:jpg))
           result = subject.composite(other_image)
-          expect(result.path).to end_with ".jpg"
+          expect(result.path).to end_with ".jpeg"
+
+          subject = described_class.open(image_path(:gif))
+          result = subject.composite(other_image)
+          expect(result.path).to end_with ".gif"
         end
       end
 
