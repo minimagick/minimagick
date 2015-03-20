@@ -147,6 +147,13 @@ attributes](http://www.imagemagick.org/script/escape.php):
 image["%[gamma]"] # "0.9"
 ```
 
+To get the all information about the image, MiniMagick gives you a handy method
+(which just converts the output from `identify -verbose` into a Hash):
+
+```ruby
+image.details #=> {"Format" => "JPEG", "Mime type" => "image/jpeg", "Resolution" => "300x300", ...}
+```
+
 ### Configuration
 
 ```ruby

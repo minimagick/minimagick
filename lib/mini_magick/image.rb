@@ -258,6 +258,11 @@ module MiniMagick
     # @return [String]
     #
     attribute :signature
+    ##
+    # Returns the information from `identify -verbose` in a Hash format.
+    #
+    # @return [Hash]
+    attribute :details
 
     ##
     # Use this method if you want to access raw Identify's format API.

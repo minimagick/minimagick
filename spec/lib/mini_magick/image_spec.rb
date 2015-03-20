@@ -339,6 +339,17 @@ require "stringio"
         end
       end
 
+      describe "#details" do
+        it "returns a hash of verbose information" do
+          expect(subject.details["Format"]).to match /^JPEG/
+          if MiniMagick.cli == :imagemagick
+            expect(subject.details["Channel depth"]["red"]).not_to be_empty
+          else
+            expect(subject.details["Channel Depths"]["Red"]).not_to be_empty
+          end
+        end
+      end
+
       describe "#layers" do
         it "returns a list of images" do
           expect(subject.layers).to all(be_a(MiniMagick::Image))
