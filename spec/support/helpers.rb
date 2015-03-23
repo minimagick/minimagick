@@ -7,8 +7,6 @@ module Helpers
         case type
         when :default, :jpg   then "default.jpg"
         when :animation, :gif then "animation.gif"
-        when :pdf             then "document.pdf"
-        when :psd             then "image.psd"
         when :exif            then "exif.jpg"
         when :not             then "not_an_image.rb"
         when :colon           then "with:colon.jpg"
