@@ -148,8 +148,6 @@ module MiniMagick
       @logger || MiniMagick::Logger.new($stdout)
     end
 
-    private
-
     def reload_tools
       MiniMagick::Tool::OptionMethods.instances.each(&:reload_methods)
     end

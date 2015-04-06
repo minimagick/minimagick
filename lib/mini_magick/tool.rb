@@ -219,8 +219,6 @@ module MiniMagick
         option *cli_options
       end
 
-      private
-
       ##
       # Creates method based on command-line option's name.
       #
