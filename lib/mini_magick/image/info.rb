@@ -103,18 +103,15 @@ module MiniMagick
           details_string.each_line.with_object([]).inject({}) do |details_hash, (line, key_stack)|
             level = line[/^\s*/].length / 2 - 1
             next details_hash if level == -1 # we ignore the root level
-            hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
-            key, value = line.split(":", 2).map(&:strip)
+            key_stack.pop if level < key_stack.size
 
-            if level == key_stack.size
-              if value.empty?
-                hash[key] = {}
-                key_stack.push key
-              else
-                hash[key] = value
-              end
-            elsif level < key_stack.size
-              key_stack.pop
+            key, _, value = line.partition(/:[\s\n]/).map(&:strip)
+            hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
+            if value.empty?
+              hash[key] = {}
+              key_stack.push key
+            else
+              hash[key] = value
             end
 
             details_hash
