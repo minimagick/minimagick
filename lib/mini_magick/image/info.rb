@@ -52,6 +52,8 @@ module MiniMagick
 
           @info.fetch(value)
         end
+      rescue ArgumentError, TypeError
+        raise MiniMagick::Invalid, "image data can't be read"
       end
 
       def colorspace
