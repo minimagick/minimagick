@@ -489,14 +489,12 @@ module MiniMagick
       end
     end
 
-    private
-
     def mogrify(page = nil)
       @info.clear
 
       MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do
-          def format(*)
+          define_method(:format) do
             fail NoMethodError,
               "you must call #format on a MiniMagick::Image directly"
           end
@@ -507,6 +505,8 @@ module MiniMagick
 
       self
     end
+
+    private
 
     def layer?
       path =~ /\[\d+\]$/

@@ -184,8 +184,6 @@ module MiniMagick
       self << ")"
     end
 
-    private
-
     ##
     # Dynamically generates modules with dynamically generated option methods
     # for each command-line tool. It uses the `-help` page of a command-line
