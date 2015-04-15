@@ -494,7 +494,7 @@ module MiniMagick
 
       MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do
-          define_method(:format) do
+          def format(*args)
             fail NoMethodError,
               "you must call #format on a MiniMagick::Image directly"
           end
