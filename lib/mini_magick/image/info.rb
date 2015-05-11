@@ -36,8 +36,6 @@ module MiniMagick
         @info.clear
       end
 
-      private
-
       def cheap_info(value)
         @info.fetch(value) do
           format, width, height, size = self["%m %w %h %b"].split(" ")

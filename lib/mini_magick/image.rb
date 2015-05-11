@@ -506,8 +506,6 @@ module MiniMagick
       self
     end
 
-    private
-
     def layer?
       path =~ /\[\d+\]$/
     end

@@ -23,8 +23,6 @@ module MiniMagick
       end
     end
 
-    private
-
     def output(data)
       printf @io, "#{format}\n", data
     end

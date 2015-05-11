@@ -42,8 +42,6 @@ module MiniMagick
       ["", "executable not found: \"#{command.first}\"", 127]
     end
 
-    private
-
     def execute_open3(*command)
       require "open3"
       Open3.capture3(*command)
