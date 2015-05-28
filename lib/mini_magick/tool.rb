@@ -229,7 +229,7 @@ module MiniMagick
       #
       def option(*options)
         options.each do |option|
-          define_method(option[1..-1].gsub('-', '_')) do |*values|
+          define_method(option[1..-1].tr('-', '_')) do |*values|
             self << option
             self.merge!(values)
             self

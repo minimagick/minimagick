@@ -100,10 +100,10 @@ module MiniMagick
       def details
         @info["details"] ||= (
           details_string = identify(&:verbose)
-          details_string.each_line.with_object([]).inject({}) do |details_hash, (line, key_stack)|
+          key_stack = []
+          details_string.lines[1..-1].each_with_object({}) do |line, details_hash|
             level = line[/^\s*/].length / 2 - 1
-            next details_hash if level == -1 # we ignore the root level
-            key_stack.pop if level < key_stack.size
+            key_stack.pop until key_stack.size <= level
 
             key, _, value = line.partition(/:[\s\n]/).map(&:strip)
             hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
@@ -113,8 +113,6 @@ module MiniMagick
             else
               hash[key] = value
             end
-
-            details_hash
           end
         )
       end
