@@ -78,7 +78,7 @@ module MiniMagick
     #   mogrify = MiniMagick::Tool::Mogrify.new
     #   mogrify.resize("500x500")
     #   mogrify << "path/to/image.jpg"
-    #   mogirfy.call # executes `mogrify -resize 500x500 path/to/image.jpg`
+    #   mogrify.call # executes `mogrify -resize 500x500 path/to/image.jpg`
     #
     # @param whiny [Boolean] Whether you want an error to be raised when
     #   ImageMagick returns an exit code of 1. You may want this because
@@ -224,7 +224,7 @@ module MiniMagick
       #   mogrify.antialias
       #   mogrify.depth(8)
       #   mogrify.resize("500x500")
-      #   mogirfy.command.join(" ")
+      #   mogrify.command.join(" ")
       #   #=> "mogrify -antialias -depth 8 -resize 500x500"
       #
       def option(*options)
