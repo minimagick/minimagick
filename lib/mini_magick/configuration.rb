@@ -7,7 +7,7 @@ module MiniMagick
     # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
     # [GraphicsMagick](http://www.graphicsmagick.org).
     #
-    # @return [Symbol] `:imagemagick` or `:minimagick`
+    # @return [Symbol] `:imagemagick` or `:graphicsmagick`
     #
     attr_accessor :cli
     # @private (for backwards compatibility)
