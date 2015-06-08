@@ -19,6 +19,7 @@ module MiniMagick
     old_cli = self.cli
     self.cli = cli
     yield
+  ensure
     self.cli = old_cli
   end
 
