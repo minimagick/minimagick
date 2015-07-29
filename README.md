@@ -168,7 +168,7 @@ For a complete list of configuration options, see
 
 ### Composite
 
-MiniMagick also alows you to
+MiniMagick also allows you to
 [composite](http://www.imagemagick.org/script/composite.php) images:
 
 ```ruby
