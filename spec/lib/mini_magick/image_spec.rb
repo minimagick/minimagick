@@ -297,7 +297,7 @@ require "stringio"
         expect(subject.width).to be_a(Fixnum).and be_nonzero
         expect(subject.height).to be_a(Fixnum).and be_nonzero
         expect(subject.dimensions).to all(be_a(Fixnum))
-        expect(subject.size).to be_a(Fixnum).and be_nonzero
+        expect(subject.size).to be_a(String).and be_nonempty
         expect(subject.colorspace).to be_a(String)
         expect(subject.resolution).to all(be_a(Fixnum))
         expect(subject.signature).to match(/[[:alnum:]]{64}/)

@@ -45,7 +45,7 @@ module MiniMagick
             "width"      => Integer(width),
             "height"     => Integer(height),
             "dimensions" => [Integer(width), Integer(height)],
-            "size"       => size.to_i,
+            "size"       => size,
           )
 
           @info.fetch(value)

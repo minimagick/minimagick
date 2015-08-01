@@ -225,7 +225,7 @@ module MiniMagick
     ##
     # Returns the file size of the image.
     #
-    # @return [Integer]
+    # @return [String]
     #
     attribute :size
     ##

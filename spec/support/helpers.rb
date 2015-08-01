@@ -34,3 +34,9 @@ end
 RSpec.configure do |config|
   config.include Helpers
 end
+
+RSpec::Matchers.define :be_nonempty do
+  match do |object|
+    !object.empty?
+  end
+end
