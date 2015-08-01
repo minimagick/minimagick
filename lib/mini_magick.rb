@@ -1,6 +1,4 @@
 require 'mini_magick/configuration'
-require 'mini_magick/tool'
-require 'mini_magick/image'
 
 module MiniMagick
 
@@ -52,3 +50,6 @@ module MiniMagick
   class Invalid < StandardError; end
 
 end
+
+require 'mini_magick/tool'
+require 'mini_magick/image'

@@ -131,7 +131,14 @@ module MiniMagick
     def cli=(value)
       @cli = value
 
-      unless [:imagemagick, :graphicsmagick].include?(@cli)
+      case @cli
+      when :imagemagick
+        Utilities.which("mogrify") or
+          raise MiniMagick::Error, "ImageMagick is not installed or CLI is not found"
+      when :graphicsmagick
+        Utilities.which("gm") or
+          raise MiniMagick::Error, "GraphicsMagick is not installed or CLI is not found"
+      else
         raise ArgumentError,
           "CLI has to be set to either :imagemagick or :graphicsmagick" \
           ", was set to #{@cli.inspect}"

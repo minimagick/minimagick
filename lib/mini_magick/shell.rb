@@ -10,11 +10,7 @@ module MiniMagick
   #
   class Shell
 
-    def initialize(whiny = true)
-      @whiny = whiny
-    end
-
-    def run(command)
+    def run(command, options = {})
       stdout, stderr, code = execute(command)
 
       case code
@@ -22,9 +18,9 @@ module MiniMagick
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
       when 127
         fail MiniMagick::Error, stderr
-      end if @whiny
+      end if options.fetch(:whiny, true)
 
-      $stderr.print(stderr)
+      $stderr.print(stderr) unless options[:stderr] == false
 
       stdout
     end

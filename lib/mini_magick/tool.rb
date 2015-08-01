@@ -15,18 +15,6 @@ module MiniMagick
   #
   class Tool
 
-    autoload :Animate,   "mini_magick/tool/animate"
-    autoload :Compare,   "mini_magick/tool/compare"
-    autoload :Composite, "mini_magick/tool/composite"
-    autoload :Conjure,   "mini_magick/tool/conjure"
-    autoload :Convert,   "mini_magick/tool/convert"
-    autoload :Display,   "mini_magick/tool/display"
-    autoload :Identify,  "mini_magick/tool/identify"
-    autoload :Import,    "mini_magick/tool/import"
-    autoload :Mogrify,   "mini_magick/tool/mogrify"
-    autoload :Montage,   "mini_magick/tool/montage"
-    autoload :Stream,    "mini_magick/tool/stream"
-
     # @private
     def self.inherited(child)
       child_name = child.name.split("::").last.downcase
@@ -87,9 +75,9 @@ module MiniMagick
     #
     # @return [String] Output of the command
     #
-    def call(whiny = @whiny)
-      shell = MiniMagick::Shell.new(whiny)
-      shell.run(command).strip
+    def call(whiny = @whiny, options = {})
+      shell = MiniMagick::Shell.new
+      shell.run(command, options.merge(whiny: whiny)).strip
     end
 
     ##
@@ -259,7 +247,9 @@ module MiniMagick
       end
 
       def cli_options
-        help = MiniMagick::Tool.new(@tool_name, false) { |b| b << "-help" }
+        tool = MiniMagick::Tool.new(@tool_name)
+        tool << "-help"
+        help = tool.call(false, stderr: false)
         cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
       end
 
@@ -267,3 +257,15 @@ module MiniMagick
 
   end
 end
+
+require "mini_magick/tool/animate"
+require "mini_magick/tool/compare"
+require "mini_magick/tool/composite"
+require "mini_magick/tool/conjure"
+require "mini_magick/tool/convert"
+require "mini_magick/tool/display"
+require "mini_magick/tool/identify"
+require "mini_magick/tool/import"
+require "mini_magick/tool/mogrify"
+require "mini_magick/tool/montage"
+require "mini_magick/tool/stream"
