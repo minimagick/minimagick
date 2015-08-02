@@ -223,11 +223,17 @@ module MiniMagick
     #
     attribute :dimensions
     ##
-    # Returns the file size of the image.
+    # Returns the file size of the image (in bytes).
+    #
+    # @return [Integer]
+    #
+    attribute :size
+    ##
+    # Returns the file size in a human readable format.
     #
     # @return [String]
     #
-    attribute :size
+    attribute :human_size
     ##
     # @return [String]
     #

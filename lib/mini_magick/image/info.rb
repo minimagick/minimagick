@@ -11,7 +11,7 @@ module MiniMagick
 
       def [](value, *args)
         case value
-        when "format", "width", "height", "dimensions", "size"
+        when "format", "width", "height", "dimensions", "size", "human_size"
           cheap_info(value)
         when "colorspace"
           colorspace
@@ -45,7 +45,8 @@ module MiniMagick
             "width"      => Integer(width),
             "height"     => Integer(height),
             "dimensions" => [Integer(width), Integer(height)],
-            "size"       => size,
+            "size"       => File.size(@path),
+            "human_size" => size,
           )
 
           @info.fetch(value)
