@@ -351,6 +351,27 @@ require "stringio"
             expect(subject.details).to have_key("Resolution")
           end
         end
+
+        it "shouldn't be stalled when processing comment with new line" do
+          MiniMagick::Utilities.tempfile(".jpg") do |file|
+            MiniMagick::Tool::Convert.new do |convert|
+              convert.merge! \
+                ["-comment", "first line\n\nsecond line"]
+              convert.merge! ["-size", "100x100", "xc:#990000"]
+              convert << file.path
+            end
+
+            subject = described_class.new(file.path)
+
+            target = MiniMagick.cli == :imagemagick ?
+              subject.details["Properties"]["comment"] :
+              subject.details["Comment"]
+
+            expect(target).to eq "first line"
+            # include only file line, but who care?
+            expect(target).not_to match /second line/
+          end
+        end
       end
 
       describe "#layers" do
