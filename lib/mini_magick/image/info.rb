@@ -104,6 +104,7 @@ module MiniMagick
           key_stack = []
           details_string.lines.to_a[1..-1].each_with_object({}) do |line, details_hash|
             level = line[/^\s*/].length / 2 - 1
+            next if level == -1 # we ignore the root level
             key_stack.pop until key_stack.size <= level
 
             key, _, value = line.partition(/:[\s\n]/).map(&:strip)
