@@ -249,8 +249,11 @@ module MiniMagick
       def cli_options
         tool = MiniMagick::Tool.new(@tool_name)
         tool << "-help"
-        help = tool.call(false, stderr: false)
-        cli_options = help.scan(/^\s+-[a-z\-]+/).map(&:strip)
+        help_page = tool.call(false, stderr: false)
+
+        cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
+        cli_options << "-gravity" if @tool_name == "mogrify" && MiniMagick.graphicsmagick?
+        cli_options
       end
 
     end

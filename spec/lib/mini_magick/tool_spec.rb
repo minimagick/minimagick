@@ -108,6 +108,13 @@ RSpec.describe MiniMagick::Tool do
     expect(subject).to respond_to(:ping)
   end
 
+  # https://github.com/minimagick/minimagick/issues/264
+  it "adds the #gravity method to GraphicsMagick's mogrify" do
+    MiniMagick.with_cli :graphicsmagick do
+      expect(MiniMagick::Tool::Mogrify.new).to respond_to(:gravity)
+    end
+  end
+
   it "doesn't raise errors when false is passed to the constructor" do
     subject.help
     subject.call(false)
