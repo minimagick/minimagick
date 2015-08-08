@@ -252,7 +252,10 @@ module MiniMagick
         help_page = tool.call(false, stderr: false)
 
         cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
-        cli_options << "-gravity" if @tool_name == "mogrify" && MiniMagick.graphicsmagick?
+        if @tool_name == "mogrify" && MiniMagick.graphicsmagick?
+          # These options were undocumented before 2015-06-14 (see gm bug 302)
+          cli_options |= %w[-box -convolve -gravity -linewidth -mattecolor -render -shave]
+        end
         cli_options
       end
 

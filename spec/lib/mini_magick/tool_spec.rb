@@ -109,9 +109,13 @@ RSpec.describe MiniMagick::Tool do
   end
 
   # https://github.com/minimagick/minimagick/issues/264
-  it "adds the #gravity method to GraphicsMagick's mogrify" do
+  # http://sourceforge.net/p/graphicsmagick/bugs/302/
+  it "adds undocumented methods to GraphicsMagick's mogrify" do
     MiniMagick.with_cli :graphicsmagick do
-      expect(MiniMagick::Tool::Mogrify.new).to respond_to(:gravity)
+      mogrify = MiniMagick::Tool::Mogrify.new
+      %w[box convolve gravity linewidth mattecolor render shave].each do |method|
+        expect(mogrify).to respond_to(method)
+      end
     end
   end
 
