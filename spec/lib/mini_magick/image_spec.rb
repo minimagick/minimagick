@@ -352,6 +352,17 @@ require "stringio"
             expect(subject.details).to have_key("Resolution")
           end
         end
+
+        context "when verbose information includes an empty line" do
+          subject { described_class.new(image_path(:empty_identify_line)) }
+          it "skips the empty line" do
+            if MiniMagick.cli == :imagemagick
+              expect(subject.details["Properties"]).to have_key("date:create")
+            else
+              expect(subject.details).to have_key("Date:create")
+            end
+          end
+        end
       end
 
       describe "#layers" do
