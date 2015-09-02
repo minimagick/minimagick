@@ -114,8 +114,6 @@ module MiniMagick
           "processor has to be set to either \"mogrify\" or \"gm\"" \
           ", was set to #{@processor.inspect}"
       end
-
-      reload_tools
     end
 
     def cli
@@ -131,20 +129,11 @@ module MiniMagick
     def cli=(value)
       @cli = value
 
-      case @cli
-      when :imagemagick
-        Utilities.which("mogrify") or
-          raise MiniMagick::Error, "ImageMagick is not installed or CLI is not found"
-      when :graphicsmagick
-        Utilities.which("gm") or
-          raise MiniMagick::Error, "GraphicsMagick is not installed or CLI is not found"
-      else
+      if not [:imagemagick, :graphicsmagick].include?(@cli)
         raise ArgumentError,
           "CLI has to be set to either :imagemagick or :graphicsmagick" \
           ", was set to #{@cli.inspect}"
       end
-
-      reload_tools
     end
 
     def cli_path
@@ -155,8 +144,9 @@ module MiniMagick
       @logger || MiniMagick::Logger.new($stdout)
     end
 
+    # Backwards compatibility
     def reload_tools
-      MiniMagick::Tool::OptionMethods.instances.each(&:reload_methods)
+      warn "[MiniMagick] MiniMagick.reload_tools is deprecated because it is no longer necessary"
     end
 
   end

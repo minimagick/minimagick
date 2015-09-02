@@ -81,42 +81,16 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
-  ["ImageMagick", "GraphicsMagick"].each do |cli|
-    context "with #{cli}", cli: cli.downcase.to_sym do
-      it "adds dynamically generated operator methods" do
-        subject.help.depth(8)
-        expect(subject.args).to eq %W[-help -depth 8]
-      end
-
-      it "doesn't just delegate to #method_missing" do
-        expect(subject.class.instance_methods).to include(:help)
-      end
-
-      it "adds dynamically generated creation operator methods" do
-        subject.radial_gradient.canvas "khaki"
-        expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
-      end
+  describe "#method_missing" do
+    it "adds CLI options" do
+      subject.foo_bar('baz')
+      expect(subject.args).to eq %w[-foo-bar baz]
     end
   end
 
-  it "resets the dynamically generated operator methods on CLI change" do
-    MiniMagick.cli = :imagemagick
-    expect(subject).to respond_to(:quiet)
-
-    MiniMagick.cli = :graphicsmagick
-    expect(subject).not_to respond_to(:quiet)
-    expect(subject).to respond_to(:ping)
-  end
-
-  # https://github.com/minimagick/minimagick/issues/264
-  # http://sourceforge.net/p/graphicsmagick/bugs/302/
-  it "adds undocumented methods to GraphicsMagick's mogrify" do
-    MiniMagick.with_cli :graphicsmagick do
-      mogrify = MiniMagick::Tool::Mogrify.new
-      %w[box convolve gravity linewidth mattecolor render shave].each do |method|
-        expect(mogrify).to respond_to(method)
-      end
-    end
+  it "defines creation operator methods" do
+    subject.radial_gradient.canvas "khaki"
+    expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
   end
 
   it "doesn't raise errors when false is passed to the constructor" do

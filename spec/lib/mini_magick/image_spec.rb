@@ -390,17 +390,6 @@ require "stringio"
             expect(subject.respond_to?(:resize)).to eq true
           end
         end
-
-        context "for an unknown method" do
-          it "fails with a NoMethodError" do
-            expect { subject.foo }
-              .to raise_error(NoMethodError, /MiniMagick::Image/)
-          end
-
-          it "cannot be responded to" do
-            expect(subject.respond_to?(:foo)).to eq false
-          end
-        end
       end
 
       describe "#combine_options" do

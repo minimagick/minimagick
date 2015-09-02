@@ -15,11 +15,10 @@ module MiniMagick
   #
   class Tool
 
-    # @private
-    def self.inherited(child)
-      child_name = child.name.split("::").last.downcase
-      child.send :include, MiniMagick::Tool::OptionMethods.new(child_name)
-    end
+    CREATION_OPERATORS = %w[
+      xc canvas logo rose gradient radial-gradient plasma tile pattern label
+      caption text
+    ]
 
     ##
     # Aside from classic instantiation, it also accepts a block, and then
@@ -173,92 +172,36 @@ module MiniMagick
     end
 
     ##
-    # Dynamically generates modules with dynamically generated option methods
-    # for each command-line tool. It uses the `-help` page of a command-line
-    # tool and generates methods from it. It then includes the generated
-    # module into the tool class.
+    # Define creator operator methods
     #
-    # @private
+    #   mogrify = MiniMagick::Tool.new("mogrify")
+    #   mogrify.canvas("khaki")
+    #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
     #
-    class OptionMethods < Module # think about it for a minute
-
-      def self.instances
-        @instances ||= []
+    CREATION_OPERATORS.each do |operator|
+      define_method(operator.gsub('-', '_')) do |value = nil|
+        self << "#{operator}:#{value}"
+        self
       end
+    end
 
-      def initialize(tool_name)
-        @tool_name = tool_name
-        reload_methods
-        self.class.instances << self
-      end
+    ##
+    # Any undefined method will be transformed into a CLI option
+    #
+    #   mogrify = MiniMagick::Tool.new("mogrify")
+    #   mogrify.adaptive_blur("...")
+    #   mogrify.foo_bar
+    #   mogrify.command.join(" ") "mogrify -adaptive-blur ... -foo-bar"
+    #
+    def method_missing(name, *args)
+      option = "-#{name.to_s.tr('_', '-')}"
+      self << option
+      self.merge!(args)
+      self
+    end
 
-      def to_s
-        "OptionMethods(#{@tool_name})"
-      end
-
-      ##
-      # Dynamically generates operator methods from the "-help" page.
-      #
-      def reload_methods
-        instance_methods(false).each { |method| undef_method(method) }
-        creation_operator *creation_operators
-        option *cli_options
-      end
-
-      ##
-      # Creates method based on command-line option's name.
-      #
-      #   mogrify = MiniMagick::Tool.new("mogrify")
-      #   mogrify.antialias
-      #   mogrify.depth(8)
-      #   mogrify.resize("500x500")
-      #   mogrify.command.join(" ")
-      #   #=> "mogrify -antialias -depth 8 -resize 500x500"
-      #
-      def option(*options)
-        options.each do |option|
-          define_method(option[1..-1].tr('-', '_')) do |*values|
-            self << option
-            self.merge!(values)
-            self
-          end
-        end
-      end
-
-      ##
-      # Creates method based on creation operator's name.
-      #
-      #   mogrify = MiniMagick::Tool.new("mogrify")
-      #   mogrify.canvas("khaki")
-      #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
-      #
-      def creation_operator(*operators)
-        operators.each do |operator|
-          define_method(operator.gsub('-', '_')) do |value = nil|
-            self << "#{operator}:#{value}"
-            self
-          end
-        end
-      end
-
-      def creation_operators
-        %w[xc canvas logo rose gradient radial-gradient
-           plasma tile pattern label caption text]
-      end
-
-      def cli_options
-        tool = MiniMagick::Tool.new(@tool_name)
-        tool << "-help"
-        help_page = tool.call(false, stderr: false)
-
-        cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
-        if @tool_name == "mogrify" && MiniMagick.graphicsmagick?
-          # These options were undocumented before 2015-06-14 (see gm bug 302)
-          cli_options |= %w[-box -convolve -gravity -linewidth -mattecolor -render -shave]
-        end
-        cli_options
-      end
-
+    def respond_to_missing?(method_name, include_private = false)
+      true
     end
 
   end

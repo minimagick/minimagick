@@ -121,7 +121,7 @@ module MiniMagick
     #
     def self.attribute(name, key = name.to_s)
       define_method(name) do |*args|
-        if args.any? && MiniMagick::Tool::Mogrify.instance_methods.include?(name)
+        if args.any? && name != :resolution
           mogrify { |b| b.send(name, *args) }
         else
           @info[key, *args]
@@ -387,16 +387,12 @@ module MiniMagick
     #
     def method_missing(name, *args)
       mogrify do |builder|
-        if builder.respond_to?(name)
-          builder.send(name, *args)
-        else
-          super
-        end
+        builder.send(name, *args)
       end
     end
 
     def respond_to_missing?(method_name, include_private = false)
-      MiniMagick::Tool::Mogrify.new.respond_to?(method_name, include_private)
+      true
     end
 
     ##
