@@ -5,11 +5,12 @@ module Helpers
     if type != :without_extension
       File.join("spec/fixtures",
         case type
-        when :default, :jpg   then "default.jpg"
-        when :animation, :gif then "animation.gif"
-        when :exif            then "exif.jpg"
-        when :not             then "not_an_image.rb"
-        when :colon           then "with:colon.jpg"
+        when :default, :jpg       then "default.jpg"
+        when :animation, :gif     then "animation.gif"
+        when :exif                then "exif.jpg"
+        when :empty_identify_line then "empty_identify_line.png"
+        when :not                 then "not_an_image.rb"
+        when :colon               then "with:colon.jpg"
         else
           fail "image #{type.inspect} doesn't exist"
         end
