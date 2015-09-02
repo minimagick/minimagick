@@ -3,15 +3,27 @@ require 'mini_magick/utilities'
 module MiniMagick
   module Configuration
 
+    # @!macro [attach] thread_attr_accessor
+    #   @attribute [rw] $1
+    def self.thread_attr_accessor(name)
+      define_method(name) do
+        Thread.current[:"minimagick_#{name}"]
+      end
+
+      define_method("#{name}=") do |value|
+        Thread.current[:"minimagick_#{name}"] = value
+      end
+    end
+
     ##
     # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
     # [GraphicsMagick](http://www.graphicsmagick.org).
     #
     # @return [Symbol] `:imagemagick` or `:graphicsmagick`
     #
-    attr_accessor :cli
+    thread_attr_accessor :cli
     # @private (for backwards compatibility)
-    attr_accessor :processor
+    thread_attr_accessor :processor
 
     ##
     # If you don't have the CLI tools in your PATH, you can set the path to the
@@ -19,9 +31,9 @@ module MiniMagick
     #
     # @return [String]
     #
-    attr_accessor :cli_path
+    thread_attr_accessor :cli_path
     # @private (for backwards compatibility)
-    attr_accessor :processor_path
+    thread_attr_accessor :processor_path
 
     ##
     # If you don't want commands to take too long, you can set a timeout (in
@@ -29,22 +41,22 @@ module MiniMagick
     #
     # @return [Integer]
     #
-    attr_accessor :timeout
+    thread_attr_accessor :timeout
     ##
     # When set to `true`, it outputs each command to STDOUT in their shell
     # version.
     #
     # @return [Boolean]
     #
-    attr_accessor :debug
+    thread_attr_accessor :debug
     ##
-    # Logger for {#debug}, default is `MiniMagick::Logger.new(STDOUT)`, but
+    # Logger for {#debug}, default is `MiniMagick::Logger.new($stdout)`, but
     # you can override it, for example if you want the logs to be written to
     # a file.
     #
     # @return [Logger]
     #
-    attr_accessor :logger
+    thread_attr_accessor :logger
 
     ##
     # If set to `true`, it will `identify` every newly created image, and raise
@@ -53,7 +65,7 @@ module MiniMagick
     #
     # @return [Boolean]
     #
-    attr_accessor :validate_on_create
+    thread_attr_accessor :validate_on_create
     ##
     # If set to `true`, it will `identify` every image that gets written (with
     # {MiniMagick::Image#write}), and raise `MiniMagick::Invalid` if the image
@@ -62,7 +74,7 @@ module MiniMagick
     #
     # @return [Boolean]
     #
-    attr_accessor :validate_on_write
+    thread_attr_accessor :validate_on_write
 
     ##
     # If set to `false`, it will not raise errors when ImageMagick returns
@@ -70,7 +82,7 @@ module MiniMagick
     #
     # @return [Boolean]
     #
-    attr_accessor :whiny
+    thread_attr_accessor :whiny
 
     ##
     # Instructs MiniMagick how to execute the shell commands. Available
@@ -79,7 +91,7 @@ module MiniMagick
     #
     # @return [String]
     #
-    attr_accessor :shell_api
+    thread_attr_accessor :shell_api
 
     def self.extended(base)
       base.validate_on_create = true
@@ -100,24 +112,27 @@ module MiniMagick
       yield self
     end
 
+    # @private
     def processor
-      @processor ||= ["mogrify", "gm"].detect do |processor|
+      Thread.current[:minimagick_processor] ||= ["mogrify", "gm"].detect do |processor|
         MiniMagick::Utilities.which(processor)
       end
     end
 
+    # @private
     def processor=(processor)
-      @processor = processor.to_s
+      Thread.current[:minimagick_processor] = processor.to_s
 
-      unless ["mogrify", "gm"].include?(@processor)
+      unless ["mogrify", "gm"].include?(processor.to_s)
         raise ArgumentError,
           "processor has to be set to either \"mogrify\" or \"gm\"" \
-          ", was set to #{@processor.inspect}"
+          ", was set to #{processor.inspect}"
       end
     end
 
+    # @private
     def cli
-      @cli ||
+      Thread.current[:minimagick_cli] ||
         case processor.to_s
         when "mogrify" then :imagemagick
         when "gm"      then :graphicsmagick
@@ -126,25 +141,30 @@ module MiniMagick
         end
     end
 
+    # @private
     def cli=(value)
-      @cli = value
+      Thread.current[:minimagick_cli] = value
 
-      if not [:imagemagick, :graphicsmagick].include?(@cli)
+      if not [:imagemagick, :graphicsmagick].include?(value)
         raise ArgumentError,
           "CLI has to be set to either :imagemagick or :graphicsmagick" \
-          ", was set to #{@cli.inspect}"
+          ", was set to #{value.inspect}"
       end
     end
 
+    # @private
     def cli_path
-      @cli_path || @processor_path
+      Thread.current[:minimagick_cli_path] || Thread.current[:minimagick_processor_path]
     end
 
+    # @private
     def logger
-      @logger || MiniMagick::Logger.new($stdout)
+      Thread.current[:minimagick_logger] || MiniMagick::Logger.new($stdout)
     end
 
-    # Backwards compatibility
+    # For backwards compatibility.
+    #
+    # @private
     def reload_tools
       warn "[MiniMagick] MiniMagick.reload_tools is deprecated because it is no longer necessary"
     end
