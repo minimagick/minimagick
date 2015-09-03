@@ -3,19 +3,6 @@ require "spec_helper"
 RSpec.describe MiniMagick::Configuration do
   subject { Object.new.extend(MiniMagick::Configuration) }
 
-  after do
-    Thread.current.keys.each do |key|
-      Thread.current[key] = nil if /^minimagick/ === key
-    end
-
-    MiniMagick.configure do |config|
-      config.validate_on_create = true
-      config.validate_on_write = true
-      config.whiny = true
-      config.shell_api = "open3"
-    end
-  end
-
   describe "#configure" do
     it "yields self" do
       expect { |b| subject.configure(&b) }

@@ -251,6 +251,11 @@ MiniMagick.with_cli(:graphicsmagick) do
 end
 ```
 
+**WARNING**: If you're building a multithreaded web application, you should
+change the CLI only on application startup. This is because the configuration is
+global, so if you change it in a controller action, other threads in the same
+process will also have their CLI changed, which could lead to race conditions.
+
 ### Metal
 
 If you want to be close to the metal, you can use ImageMagick's command-line
