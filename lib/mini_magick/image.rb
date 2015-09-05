@@ -338,7 +338,7 @@ module MiniMagick
         new_tempfile = MiniMagick::Utilities.tempfile(".#{format}")
         new_path = new_tempfile.path
       else
-        new_path = path.sub(/\.\w+$/, ".#{format}")
+        new_path = path.sub(/(\.\w+)?$/, ".#{format}")
       end
 
       MiniMagick::Tool::Convert.new do |convert|

@@ -179,10 +179,20 @@ require "stringio"
           }.to change { subject.dimensions }.to [100, 100]
         end
 
-        it "works without an extension" do
-          subject = described_class.open(image_path(:without_extension))
-          expect { subject.format("png") }
-            .to change { File.extname(subject.path) }.from("").to(".png")
+        it "works without an extension with .open" do
+          subject = described_class.open(image_path(:jpg_without_extension))
+          subject.format("png")
+
+          expect(File.extname(subject.path)).to eq ".png"
+          expect(subject.type).to eq "PNG"
+        end
+
+        it "works without an extension with .new" do
+          subject = described_class.new(image_path(:jpg_without_extension))
+          subject.format("png")
+
+          expect(File.extname(subject.path)).to eq ".png"
+          expect(subject.type).to eq "PNG"
         end
 
         it "deletes the previous tempfile" do

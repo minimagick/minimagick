@@ -2,7 +2,7 @@ require "tempfile"
 
 module Helpers
   def image_path(type = :default)
-    if type != :without_extension
+    if type != :jpg_without_extension
       File.join("spec/fixtures",
         case type
         when :default, :jpg       then "default.jpg"
