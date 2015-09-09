@@ -332,8 +332,6 @@ module MiniMagick
     # @return [self]
     #
     def format(format, page = 0)
-      @info.clear
-
       if @tempfile
         new_tempfile = MiniMagick::Utilities.tempfile(".#{format}")
         new_path = new_tempfile.path
@@ -355,6 +353,7 @@ module MiniMagick
       end
 
       path.replace new_path
+      @info.clear
 
       self
     end
@@ -492,8 +491,6 @@ module MiniMagick
     end
 
     def mogrify(page = nil)
-      @info.clear
-
       MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do
           def format(*args)
@@ -504,6 +501,8 @@ module MiniMagick
         yield builder if block_given?
         builder << (page ? "#{path}[#{page}]" : path)
       end
+
+      @info.clear
 
       self
     end

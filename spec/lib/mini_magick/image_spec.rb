@@ -218,6 +218,11 @@ require "stringio"
           expect(subject).to be_valid
         end
 
+        it "clears the info only at the end" do
+          subject.format('png') { subject.type }
+          expect(subject.type).to eq "PNG"
+        end
+
         it "returns self" do
           expect(subject.format('png')).to eq subject
         end
@@ -423,6 +428,11 @@ require "stringio"
         it "doesn't allow calling of #format" do
           expect { subject.combine_options { |c| c.format("png") } }
             .to raise_error(NoMethodError)
+        end
+
+        it "clears the info only at the end" do
+          subject.combine_options { |c| c.resize('20x30!'); subject.width }
+          expect(subject.dimensions).to eq [20, 30]
         end
 
         it "returns self" do
