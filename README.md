@@ -292,8 +292,8 @@ MiniMagick::Tool::Convert.new do |convert|
 end
 ```
 
-Note that it's important that everything that in the command-line you would
-with a space you pass here as a separate argument
+Note that it is important that every command you would pass to the command line
+has to be separated with `<<`, e.g.:
 
 ```ruby
 # GOOD
