@@ -40,12 +40,15 @@ module MiniMagick
         @info.fetch(value) do
           format, width, height, size = self["%m %w %h %b"].split(" ")
 
+          path = @path
+          path = path.match(/\[\d+]$/).pre_match if path =~ /\[\d+\]$/
+
           @info.update(
             "format"     => format,
             "width"      => Integer(width),
             "height"     => Integer(height),
             "dimensions" => [Integer(width), Integer(height)],
-            "size"       => File.size(@path),
+            "size"       => File.size(path),
             "human_size" => size,
           )
 
@@ -120,9 +123,12 @@ module MiniMagick
       end
 
       def identify
+        path = @path
+        path += "[0]" unless path =~ /\[\d+\]$/
+
         MiniMagick::Tool::Identify.new do |builder|
           yield builder if block_given?
-          builder << "#{@path}[0]"
+          builder << path
         end
       end
 
