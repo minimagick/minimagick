@@ -243,7 +243,7 @@ end
 
 If you're a real ImageMagick guru, you might want to use GraphicsMagick only
 for certain processing blocks (because it's more efficient), or vice versa. You
-can acomplish this with `.with_cli`:
+can accomplish this with `.with_cli`:
 
 ```ruby
 MiniMagick.with_cli(:graphicsmagick) do
