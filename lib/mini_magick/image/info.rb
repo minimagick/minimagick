@@ -41,7 +41,7 @@ module MiniMagick
           format, width, height, size = self["%m %w %h %b"].split(" ")
 
           path = @path
-          path = path.match(/\[\d+]$/).pre_match if path =~ /\[\d+\]$/
+          path = path.match(/\[\d+\]$/).pre_match if path =~ /\[\d+\]$/
 
           @info.update(
             "format"     => format,
