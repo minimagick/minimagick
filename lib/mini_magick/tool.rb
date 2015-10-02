@@ -16,8 +16,8 @@ module MiniMagick
   class Tool
 
     CREATION_OPERATORS = %w[
-      xc canvas logo rose gradient radial-gradient plasma tile pattern label
-      caption text
+      xc canvas logo rose gradient radial-gradient plasma pattern label caption
+      text
     ]
 
     ##
