@@ -1,3 +1,4 @@
+require 'mini_magick/version'
 require 'mini_magick/configuration'
 
 module MiniMagick
