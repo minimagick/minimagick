@@ -204,6 +204,22 @@ module MiniMagick
       true
     end
 
+    def self.option_methods
+      @option_methods ||= (
+        tool = new
+        tool << "-help"
+        help_page = tool.call(false, stderr: false)
+
+        cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
+        if tool.name == "mogrify" && MiniMagick.graphicsmagick?
+          # These options were undocumented before 2015-06-14 (see gm bug 302)
+          cli_options |= %w[-box -convolve -gravity -linewidth -mattecolor -render -shave]
+        end
+
+        cli_options.map { |o| o[1..-1].tr('-','_') }
+      )
+    end
+
   end
 end
 

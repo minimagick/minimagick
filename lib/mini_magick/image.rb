@@ -391,7 +391,7 @@ module MiniMagick
     end
 
     def respond_to_missing?(method_name, include_private = false)
-      true
+      MiniMagick::Tool::Mogrify.option_methods.include?(method_name.to_s)
     end
 
     ##
