@@ -218,6 +218,14 @@ require "stringio"
           expect(subject).to be_valid
         end
 
+        it "reformats a layer" do
+          subject = described_class.open(image_path(:animation))
+          layer = subject.layers.first
+          layer.format('jpg')
+          expect(layer).to be_valid
+          expect(File.exist?(layer.path)).to eq true
+        end
+
         it "clears the info only at the end" do
           subject.format('png') { subject.type }
           expect(subject.type).to eq "PNG"

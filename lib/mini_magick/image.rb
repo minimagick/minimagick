@@ -337,10 +337,14 @@ module MiniMagick
         new_path = new_tempfile.path
       else
         new_path = path.sub(/(\.\w+)?$/, ".#{format}")
+        new_path.sub!(/\[(\d+)\]/, '_\1') if layer?
       end
 
+      input_path = path.dup
+      input_path << "[#{page}]" if page && !layer?
+
       MiniMagick::Tool::Convert.new do |convert|
-        convert << (page ? "#{path}[#{page}]" : path)
+        convert << input_path
         yield convert if block_given?
         convert << new_path
       end
@@ -349,7 +353,7 @@ module MiniMagick
         @tempfile.unlink
         @tempfile = new_tempfile
       else
-        File.delete(path) unless path == new_path
+        File.delete(path) unless path == new_path || layer?
       end
 
       path.replace new_path
