@@ -392,14 +392,11 @@ require "stringio"
           end
         end
 
-        context "when verbose information includes a badly encoded line" do
+        context "when verbose information includes a badly encoded line do",
+          skip_cli: :graphicsmagick do
           subject { described_class.new(image_path(:badly_encoded_line)) }
           it "skips the badly encoded line" do
-            if MiniMagick.cli == :imagemagick
-              expect(subject.details).not_to have_key("Software")
-            else
-              expect(subject.details).not_to have_key("Software")
-            end
+            expect(subject.details).not_to have_key("Software")
           end
         end
       end
