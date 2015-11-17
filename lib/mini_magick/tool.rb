@@ -186,6 +186,16 @@ module MiniMagick
     end
 
     ##
+    # This option is a valid ImageMagick option, but it's also a Ruby method,
+    # so we need to override it so that it correctly acts as an option method.
+    #
+    def clone(*args)
+      self << '-clone'
+      self.merge!(args)
+      self
+    end
+
+    ##
     # Any undefined method will be transformed into a CLI option
     #
     #   mogrify = MiniMagick::Tool.new("mogrify")

@@ -81,6 +81,23 @@ RSpec.describe MiniMagick::Tool do
     end
   end
 
+  describe "#clone" do
+    it "adds an option instead of the default behaviour" do
+      subject.clone
+      expect(subject.args).to eq %W[-clone]
+    end
+
+    it "accepts arguments" do
+      subject.clone(0)
+      expect(subject.args).to eq %W[-clone 0]
+    end
+
+    it "is convertable to plus version" do
+      subject.clone.+
+      expect(subject.args).to eq %W[+clone]
+    end
+  end
+
   describe "#method_missing" do
     it "adds CLI options" do
       subject.foo_bar('baz')
