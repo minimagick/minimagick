@@ -9,6 +9,7 @@ module Helpers
         when :animation, :gif     then "animation.gif"
         when :exif                then "exif.jpg"
         when :empty_identify_line then "empty_identify_line.png"
+        when :badly_encoded_line  then "badly_encoded_line.jpg"
         when :not                 then "not_an_image.rb"
         when :colon               then "with:colon.jpg"
         else
