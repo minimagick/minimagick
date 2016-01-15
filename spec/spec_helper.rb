@@ -1,6 +1,7 @@
 require "bundler/setup"
 require "mini_magick"
 require "pry"
+require 'webmock/rspec'
 
 require_relative "support/helpers"
 

@@ -67,11 +67,13 @@ require "stringio"
         end
 
         it "loads a remote image" do
+          WebMock.allow_net_connect!
           begin
             image = described_class.open(image_url)
             expect(image).to be_valid
           rescue SocketError
           end
+          WebMock.disable_net_connect!
         end
 
         it "validates the image" do
@@ -83,6 +85,24 @@ require "stringio"
           expect { described_class.open(image_path(:colon)) }
             .not_to raise_error
         end
+      end
+
+      describe ".open_with_token" do
+
+        it "makes a copy of the image" do
+          stub_tokenized_requests
+          image = described_class.open_with_token(download_url_with_token, valid_bearer_token)
+          expect(image.path).not_to eq download_url_with_token
+          expect(image).to be_valid
+        end
+
+        it "raises MiniMagick::Unauthorized exception" do
+          stub_tokenized_requests
+          expect { 
+            described_class.open_with_token(download_url_with_token, invalid_bearer_token)
+          }.to raise_error(MiniMagick::Unauthorized)
+        end
+
       end
 
       describe ".create" do
