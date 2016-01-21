@@ -12,6 +12,7 @@ module Helpers
         when :badly_encoded_line  then "badly_encoded_line.jpg"
         when :not                 then "not_an_image.rb"
         when :colon               then "with:colon.jpg"
+        when :clipping_path       then "clipping_path.jpg"
         else
           fail "image #{type.inspect} doesn't exist"
         end

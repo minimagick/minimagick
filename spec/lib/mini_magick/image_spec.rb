@@ -399,6 +399,19 @@ require "stringio"
             expect(subject.details).not_to have_key("Software")
           end
         end
+
+        # GraphicsMagick does not output the clipping path
+        context "when verbose information includes a clipping path",
+          skip_cli: :graphicsmagick do
+          subject { described_class.new(image_path(:clipping_path)) }
+          it "does not hang when parsing verbose data" do
+            # Retrieving .details should happen very quickly but as of v4.3.6
+            # will hang indefinitely without the timeout
+            Timeout::timeout(10) do
+              expect(subject.details['Clipping path'][0..4]).to eq "<?xml"
+            end
+          end
+        end
       end
 
       describe "#layers" do
