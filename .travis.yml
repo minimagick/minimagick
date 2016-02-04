@@ -12,5 +12,7 @@ matrix:
   allow_failures:
     - rvm: ruby-head
 before_install:
+  - sudo apt-get update
   - sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev
   - sudo apt-get install -qq graphicsmagick
+  - gem update bundler
