@@ -109,7 +109,16 @@ module MiniMagick
             next if !line.valid_encoding? || line.strip.length.zero?
 
             level = line[/^\s*/].length / 2 - 1
-            key_stack.pop until key_stack.size <= level
+            if level >= 0
+              key_stack.pop until key_stack.size <= level
+            else
+              # Some metadata, such as SVG clipping paths, will be saved without
+              # indentation, resulting in a level of -1
+              last_key = details_hash.keys.last
+              details_hash[last_key] = '' if details_hash[last_key].empty?
+              details_hash[last_key] << line
+              next
+            end
 
             key, _, value = line.partition(/:[\s\n]/).map(&:strip)
             hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
