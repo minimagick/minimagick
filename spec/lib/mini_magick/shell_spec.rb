@@ -70,6 +70,12 @@ RSpec.describe MiniMagick::Shell do
           stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
           expect(stdout).to match(/\d+ \d+/)
         end
+
+        it "doesn't break with Ruby standard logger" do
+          MiniMagick.logger = ::Logger.new("test")
+          stdout, stderr, status = subject.execute(%W[identify #{image_path(:gif)}])
+          expect(status).to eq 0
+        end
       end
     end
   end
