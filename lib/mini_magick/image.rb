@@ -133,6 +133,10 @@ module MiniMagick
     # @return [String] The location of the current working file
     #
     attr_reader :path
+    ##
+    # @return [Tempfile] The underlying temporary file
+    #
+    attr_reader :tempfile
 
     ##
     # Create a new {MiniMagick::Image} object.

@@ -153,6 +153,14 @@ require "stringio"
         end
       end
 
+      describe "#tempfile" do
+        it "returns the underlying temporary file" do
+          image = described_class.open(image_path)
+
+          expect(image.tempfile).to be_a(Tempfile)
+        end
+      end
+
       describe "#format" do
         subject { described_class.open(image_path(:jpg)) }
 
