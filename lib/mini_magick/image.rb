@@ -467,7 +467,10 @@ module MiniMagick
     # Destroys the tempfile (created by {.open}) if it exists.
     #
     def destroy!
-      @tempfile.unlink if @tempfile
+      if @tempfile
+        FileUtils.rm_f @tempfile.path.sub(/mpc$/, "cache") if @tempfile.path.end_with?(".mpc")
+        @tempfile.unlink
+      end
     end
 
     ##
