@@ -541,6 +541,22 @@ require "stringio"
         end
       end
 
+      describe "#destroy!" do
+        it "deletes the underlying tempfile" do
+          image = described_class.open(image_path)
+          image.destroy!
+
+          expect(File.exists?(image.path)).to eq false
+        end
+
+        it "doesn't delete when there is no tempfile" do
+          image = described_class.new(image_path)
+          image.destroy!
+
+          expect(File.exists?(image.path)).to eq true
+        end
+      end
+
       describe "#identify" do
         it "returns the output of identify" do
           expect(subject.identify).to match(subject.type)
