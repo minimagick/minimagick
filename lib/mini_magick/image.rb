@@ -354,7 +354,7 @@ module MiniMagick
       end
 
       if @tempfile
-        @tempfile.unlink
+        destroy!
         @tempfile = new_tempfile
       else
         File.delete(path) unless path == new_path || layer?
