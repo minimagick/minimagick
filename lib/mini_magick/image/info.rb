@@ -139,7 +139,7 @@ module MiniMagick
         MiniMagick::Tool::Identify.new do |builder|
           yield builder if block_given?
           builder << path
-        end
+        end.first
       end
 
       def decode_comma_separated_ascii_characters(encoded_value)

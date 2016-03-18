@@ -72,11 +72,11 @@ module MiniMagick
     #   some ImageMagick's commands (`identify -help`) return exit code 1,
     #   even though no error happened.
     #
-    # @return [String] Output of the command
+    # @return [Array] Output and Errors of command
     #
     def call(whiny = @whiny, options = {})
       shell = MiniMagick::Shell.new
-      shell.run(command, options.merge(whiny: whiny)).strip
+      shell.run(command, options.merge(whiny: whiny)).map(&:strip)
     end
 
     ##
@@ -220,7 +220,7 @@ module MiniMagick
         tool << "-help"
         help_page = tool.call(false, stderr: false)
 
-        cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
+        cli_options = help_page.first.scan(/^\s+-[a-z\-]+/).map(&:strip)
         if tool.name == "mogrify" && MiniMagick.graphicsmagick?
           # These options were undocumented before 2015-06-14 (see gm bug 302)
           cli_options |= %w[-box -convolve -gravity -linewidth -mattecolor -render -shave]

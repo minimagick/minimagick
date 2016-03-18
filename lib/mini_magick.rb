@@ -43,7 +43,7 @@ module MiniMagick
   #
   # @return [String]
   def self.cli_version
-    output = MiniMagick::Tool::Identify.new(&:version)
+    output = MiniMagick::Tool::Identify.new(&:version).first
     output[/\d+\.\d+\.\d+(-\d+)?/]
   end
 

@@ -139,6 +139,16 @@ module MiniMagick
     attr_reader :tempfile
 
     ##
+    # @return [String] Output of last stdout
+    #
+    attr_reader :stdout
+
+    ##
+    # @return [String] Output of last stderr
+    #
+    attr_reader :stderr
+
+    ##
     # Create a new {MiniMagick::Image} object.
     #
     # _DANGER_: The file location passed in here is the *working copy*. That
@@ -302,7 +312,7 @@ module MiniMagick
     # @return [Array<MiniMagick::Image>]
     #
     def layers
-      layers_count = identify.lines.count
+      layers_count = identify.first.lines.count
       layers_count.times.map do |idx|
         MiniMagick::Image.new("#{path}[#{idx}]")
       end
@@ -502,7 +512,7 @@ module MiniMagick
     end
 
     def mogrify(page = nil)
-      MiniMagick::Tool::Mogrify.new do |builder|
+      @stdout, @stderr = MiniMagick::Tool::Mogrify.new do |builder|
         builder.instance_eval do
           def format(*args)
             fail NoMethodError,

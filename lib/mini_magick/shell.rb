@@ -20,9 +20,9 @@ module MiniMagick
         fail MiniMagick::Error, stderr
       end if options.fetch(:whiny, true)
 
-      $stderr.print(stderr) unless options[:stderr] == false
+    $stderr.print(stderr) unless options[:stderr] == false
 
-      stdout
+      [stdout, stderr]
     end
 
     def execute(command)

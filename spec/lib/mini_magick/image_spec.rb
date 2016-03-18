@@ -532,7 +532,7 @@ require "stringio"
 
         it "collapses the image to one frame" do
           subject.collapse!
-          expect(subject.identify.lines.count).to eq 1
+          expect(subject.identify.first.lines.count).to eq 1
         end
 
         it "keeps the extension" do
@@ -576,20 +576,20 @@ require "stringio"
 
       describe "#identify" do
         it "returns the output of identify" do
-          expect(subject.identify).to match(subject.type)
+          expect(subject.identify.first).to match(subject.type)
         end
 
         it "yields an optional block" do
           output = subject.identify do |b|
             b.verbose
-          end
+          end.first
           expect(output).to match("Format:")
         end
       end
 
       describe "#run_command" do
         it "runs the given command" do
-          output = subject.run_command("identify", "-format", "%w", subject.path)
+          output = subject.run_command("identify", "-format", "%w", subject.path).first
           expect(output).to eq subject.width.to_s
         end
       end
