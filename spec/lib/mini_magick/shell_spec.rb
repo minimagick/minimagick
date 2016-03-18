@@ -12,7 +12,7 @@ RSpec.describe MiniMagick::Shell do
     it "returns stdout" do
       allow(subject).to receive(:execute).and_return(["stdout", "stderr", 0])
       output = subject.run(%W[foo])
-      expect(output).to eq "stdout"
+      expect(output).to eq ["stdout", "stderr"]
     end
 
     it "uses stderr for error messages" do
@@ -29,7 +29,7 @@ RSpec.describe MiniMagick::Shell do
 
     it "raises errors only in whiny mode" do
       allow(subject).to receive(:execute).and_return(["stdout", "", 127])
-      expect(subject.run(%W[foo], whiny: false)).to eq "stdout"
+      expect(subject.run(%W[foo], whiny: false)).to eq ["stdout", ""]
     end
 
     it "prints to stderr output to $stderr in non-whiny mode" do

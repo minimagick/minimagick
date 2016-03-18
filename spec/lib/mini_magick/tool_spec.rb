@@ -6,13 +6,13 @@ RSpec.describe MiniMagick::Tool do
   describe "#call" do
     it "calls the shell to run the command" do
       subject << image_path(:gif)
-      output = subject.call
+      output = subject.call.first
       expect(output).to match("GIF")
     end
 
     it "strips the output" do
       subject << image_path
-      output = subject.call
+      output = subject.call.first
       expect(output).not_to end_with("\n")
     end
   end
@@ -21,7 +21,7 @@ RSpec.describe MiniMagick::Tool do
     it "accepts a block, and immediately executes the command" do
       output = described_class.new("identify") do |builder|
         builder << image_path(:gif)
-      end
+      end.first
       expect(output).to match("GIF")
     end
   end
