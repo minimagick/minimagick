@@ -71,7 +71,7 @@ module MiniMagick
     #   mogrify = MiniMagick::Tool::Mogrify.new
     #   # build the command
     #   mogrify.call do |stdout, stderr, status|
-    #   # handle the case
+    #     # ...
     #   end
     #
     # @param whiny [Boolean] Whether you want an error to be raised when
@@ -79,18 +79,19 @@ module MiniMagick
     #   some ImageMagick's commands (`identify -help`) return exit code 1,
     #   even though no error happened.
     #
-    # @return [String, Integer] If no block is given, returns the output of the
-    #   command, if block is given, returns the exit status of the command
+    # @yield [Array] Optionally yields stdout, stderr, and exit status
+    #
+    # @return [String] Returns the output of the command
     #
     def call(whiny = @whiny, options = {})
       shell = MiniMagick::Shell.new
       if block_given?
-        stdin, stdout, status = shell.execute(command)
-        yield stdin, stdout, status
-        status
+        stdout, stderr, status = shell.execute(command)
+        yield stdout, stderr, status
       else
-        shell.run(command, options.merge(whiny: whiny)).strip
+        stdout = shell.run(command, options.merge(whiny: whiny))
       end
+      stdout.strip
     end
 
     ##

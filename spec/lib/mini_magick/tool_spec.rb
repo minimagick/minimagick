@@ -17,13 +17,9 @@ RSpec.describe MiniMagick::Tool do
     end
 
     it "accepts a block, and yields stdin, stdout and exit status" do
-      allow_any_instance_of(Shell).to receive(:execute).and_return(["stdout", "stderr", 1])
-      instance = subject
-      instance.call do |stdout, stderr, status|
-        expect(stdout).to eq "stdout"
-        expect(stderr).to eq "stderr"
-        expect(status).to be 1
-      end
+      allow_any_instance_of(MiniMagick::Shell).to receive(:execute).and_return(["stdout", "stderr", 1])
+      expect { |block| subject.call(&block) }.to yield_with_args("stdout", "stderr", 1)
+      expect(subject.call{}).to eq "stdout"
     end
   end
 

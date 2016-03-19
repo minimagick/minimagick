@@ -371,6 +371,21 @@ end
 convert wand.gif \( wand.gif -rotate 90 \) images.gif
 ```
 
+#### Capturing stderr
+
+Some MiniMagick tools such as `compare` output the result of the command on
+standard error, even if the command succeeded. The result of
+`MiniMagick::Tool#call` is always the standard output, but if you pass it a
+block, it will yield the stdout, stderr and exit status of the command:
+
+```rb
+compare = MiniMagick::Tool::Compare.new
+# build the command
+compare.call do |stdout, stderr, status|
+  # ...
+end
+```
+
 ## Troubleshooting
 
 ### Errors being raised when they shouldn't
