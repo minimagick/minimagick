@@ -26,5 +26,7 @@ RSpec.configure do |config|
   end
 end
 
+MiniMagick.logger = Logger.new(nil)
+
 SHELL_APIS = ["open3"]
 SHELL_APIS << "posix-spawn" unless RUBY_PLATFORM == "java"

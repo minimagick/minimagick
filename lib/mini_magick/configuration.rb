@@ -1,4 +1,5 @@
 require 'mini_magick/utilities'
+require 'logger'
 
 module MiniMagick
   module Configuration
@@ -86,6 +87,7 @@ module MiniMagick
       base.validate_on_write = true
       base.whiny = true
       base.shell_api = "open3"
+      base.logger = Logger.new($stdout)
     end
 
     ##
@@ -140,13 +142,14 @@ module MiniMagick
       @cli_path || @processor_path
     end
 
-    def logger
-      @logger || MiniMagick::Logger.new($stdout)
+    def debug=(value)
+      warn "MiniMagick.debug is deprecated and will be removed in MiniMagick 5. Use `MiniMagick.logger.level = Logger::DEBUG` instead."
+      logger.level = Logger::DEBUG
     end
 
     # Backwards compatibility
     def reload_tools
-      warn "[MiniMagick] MiniMagick.reload_tools is deprecated because it is no longer necessary"
+      warn "MiniMagick.reload_tools is deprecated because it is no longer necessary"
     end
 
   end

@@ -218,18 +218,18 @@ image.valid?
 image.validate! # raises MiniMagick::Invalid if image is invalid
 ```
 
-### Debugging
+### Logging
 
-When things go wrong and commands start failing, you can set the debug mode:
+You can choose to log MiniMagick commands and their execution times:
 
 ```ruby
-MiniMagick.configure do |config|
-  config.debug = true
-end
+MiniMagick.logger.level = Logger::DEBUG
+```
+```
+D, [2016-03-19T07:31:36.755338 #87191] DEBUG -- : [0.01s] identify /var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/mini_magick20160319-87191-1ve31n1.jpg
 ```
 
-In this mode every command that gets executed in the shell will be written
-to stdout.
+In Rails you'll probably want to set `MiniMagick.logger = Rails.logger`.
 
 ### Switching CLIs (ImageMagick \<=\> GraphicsMagick)
 

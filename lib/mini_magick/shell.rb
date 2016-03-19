@@ -1,5 +1,5 @@
-require "mini_magick/logger"
 require "timeout"
+require "benchmark"
 
 module MiniMagick
   ##
@@ -27,7 +27,7 @@ module MiniMagick
 
     def execute(command)
       stdout, stderr, status =
-        MiniMagick.logger.debug(command.join(" ")) do
+        log(command.join(" ")) do
           Timeout.timeout(MiniMagick.timeout) do
             send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", *command)
           end
@@ -37,6 +37,8 @@ module MiniMagick
     rescue Errno::ENOENT, IOError
       ["", "executable not found: \"#{command.first}\"", 127]
     end
+
+    private
 
     def execute_open3(*command)
       require "open3"
@@ -49,6 +51,13 @@ module MiniMagick
       Process.waitpid(pid)
 
       [stdout.read, stderr.read, $?]
+    end
+
+    def log(command, &block)
+      value = nil
+      duration = Benchmark.realtime { value = block.call }
+      MiniMagick.logger.debug "[%.2fs] %s" % [duration, command]
+      value
     end
 
   end

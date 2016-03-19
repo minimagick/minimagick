@@ -61,9 +61,11 @@ RSpec.describe MiniMagick::Shell do
         end
 
         it "logs the command and execution time in debug mode" do
-          allow(MiniMagick).to receive(:debug).and_return(true)
-          expect { subject.execute(%W[identify #{image_path(:gif)}]) }.
-            to output(/\[\d+.\d+s\] identify #{image_path(:gif)}/).to_stdout
+          MiniMagick.logger = Logger.new(stream = StringIO.new)
+          MiniMagick.logger.level = Logger::DEBUG
+          subject.execute(%W[identify #{image_path(:gif)}])
+          stream.rewind
+          expect(stream.read).to match /\[\d+.\d+s\] identify #{image_path(:gif)}/
         end
 
         it "doesn't break on spaces" do
