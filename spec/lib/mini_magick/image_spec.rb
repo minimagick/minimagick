@@ -240,6 +240,7 @@ require "stringio"
           layer = subject.layers.first
           layer.format('jpg')
           expect(layer).to be_valid
+          expect(layer.path[/\..+$/]).to eq ".jpg"
           expect(File.exist?(layer.path)).to eq true
         end
 

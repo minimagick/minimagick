@@ -340,8 +340,7 @@ module MiniMagick
         new_tempfile = MiniMagick::Utilities.tempfile(".#{format}")
         new_path = new_tempfile.path
       else
-        new_path = path.sub(/(\.\w+)?$/, ".#{format}")
-        new_path.sub!(/\[(\d+)\]/, '_\1') if layer?
+        new_path = Pathname(path).sub_ext(".#{format}").to_s
       end
 
       input_path = path.dup
