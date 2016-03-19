@@ -26,14 +26,14 @@ module MiniMagick
     end
 
     def execute(command)
-      stdout, stderr, status =
-        MiniMagick.logger.debug(command.join(" ")) do
-          Timeout.timeout(MiniMagick.timeout) do
-            send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", *command)
-          end
+      stdout, stderr, status = nil, nil, nil
+      MiniMagick.logger.debug(command.join(" ")) do
+        Timeout.timeout(MiniMagick.timeout) do
+          stdout, stderr, status = send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", *command)
         end
+      end
 
-      [stdout, stderr, status.exitstatus]
+      [stdout, stderr, status ? status.exitstatus : nil]
     rescue Errno::ENOENT, IOError
       ["", "executable not found: \"#{command.first}\"", 127]
     end
