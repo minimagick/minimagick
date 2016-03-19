@@ -67,16 +67,30 @@ module MiniMagick
     #   mogrify << "path/to/image.jpg"
     #   mogrify.call # executes `mogrify -resize 500x500 path/to/image.jpg`
     #
+    # @example
+    #   mogrify = MiniMagick::Tool::Mogrify.new
+    #   # build the command
+    #   mogrify.call do |stdout, stderr, status|
+    #   # handle the case
+    #   end
+    #
     # @param whiny [Boolean] Whether you want an error to be raised when
     #   ImageMagick returns an exit code of 1. You may want this because
     #   some ImageMagick's commands (`identify -help`) return exit code 1,
     #   even though no error happened.
     #
-    # @return [String] Output of the command
+    # @return [String, Integer] If no block is given, returns the output of the
+    #   command, if block is given, returns the exit status of the command
     #
     def call(whiny = @whiny, options = {})
       shell = MiniMagick::Shell.new
-      shell.run(command, options.merge(whiny: whiny)).strip
+      if block_given?
+        stdin, stdout, status = shell.execute(command)
+        yield stdin, stdout, status
+        status
+      else
+        shell.run(command, options.merge(whiny: whiny)).strip
+      end
     end
 
     ##
