@@ -401,11 +401,11 @@ MiniMagick.configure do |config|
 end
 ```
 
-If you're using the metal version, you can pass the `whiny` value to the
+If you're using the tool directly, you can pass `whiny: false` value to the
 constructor:
 
 ```rb
-MiniMagick::Tool::Identify.new(false) do |b|
+MiniMagick::Tool::Identify.new(whiny: false) do |b|
   b.help
 end
 ```

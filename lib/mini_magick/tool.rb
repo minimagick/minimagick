@@ -49,13 +49,15 @@ module MiniMagick
     # @param whiny [Boolean] Whether to raise errors on exit codes different
     #   than 0.
     # @example
-    #   MiniMagick::Tool::Identify.new(false) do |identify|
+    #   MiniMagick::Tool::Identify.new(whiny: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
-    def initialize(name, whiny = MiniMagick.whiny)
+    def initialize(name, options = {})
+      warn "MiniMagick::Tool.new(false) is deprecated and will be removed in MiniMagick 5, use MiniMagick::Tool.new(whiny: false) instead." if !options.is_a?(Hash)
+
       @name  = name
-      @whiny = whiny
       @args  = []
+      @whiny = options.is_a?(Hash) ? options.fetch(:whiny, true) : options
     end
 
     ##
@@ -74,16 +76,15 @@ module MiniMagick
     #     # ...
     #   end
     #
-    # @param whiny [Boolean] Whether you want an error to be raised when
-    #   ImageMagick returns an exit code of 1. You may want this because
-    #   some ImageMagick's commands (`identify -help`) return exit code 1,
-    #   even though no error happened.
-    #
     # @yield [Array] Optionally yields stdout, stderr, and exit status
     #
     # @return [String] Returns the output of the command
     #
-    def call(whiny = @whiny, options = {})
+    def call(*args)
+      options = args[-1].is_a?(Hash) ? args.pop : {}
+      warn "Passing whiny to MiniMagick::Tool#call is deprecated and will be removed in MiniMagick 5, use MiniMagick::Tool.new(whiny: false) instead." if args.any?
+      whiny = args.fetch(0, @whiny)
+
       shell = MiniMagick::Shell.new
       if block_given?
         stdout, stderr, status = shell.execute(command)
@@ -91,6 +92,7 @@ module MiniMagick
       else
         stdout = shell.run(command, options.merge(whiny: whiny))
       end
+
       stdout.strip
     end
 
@@ -231,9 +233,9 @@ module MiniMagick
 
     def self.option_methods
       @option_methods ||= (
-        tool = new
+        tool = new(whiny: false)
         tool << "-help"
-        help_page = tool.call(false, stderr: false)
+        help_page = tool.call(stderr: false)
 
         cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
         if tool.name == "mogrify" && MiniMagick.graphicsmagick?

@@ -9,7 +9,7 @@ RSpec.describe MiniMagick::Shell do
       subject.run(%W[identify #{image_path}])
     end
 
-    it "returns stdout" do
+    it "returns stdout, stderr and status" do
       allow(subject).to receive(:execute).and_return(["stdout", "stderr", 0])
       output = subject.run(%W[foo])
       expect(output).to eq "stdout"
@@ -29,7 +29,7 @@ RSpec.describe MiniMagick::Shell do
 
     it "raises errors only in whiny mode" do
       allow(subject).to receive(:execute).and_return(["stdout", "", 127])
-      expect(subject.run(%W[foo], whiny: false)).to eq "stdout"
+      expect { subject.run(%W[foo], whiny: false) }.not_to raise_error
     end
 
     it "prints to stderr output to $stderr in non-whiny mode" do
