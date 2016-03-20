@@ -21,6 +21,12 @@ RSpec.describe MiniMagick::Tool do
       expect { |block| subject.call(&block) }.to yield_with_args("stdout", "stderr", 0)
       expect(subject.call{}).to eq "stdout"
     end
+
+    it "accepts stdin" do
+      subject.stdin
+      output = subject.call(stdin: File.read(image_path))
+      expect(output).to match(/JPEG/)
+    end
   end
 
   describe ".new" do

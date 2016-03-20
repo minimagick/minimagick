@@ -188,6 +188,19 @@ module MiniMagick
     end
 
     ##
+    # Adds ImageMagick's pseudo-filename `-` for standard input.
+    #
+    # @example
+    #   identify = MiniMagick::Tool::Identify.new
+    #   identify.stdin
+    #   identify.call(stdin: image_content)
+    #   # executes `identify -` with the given standard input
+    #
+    def stdin
+      self << "-"
+    end
+
+    ##
     # Define creator operator methods
     #
     #   mogrify = MiniMagick::Tool.new("mogrify")

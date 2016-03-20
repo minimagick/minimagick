@@ -371,7 +371,18 @@ end
 convert wand.gif \( wand.gif -rotate 90 \) images.gif
 ```
 
-#### Capturing stderr
+#### Passing STDIN
+
+If you want to pass something to standard input, you can pass the `:stdin`
+option to `#call`:
+
+```ruby
+identify = MiniMagick::Tool::Identify.new
+identify.stdin # alias for `identify << "-"`
+identify.call(stdin: image_content)
+```
+
+#### Capturing STDERR
 
 Some MiniMagick tools such as `compare` output the result of the command on
 standard error, even if the command succeeded. The result of
