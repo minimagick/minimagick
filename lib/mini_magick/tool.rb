@@ -85,8 +85,11 @@ module MiniMagick
       warn "Passing whiny to MiniMagick::Tool#call is deprecated and will be removed in MiniMagick 5, use MiniMagick::Tool.new(whiny: false) instead." if args.any?
       whiny = args.fetch(0, @whiny)
 
+      options[:whiny] = whiny
+      options[:stderr] = false if block_given?
+
       shell = MiniMagick::Shell.new
-      stdout, stderr, status = shell.run(command, options.merge(whiny: whiny))
+      stdout, stderr, status = shell.run(command, options)
       yield stdout, stderr, status if block_given?
 
       stdout.strip
