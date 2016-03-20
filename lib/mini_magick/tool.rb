@@ -57,7 +57,7 @@ module MiniMagick
 
       @name  = name
       @args  = []
-      @whiny = options.is_a?(Hash) ? options.fetch(:whiny, true) : options
+      @whiny = options.is_a?(Hash) ? options.fetch(:whiny, MiniMagick.whiny) : options
     end
 
     ##

@@ -18,7 +18,7 @@ module MiniMagick
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
       when 127
         fail MiniMagick::Error, stderr
-      end if options.fetch(:whiny, true)
+      end if options.fetch(:whiny, MiniMagick.whiny)
 
       $stderr.print(stderr) unless options[:stderr] == false
 
