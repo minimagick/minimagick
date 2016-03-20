@@ -11,9 +11,9 @@ module MiniMagick
   class Shell
 
     def run(command, options = {})
-      stdout, stderr, code = execute(command)
+      stdout, stderr, status = execute(command)
 
-      case code
+      case status
       when 1
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
       when 127
@@ -22,7 +22,7 @@ module MiniMagick
 
       $stderr.print(stderr) unless options[:stderr] == false
 
-      stdout
+      [stdout, stderr, status]
     end
 
     def execute(command)

@@ -86,12 +86,8 @@ module MiniMagick
       whiny = args.fetch(0, @whiny)
 
       shell = MiniMagick::Shell.new
-      if block_given?
-        stdout, stderr, status = shell.execute(command)
-        yield stdout, stderr, status
-      else
-        stdout = shell.run(command, options.merge(whiny: whiny))
-      end
+      stdout, stderr, status = shell.run(command, options.merge(whiny: whiny))
+      yield stdout, stderr, status if block_given?
 
       stdout.strip
     end
