@@ -87,7 +87,7 @@ module MiniMagick
       base.validate_on_write = true
       base.whiny = true
       base.shell_api = "open3"
-      base.logger = Logger.new($stdout)
+      base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
     end
 
     ##
@@ -144,7 +144,7 @@ module MiniMagick
 
     def debug=(value)
       warn "MiniMagick.debug is deprecated and will be removed in MiniMagick 5. Use `MiniMagick.logger.level = Logger::DEBUG` instead."
-      logger.level = Logger::DEBUG
+      logger.level = value ? Logger::DEBUG : Logger::INFO
     end
 
     # Backwards compatibility
