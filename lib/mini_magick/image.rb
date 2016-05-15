@@ -157,11 +157,10 @@ module MiniMagick
       combine_options(&block) if block
     end
 
-    def eql?(other)
-      self.class.equal?(other.class) &&
-        signature == other.signature
+    def ==(other)
+      self.class == other.class && signature == other.signature
     end
-    alias == eql?
+    alias eql? ==
 
     def hash
       signature.hash
