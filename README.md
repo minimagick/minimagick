@@ -397,6 +397,19 @@ compare.call do |stdout, stderr, status|
 end
 ```
 
+## Limiting resources
+
+ImageMagick supports a number of environment variables for controlling its
+resource limits. For example, you can enfore memory or execution time limits by
+setting the following variables in your application's process environment:
+
+* `MAGICK_MEMORY_LIMIT=128MiB`
+* `MAGICK_MAP_LIMIT=64MiB`
+* `MAGICK_TIME_LIMIT=30`
+
+For a full list of variables and description, see [ImageMagick's resources
+documentation](http://www.imagemagick.org/script/resources.php).
+
 ## Troubleshooting
 
 ### Errors being raised when they shouldn't
