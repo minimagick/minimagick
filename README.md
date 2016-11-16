@@ -400,7 +400,7 @@ end
 ## Limiting resources
 
 ImageMagick supports a number of environment variables for controlling its
-resource limits. For example, you can enfore memory or execution time limits by
+resource limits. For example, you can enforce memory or execution time limits by
 setting the following variables in your application's process environment:
 
 * `MAGICK_MEMORY_LIMIT=128MiB`
