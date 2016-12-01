@@ -105,33 +105,23 @@ module MiniMagick
         @info["details"] ||= (
           details_string = identify(&:verbose)
           key_stack = []
-          append_to = nil
-          details_string.lines.to_a[1..-1].each_with_object({}) do |line, details_hash|
+          lines_collapsed = []
+
+          details_string.lines.to_a[1..-1].each do |line|
+            # Skip empty or invalid lines
             next if !line.valid_encoding? || line.strip.length.zero?
-
-            level = line[/^\s*/].length / 2 - 1
-            if level >= 0
-              key_stack.pop until key_stack.size <= level
+            if line[0] != " "
+              # Continuation line
+              lines_collapsed[-1] << line
             else
-              # Some metadata, such as SVG clipping paths, will be saved without
-              # indentation, resulting in a level of -1
-              if append_to.nil?
-                # We do not have anything to append to. This happens when we
-                # previously assumed that we were starting a new hash level, but
-                # in fact we are setting a value. Set append_to, and the
-                # hash[key], according to the key_stack.
-                hash = key_stack[0..-2].inject(details_hash) { |hash, key| hash.fetch(key) }
-                append_to = hash[key_stack[-1]] = ''
-              else
-                # We are appending to something, and we previously chomped a
-                # newline. Add it back.
-                append_to << "\n"
-              end
-              append_to << line.chomp
-              next
+              lines_collapsed << line
             end
+          end
 
-            append_to = nil
+          lines_collapsed.each_with_object({}) do |line, details_hash|
+            level = line[/^\s*/].length / 2 - 1
+            key_stack.pop until key_stack.size <= level
+
             key, _, value = line.partition(/:[\s\n]/).map(&:strip)
             hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
             if value.empty?
@@ -139,10 +129,8 @@ module MiniMagick
               key_stack.push key
             else
               hash[key] = value
-              append_to = hash[key]
             end
-          end
-        )
+          end)
       end
 
       def identify
