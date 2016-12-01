@@ -81,7 +81,7 @@ module MiniMagick
       def exif
         @info["exif"] ||= (
           output = self["%[EXIF:*]"]
-          pairs = output.gsub(/^exif:/, "").split("\n").map { |line| line.split("=", 2) }
+          pairs = output.gsub(/^exif:/, "").split("\n").map { |line| line.split("=", 2) }.reject(&:empty?)
           Hash[pairs].tap do |hash|
             ASCII_ENCODED_EXIF_KEYS.each do |key|
               next unless hash.has_key?(key)
