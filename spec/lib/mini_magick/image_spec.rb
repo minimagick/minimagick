@@ -428,6 +428,15 @@ require "stringio"
         end
       end
 
+      describe "#data" do
+        subject { described_class.new(image_path(:jpg)) }
+
+        it "returns image JSON data", skip_cli: :graphicsmagick do
+          expect(subject.data["format"]).to eq "JPEG"
+          expect(subject.data["colorspace"]).to eq "sRGB"
+        end
+      end
+
       describe "#layers" do
         it "returns a list of images" do
           expect(subject.layers).to all(be_a(MiniMagick::Image))

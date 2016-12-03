@@ -149,11 +149,56 @@ image["%[gamma]"] # "0.9"
 ```
 
 To get the all information about the image, MiniMagick gives you a handy method
-(which just converts the output from `identify -verbose` into a Hash):
+which returns the output from `identify -verbose` in hash format:
 
 ```ruby
-image.details #=> {"Format" => "JPEG", "Mime type" => "image/jpeg", "Resolution" => "300x300", ...}
+image.data #=>
+# {
+#   "format": "JPEG",
+#   "mimeType": "image/jpeg",
+#   "class": "DirectClass",
+#   "geometry": {
+#     "width": 200,
+#     "height": 276,
+#     "x": 0,
+#     "y": 0
+#   },
+#   "resolution": {
+#     "x": "300",
+#     "y": "300"
+#   },
+#   "colorspace": "sRGB",
+#   "channelDepth": {
+#     "red": 8,
+#     "green": 8,
+#     "blue": 8
+#   },
+#   "quality": 92,
+#   "properties": {
+#     "date:create": "2016-07-11T19:17:53+08:00",
+#     "date:modify": "2016-07-11T19:17:53+08:00",
+#     "exif:ColorSpace": "1",
+#     "exif:ExifImageLength": "276",
+#     "exif:ExifImageWidth": "200",
+#     "exif:ExifOffset": "90",
+#     "exif:Orientation": "1",
+#     "exif:ResolutionUnit": "2",
+#     "exif:XResolution": "300/1",
+#     "exif:YResolution": "300/1",
+#     "icc:copyright": "Copyright (c) 1998 Hewlett-Packard Company",
+#     "icc:description": "sRGB IEC61966-2.1",
+#     "icc:manufacturer": "IEC http://www.iec.ch",
+#     "icc:model": "IEC 61966-2.1 Default RGB colour space - sRGB",
+#     "jpeg:colorspace": "2",
+#     "jpeg:sampling-factor": "1x1,1x1,1x1",
+#     "signature": "1b2336f023e5be4a9f357848df9803527afacd4987ecc18c4295a272403e52c1"
+#   },
+#   ...
+# }
 ```
+
+Note that `MiniMagick::Image#data` is supported only on ImageMagick, for
+GraphicsMagick use `MiniMagick::Image#details`.
 
 ### Configuration
 

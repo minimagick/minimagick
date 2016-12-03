@@ -268,7 +268,14 @@ module MiniMagick
     #
     attribute :signature
     ##
-    # Returns the information from `identify -verbose` in a Hash format.
+    # Returns the information from `identify -verbose` in a Hash format, for
+    # ImageMagick.
+    #
+    # @return [Hash]
+    attribute :data
+    ##
+    # Returns the information from `identify -verbose` in a Hash format, for
+    # GraphicsMagick.
     #
     # @return [Hash]
     attribute :details

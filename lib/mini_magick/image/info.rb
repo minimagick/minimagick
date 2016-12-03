@@ -1,3 +1,5 @@
+require "json"
+
 module MiniMagick
   class Image
     # @private
@@ -27,6 +29,8 @@ module MiniMagick
           exif
         when "details"
           details
+        when "data"
+          data
         else
           raw(value)
         end
@@ -115,6 +119,8 @@ module MiniMagick
       end
 
       def details
+        warn "[MiniMagick] MiniMagick::Image#details has been deprecated, as it was causing too many parsing errors. You should use MiniMagick::Image#data instead, which differs in a way that the keys are in camelcase." if MiniMagick.imagemagick?
+
         @info["details"] ||= (
           details_string = identify(&:verbose)
           key_stack = []
@@ -145,19 +151,37 @@ module MiniMagick
         )
       end
 
-      def identify
-        path = @path
-        path += "[0]" unless path =~ /\[\d+\]$/
+      def data
+        raise Error, "MiniMagick::Image#data isn't supported on GraphicsMagick. Use MiniMagick::Image#details instead." if MiniMagick.graphicsmagick?
 
+        @info["data"] ||= (
+          json = MiniMagick::Tool::Convert.new do |convert|
+            convert << path
+            convert << "json:"
+          end
+
+          JSON.parse(json).fetch("image")
+        )
+      end
+
+      def identify
         MiniMagick::Tool::Identify.new do |builder|
           yield builder if block_given?
           builder << path
         end
       end
 
+      private
+
       def decode_comma_separated_ascii_characters(encoded_value)
         return encoded_value unless encoded_value.include?(',')
         encoded_value.scan(/\d+/).map(&:to_i).map(&:chr).join
+      end
+
+      def path
+        value = @path
+        value += "[0]" unless value =~ /\[\d+\]$/
+        value
       end
 
     end
