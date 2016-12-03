@@ -337,11 +337,13 @@ module MiniMagick
     # @param page [Integer] If this is an animated gif, say which 'page' you
     #   want with an integer. Default 0 will convert only the first page; 'nil'
     #   will convert all pages.
+    # @param read_opts [Hash] Any read options to be passed to ImageMagick
+    #   for example: image.format('jpg', page, {density: '300'})
     # @yield [MiniMagick::Tool::Convert] It optionally yields the command,
     #   if you want to add something.
     # @return [self]
     #
-    def format(format, page = 0)
+    def format(format, page = 0, read_opts={})
       if @tempfile
         new_tempfile = MiniMagick::Utilities.tempfile(".#{format}")
         new_path = new_tempfile.path
@@ -353,6 +355,9 @@ module MiniMagick
       input_path << "[#{page}]" if page && !layer?
 
       MiniMagick::Tool::Convert.new do |convert|
+        read_opts.each do |opt, val|
+          convert.send(opt.to_s, val)
+        end
         convert << input_path
         yield convert if block_given?
         convert << new_path

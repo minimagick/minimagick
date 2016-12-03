@@ -28,6 +28,9 @@ require "stringio"
           image = described_class.read(tempfile)
           expect(image).to be_valid
         end
+
+
+
       end
 
       describe ".import_pixels" do
@@ -251,6 +254,14 @@ require "stringio"
 
         it "returns self" do
           expect(subject.format('png')).to eq subject
+        end
+
+        it "reads read_opts from passed arguments" do
+          subject = described_class.open(image_path(:animation))
+          layer = subject.layers.first
+          layer.format('jpg', nil, {density: '300'})
+          expect(layer).to be_valid
+
         end
       end
 
