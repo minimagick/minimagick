@@ -145,12 +145,12 @@ module MiniMagick
     # is, it gets *modified*. You can either copy it yourself or use {.open}
     # which creates a temporary file for you and protects your original.
     #
-    # @param input_path [String] The location of an image file
+    # @param input_path [String, Pathname] The location of an image file
     # @yield [MiniMagick::Tool::Mogrify] If block is given, {#combine_options}
     #   is called.
     #
     def initialize(input_path, tempfile = nil, &block)
-      @path = input_path
+      @path = input_path.to_s
       @tempfile = tempfile
       @info = MiniMagick::Image::Info.new(@path)
 

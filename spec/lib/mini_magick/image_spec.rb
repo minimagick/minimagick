@@ -116,6 +116,11 @@ require "stringio"
           expect(image).to be_valid
         end
 
+        it "accepts a Pathname" do
+          image = described_class.new(Pathname(image_path))
+          expect(image.path).to be_a(String)
+        end
+
         it "accepts a block which it passes on to #combine_options" do
           image = described_class.new(subject.path) do |b|
             b.resize "100x100!"
