@@ -7,3 +7,4 @@ coverage
 .rubocop.yml
 tags
 doc/
+bin/rspec
