@@ -319,12 +319,10 @@ require "stringio"
 
         it "reads exif" do
           subject = described_class.new(image_path(:exif))
-          gps_latitude = subject.exif["GPSLatitude"].split(/\s*,\s*/)
-          gps_longitude = subject.exif["GPSLongitude"].split(/\s*,\s*/)
 
-          expect(subject["EXIF:ColorSpace"]).to eq "1"
-          expect(gps_latitude.size).to eq 3
-          expect(gps_longitude.size).to eq 3
+          expect(subject.exif["Flash"]).to eq "0"
+          expect(subject.exif["ImageUniqueID"]).to include("\n") # multiline
+          expect(subject["EXIF:Flash"]).to eq "0"
         end
 
         it "passes unknown values directly to -format" do
