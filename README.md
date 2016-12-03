@@ -197,8 +197,9 @@ image.data #=>
 # }
 ```
 
-Note that `MiniMagick::Image#data` is supported only on ImageMagick, for
-GraphicsMagick use `MiniMagick::Image#details`.
+Note that `MiniMagick::Image#data` is supported only on ImageMagick 6.8.8-3 or
+above, for GraphicsMagick or older versions of ImageMagick use
+`MiniMagick::Image#details`.
 
 ### Configuration
 
