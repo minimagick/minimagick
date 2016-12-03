@@ -23,7 +23,7 @@ RSpec.describe MiniMagick::Tool do
     end
 
     it "accepts stdin" do
-      subject.stdin
+      subject << "-"
       output = subject.call(stdin: File.read(image_path))
       expect(output).to match(/JPEG/)
     end
@@ -85,6 +85,20 @@ RSpec.describe MiniMagick::Tool do
       subject.debug.+ "foo"
       subject.debug.+ 8, "bar"
       expect(subject.args).to eq %W[-help +help +debug foo +debug 8 bar]
+    end
+  end
+
+  describe "#stdin" do
+    it "appends the '-' pseudo-filename" do
+      subject.stdin
+      expect(subject.args).to eq %W[-]
+    end
+  end
+
+  describe "#stdout" do
+    it "appends the '-' pseudo-filename" do
+      subject.stdout
+      expect(subject.args).to eq %W[-]
     end
   end
 

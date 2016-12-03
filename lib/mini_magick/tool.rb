@@ -201,6 +201,21 @@ module MiniMagick
     end
 
     ##
+    # Adds ImageMagick's pseudo-filename `-` for standard output.
+    #
+    # @example
+    #   content = MiniMagick::Tool::Convert.new do |convert|
+    #     convert << "input.jpg"
+    #     convert.auto_orient
+    #     convert.stdout
+    #   end
+    #   # executes `convert input.jpg -auto-orient -` which returns file contents
+    #
+    def stdout
+      self << "-"
+    end
+
+    ##
     # Define creator operator methods
     #
     #   mogrify = MiniMagick::Tool.new("mogrify")

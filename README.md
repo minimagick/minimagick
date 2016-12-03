@@ -417,15 +417,26 @@ end
 convert wand.gif \( wand.gif -rotate 90 \) images.gif
 ```
 
-#### Passing STDIN
+#### STDIN and STDOUT
 
 If you want to pass something to standard input, you can pass the `:stdin`
 option to `#call`:
 
 ```ruby
 identify = MiniMagick::Tool::Identify.new
-identify.stdin # alias for `identify << "-"`
+identify.stdin # alias for "-"
 identify.call(stdin: image_content)
+```
+
+MiniMagick also has `#stdout` alias for "-" for outputing file contents to
+standard output:
+
+```ruby
+content = MiniMagick::Tool::Convert.new do |convert|
+  convert << "input.jpg"
+  convert.auto_orient
+  convert.stdout # alias for "-"
+end
 ```
 
 #### Capturing STDERR
