@@ -42,7 +42,7 @@ module MiniMagick
 
       def cheap_info(value)
         @info.fetch(value) do
-          format, width, height, size = self["%m %w %h %b"].split(" ")
+          format, width, height, size = self['"%m %w %h %b"'].split(" ")
 
           path = @path
           path = path.match(/\[\d+\]$/).pre_match if path =~ /\[\d+\]$/
@@ -73,7 +73,7 @@ module MiniMagick
       def resolution(unit = nil)
         output = identify do |b|
           b.units unit if unit
-          b.format "%x %y"
+          b.format '"%x %y"'
         end
         output.split(" ").map(&:to_i)
       end
