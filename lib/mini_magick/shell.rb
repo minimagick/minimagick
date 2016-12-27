@@ -52,9 +52,11 @@ module MiniMagick
       pid, stdin, stdout, stderr = POSIX::Spawn.popen4(*command)
       [stdin, stdout, stderr].each(&:binmode)
       stdin.write(options[:stdin].to_s)
+      out = stdout.read
+      err = stderr.read
       Process.waitpid(pid)
 
-      [stdout.read, stderr.read, $?]
+      [out, err, $?]
     end
 
     def log(command, &block)

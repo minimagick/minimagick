@@ -55,6 +55,13 @@ RSpec.describe MiniMagick::Shell do
           expect(status).to eq 1
         end
 
+        it "handles larger output" do
+          Timeout.timeout(1) do
+            stdout, _, _ = subject.execute(%W[convert #{image_path(:gif)} -])
+            expect(stdout).to match("GIF")
+          end
+        end
+
         it "returns an appropriate response when command wasn't found" do
           stdout, stderr, code = subject.execute(%W[unexisting command])
           expect(code).to eq 127
