@@ -313,18 +313,18 @@ require "stringio"
 
       describe "#[]" do
         it "inspects image meta info" do
-          expect(subject[:width]).to be_a(Fixnum)
-          expect(subject[:height]).to be_a(Fixnum)
-          expect(subject[:dimensions]).to all(be_a(Fixnum))
+          expect(subject[:width]).to be_a(Integer)
+          expect(subject[:height]).to be_a(Integer)
+          expect(subject[:dimensions]).to all(be_a(Integer))
           expect(subject[:colorspace]).to be_a(String)
           expect(subject[:format]).to match(/[A-Z]/)
           expect(subject[:signature]).to match(/[[:alnum:]]{64}/)
         end
 
         it "supports string keys" do
-          expect(subject["width"]).to be_a(Fixnum)
-          expect(subject["height"]).to be_a(Fixnum)
-          expect(subject["dimensions"]).to all(be_a(Fixnum))
+          expect(subject["width"]).to be_a(Integer)
+          expect(subject["height"]).to be_a(Integer)
+          expect(subject["dimensions"]).to all(be_a(Integer))
           expect(subject["colorspace"]).to be_a(String)
           expect(subject["format"]).to match(/[A-Z]/)
           expect(subject['signature']).to match(/[[:alnum:]]{64}/)
@@ -343,13 +343,13 @@ require "stringio"
       it "has attributes" do
         expect(subject.type).to match(/^[A-Z]+$/)
         expect(subject.mime_type).to match(/^image\/[a-z]+$/)
-        expect(subject.width).to be_a(Fixnum).and be_nonzero
-        expect(subject.height).to be_a(Fixnum).and be_nonzero
-        expect(subject.dimensions).to all(be_a(Fixnum))
+        expect(subject.width).to be_a(Integer).and be_nonzero
+        expect(subject.height).to be_a(Integer).and be_nonzero
+        expect(subject.dimensions).to all(be_a(Integer))
         expect(subject.size).to be_a(Integer).and be_nonzero
         expect(subject.human_size).to be_a(String).and be_nonempty
         expect(subject.colorspace).to be_a(String)
-        expect(subject.resolution).to all(be_a(Fixnum))
+        expect(subject.resolution).to all(be_a(Integer))
         expect(subject.signature).to match(/[[:alnum:]]{64}/)
       end
 
