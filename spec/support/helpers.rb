@@ -13,6 +13,7 @@ module Helpers
         when :not                 then "not_an_image.rb"
         when :colon               then "with:colon.jpg"
         when :clipping_path       then "clipping_path.jpg"
+        when :rgb                 then "rgb.png"
         else
           fail "image #{type.inspect} doesn't exist"
         end
