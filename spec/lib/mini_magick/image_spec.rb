@@ -612,6 +612,27 @@ require "stringio"
           expect(output).to eq subject.width.to_s
         end
       end
+
+      describe "#get_pixels", skip_cli: :graphicsmagick do
+        it "runs the command" do
+          expect(subject.get_pixels.class).to eq Array
+        end
+
+        it "returns a matrix of correct dimensions when called on full image"  do
+          output = subject.get_pixels
+          expect(output.size).to eq subject.height
+          expect(output.first.size).to eq subject.width
+          expect(output[0][0].size).to eq 3
+        end
+
+        it "returns a matrix of correct dimensions when called a part of the image" do
+          x, y, columns, rows = 10, 10, 30, 40
+          output = subject.get_pixels x, y, columns, rows
+          expect(output.size).to eq rows
+          expect(output.first.size).to eq columns
+          expect(output[0][0].size).to eq 3
+        end
+      end
     end
   end
 end

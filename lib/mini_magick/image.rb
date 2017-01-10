@@ -532,5 +532,36 @@ module MiniMagick
       path =~ /\[\d+\]$/
     end
 
+
+    ##
+    # Returns a matrix of pixels corresponding to the size given.
+    # Each element is a triplet of the RGB values of that pixel.
+    #
+    #
+    # @example
+    #   image = MiniMagick::Image.open("image.jpg")
+    #   image.get_pixels # Entire image
+    #   image.get_pixels(10, 10, 30, 30) # 30x30 rectangle at offset 10+10
+    #
+    # @return [Array] Matrix of each color of each pixel
+    #
+    def get_pixels(*args)
+      convert = MiniMagick::Tool::Convert.new
+      if args.any?
+        raise ArgumentError, "must provide 4 arguments: (x, y, columns, rows)" if args.size != 4
+        x, y, columns, rows = args
+        convert << "#{path}[#{rows}x#{columns}+#{x}+#{y}]"
+      else
+        columns = width
+        convert << path
+      end
+
+      convert.depth(8)
+      convert << "RGB:-"
+      content = convert.call
+
+      pixels = content.unpack("C*")
+      pixels.each_slice(3).each_slice(columns).to_a
+    end
   end
 end
