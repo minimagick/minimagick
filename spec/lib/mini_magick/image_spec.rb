@@ -612,6 +612,77 @@ require "stringio"
           expect(output).to eq subject.width.to_s
         end
       end
+
+      describe '#get_pixels' do
+        let(:image)   { described_class.new image_path :rgb }
+        let(:magenta) { [255,   0, 255] }
+        let(:gray)    { [128, 128, 128] }
+        let(:green)   { [  0, 255,   0] }
+        let(:cyan)    { [  0, 255, 255] }
+
+        it 'raises an error if args.length != 4' do
+          expect { image.get_pixels(1, 2, 3) }.to raise_error(ArgumentError)
+        end
+
+        context 'called without arguments (whole image)' do
+          let(:pix1) { image.get_pixels }
+
+          it 'returns a width-by-height matrix' do
+            expect(pix1.length).to eq(image.height)
+            pix1.each do |row|
+              expect(row.length).to eq(image.width)
+            end
+          end
+
+          it 'returns a magenta pixel' do
+            expect(pix1[3][3]).to eq(magenta)
+          end
+
+          it 'returns a gray pixel' do
+            expect(pix1[-4][-4]).to eq(gray)
+          end
+
+          it 'returns a green pixel' do
+            expect(pix1[3][-4]).to eq(green)
+          end
+
+          it 'returns a cyan pixel' do
+            expect(pix1[-4][3]).to eq(cyan)
+          end
+        end
+
+        context 'for a portion of the image' do
+          let(:cols) { 10 }
+          let(:rows) {  6 }
+          let(:pix)  { image.get_pixels(cols,rows,3,3) }
+
+          it 'returns a matrix of the requested height' do
+            expect(pix.length).to eq(rows)
+          end
+
+          it 'returns a matrix of the requested width' do
+            pix.each do |x|
+              expect(x.length).to eq(cols)
+            end
+          end
+
+          it 'returns a magenta pixel' do
+            expect(pix[0][0]).to eq(magenta)
+          end
+
+          it 'returns a gray pixel' do
+            expect(pix[-1][-1]).to eq(gray)
+          end
+
+          it 'returns a cyan pixel' do
+            expect(pix[-1][0]).to eq(cyan)
+          end
+
+          it 'returns a green pixel' do
+            expect(pix[0][-1]).to eq(green)
+          end
+        end
+      end
     end
   end
 end

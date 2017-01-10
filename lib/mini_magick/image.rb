@@ -532,5 +532,22 @@ module MiniMagick
       path =~ /\[\d+\]$/
     end
 
+    ##
+    # Returns RGB pixel values from an image.
+    def get_pixels(*args)
+      convert = MiniMagick::Tool::Convert.new
+      convert << path
+      if args.any?
+        raise ArgumentError, "must provide 4 arguments: (columns, rows, x, y)" if args.size != 4
+        columns, rows, x, y = args
+        convert.crop "#{columns}x#{rows}+#{x}+#{y}"
+      else
+        columns = width
+      end
+      convert.depth(8)
+      convert << "RGB:-"
+      pixels = convert.call.unpack("C*")
+      pixels.each_slice(3).each_slice(columns).to_a
+    end
   end
 end
