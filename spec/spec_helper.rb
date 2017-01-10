@@ -10,6 +10,7 @@ RSpec.configure do |config|
   config.color = true
   config.fail_fast = true unless ENV["CI"]
   config.filter_run :focus
+  config.run_all_when_everything_filtered = true
 
   [:imagemagick, :graphicsmagick].each do |cli|
     config.before(cli: cli) do |example|
