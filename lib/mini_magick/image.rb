@@ -563,20 +563,16 @@ module MiniMagick
       convert.depth(8)
       convert << "RGB:-"
       pixels = convert.call.unpack("C*")
-      pixels.each_slice(3).each_slice(region_width region).to_a
+      pixels.each_slice(3).each_slice(width_of region).to_a
     end
 
     private
 
-    def region_width(region)
-      if region
-        # we are retrieving a region
-        # hackish trick to figure out desired width from the given geometry
-        region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
-        $1=='' ? width - $2.to_i : $1.to_i
-      else
-        width
-      end
+    def width_of(region)
+      return width unless region
+      # hackish trick to figure out desired width from the given geometry
+      region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
+      $1=='' ? width - $2.to_i : $1.to_i
     end
   end
 end
