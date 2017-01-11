@@ -614,23 +614,19 @@ require "stringio"
       end
 
       describe '#get_pixels' do
-        let(:image)   { described_class.new image_path :rgb }
+        let(:img)     { described_class.new image_path :rgb }
         let(:magenta) { [255,   0, 255] }
         let(:gray)    { [128, 128, 128] }
         let(:green)   { [  0, 255,   0] }
         let(:cyan)    { [  0, 255, 255] }
 
-        it 'raises an error if args.length != 4' do
-          expect { image.get_pixels(1, 2, 3) }.to raise_error(ArgumentError)
-        end
-
         context 'called without arguments (whole image)' do
-          let(:pix1) { image.get_pixels }
+          let(:pix1) { img.get_pixels }
 
           it 'returns a width-by-height matrix' do
-            expect(pix1.length).to eq(image.height)
+            expect(pix1.length).to eq(img.height)
             pix1.each do |row|
-              expect(row.length).to eq(image.width)
+              expect(row.length).to eq(img.width)
             end
           end
 
@@ -654,7 +650,32 @@ require "stringio"
         context 'for a portion of the image' do
           let(:cols) { 10 }
           let(:rows) {  6 }
-          let(:pix)  { image.get_pixels(cols,rows,3,3) }
+          let(:region) { "#{cols}x#{rows}+3+3" }
+          let(:pix)  { img.get_pixels region }
+
+          it 'raises an error with invalid arg' do
+            expect { img.get_pixels 'hello' }.to raise_error
+          end
+
+          it 'figures out the matrix width from a WxH geometry string' do
+            p = img.get_pixels '12x45'
+            expect(p.first.length).to eq(12)
+          end
+
+          it 'figures out the matrix width from a +X+Y geometry string' do
+            p = img.get_pixels '+10+0'
+            expect(p.first.length).to eq(6)
+          end
+
+          it 'figures out the matrix width from a WxH+X+Y geometry string' do
+            p = img.get_pixels '12x5+2+0'
+            expect(p.first.length).to eq(12)
+          end
+
+          pending 'raises an error if the requested region exceeds image size' do
+            p = img.get_pixels '12x5+10+0'
+            expect { p.first.length }.to raise_error(ArgumentError)
+          end
 
           it 'returns a matrix of the requested height' do
             expect(pix.length).to eq(rows)

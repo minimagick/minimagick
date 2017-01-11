@@ -533,17 +533,43 @@ module MiniMagick
     end
 
     ##
-    # Returns RGB pixel values from an image.
-    def get_pixels(*args)
+    # Returns a matrix of pixels from the image. The matrix is constructed as
+    # an array (1) of arrays (2) of arrays (3) of unsigned integers:
+    #
+    # 1) one for each row of pixels
+    # 2) one for each column of pixels
+    # 3) three elements in the range 0-255, one for each of the RGB color channels
+    #
+    # @example
+    #   img = MiniMagick::Image.open 'image.jpg'
+    #   pix = image.get_pixels
+    #   pix[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
+    #
+    # A rectangular region of pixels (rather than the whole image) can be
+    # retrieved by passing the appropriate coordinates as a string argument.
+    # The following, for example, gets pixels for a 40-column by 30-row area, with
+    # the top-left corner at column 10, row 5 (see ImageMagick's documentation for
+    # more image geometry options):
+    #
+    # @example
+    #   img = MiniMagick::Image.open 'image.jpg'
+    #   pix = img.get_pixels '40x30+10+5'
+    #
+    # @return [Array] Matrix of each color of each pixel
+    def get_pixels(region=nil)
       convert = MiniMagick::Tool::Convert.new
       convert << path
-      if args.any?
-        raise ArgumentError, "must provide 4 arguments: (columns, rows, x, y)" if args.size != 4
-        columns, rows, x, y = args
-        convert.crop "#{columns}x#{rows}+#{x}+#{y}"
-      else
+
+      if region.nil?
         columns = width
+      else
+        # we are retrieving a region
+        convert.crop region
+        # hackish trick to figure out desired width from the given geometry
+        region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
+        columns = ($1=='') ? width - $2.to_i : $1.to_i
       end
+
       convert.depth(8)
       convert << "RGB:-"
       pixels = convert.call.unpack("C*")
