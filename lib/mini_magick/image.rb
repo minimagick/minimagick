@@ -559,21 +559,24 @@ module MiniMagick
     def get_pixels(region=nil)
       convert = MiniMagick::Tool::Convert.new
       convert << path
-
-      if region.nil?
-        columns = width
-      else
-        # we are retrieving a region
-        convert.crop region
-        # hackish trick to figure out desired width from the given geometry
-        region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
-        columns = ($1=='') ? width - $2.to_i : $1.to_i
-      end
-
+      convert.crop(region) if region
       convert.depth(8)
       convert << "RGB:-"
       pixels = convert.call.unpack("C*")
-      pixels.each_slice(3).each_slice(columns).to_a
+      pixels.each_slice(3).each_slice(region_width region).to_a
+    end
+
+    private
+
+    def region_width(region)
+      if region
+        # we are retrieving a region
+        # hackish trick to figure out desired width from the given geometry
+        region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
+        $1=='' ? width - $2.to_i : $1.to_i
+      else
+        width
+      end
     end
   end
 end
