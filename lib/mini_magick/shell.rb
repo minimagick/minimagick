@@ -28,9 +28,7 @@ module MiniMagick
     def execute(command, options = {})
       stdout, stderr, status =
         log(command.join(" ")) do
-          Timeout.timeout(MiniMagick.timeout) do
-            send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", command, options)
-          end
+          send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", command, options)
         end
 
       [stdout, stderr, status.exitstatus]
@@ -43,20 +41,28 @@ module MiniMagick
     def execute_open3(command, options = {})
       require "open3"
 
-      Open3.capture3(*command, binmode: true, stdin_data: options[:stdin].to_s)
+      Timeout.timeout(MiniMagick.timeout) do
+        Open3.capture3(*command, binmode: true, stdin_data: options[:stdin].to_s)
+      end
     end
 
     def execute_posix_spawn(command, options = {})
       require "posix-spawn"
 
-      pid, stdin, stdout, stderr = POSIX::Spawn.popen4(*command)
-      [stdin, stdout, stderr].each(&:binmode)
-      stdin.write(options[:stdin].to_s)
-      out = stdout.read
-      err = stderr.read
-      Process.waitpid(pid)
+      pid = nil
+      Timeout.timeout(MiniMagick.timeout) do
+        pid, stdin, stdout, stderr = POSIX::Spawn.popen4(*command)
+        [stdin, stdout, stderr].each(&:binmode)
+        stdin.write(options[:stdin].to_s)
+        out = stdout.read
+        err = stderr.read
+        Process.waitpid(pid)
 
-      [out, err, $?]
+        [out, err, $?]
+      end
+    rescue => e
+      Process.kill('TERM', pid) if pid
+      raise e
     end
 
     def log(command, &block)
