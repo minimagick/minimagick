@@ -160,7 +160,8 @@ module MiniMagick
             convert << "json:"
           end
 
-          JSON.parse(json).fetch("image")
+          parsed_json = JSON.parse(json)
+          parsed_json.respond_to?(:each) ? parsed_json[0].fetch('image') : parsed_json.fetch('image')
         )
       end
 

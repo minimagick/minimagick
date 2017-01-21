@@ -6,6 +6,7 @@ module Helpers
       File.join("spec/fixtures",
         case type
         when :default, :jpg       then "default.jpg"
+        when :png                 then "engine.png"  
         when :animation, :gif     then "animation.gif"
         when :exif                then "exif.jpg"
         when :empty_identify_line then "empty_identify_line.png"
