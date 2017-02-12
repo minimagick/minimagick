@@ -442,7 +442,6 @@ require "stringio"
       end
 
       describe "#data" do
-
         describe "when the data return is not an array" do
           subject { described_class.new(image_path(:jpg)) }
 
@@ -451,15 +450,15 @@ require "stringio"
             expect(subject.data["colorspace"]).to eq "sRGB"
           end
         end
+
         describe "when the data return is an array (ex png)" do
           subject { described_class.new(image_path(:png)) }
+
           it "returns image JSON data", skip_cli: :graphicsmagick do
             expect(subject.data["format"]).to eq "PNG"
             expect(subject.data["colorspace"]).to eq "sRGB"
           end
         end
-
-        it "returns image JSON data for png"
       end unless ENV["CI"] # problems installing newer ImageMagick versions on CI
 
       describe "#layers" do
