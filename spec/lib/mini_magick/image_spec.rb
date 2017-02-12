@@ -376,8 +376,7 @@ require "stringio"
         end
 
         it "decodes the ExifVersion" do
-          expect(subject.exif["ExifVersion"]).to eq("Exif Version 2.2") if MiniMagick.imagemagick?
-          expect(subject.exif["ExifVersion"]).to eq("0220") if MiniMagick.graphicsmagick?
+          expect(subject.exif["ExifVersion"]).to eq("0220")
         end unless ENV["CI"]
       end
 
@@ -399,7 +398,7 @@ require "stringio"
         it "returns a hash of verbose information" do
           expect(subject.details["Format"]).to match /^JPEG/
           if MiniMagick.cli == :imagemagick
-            expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
+            expect(subject.details["Channel depth"]["Red"]).to eq "8-bit"
             expect(subject.details).to have_key("Background color")
             expect(subject.details["Properties"]).to have_key("date:create")
           else
@@ -410,6 +409,7 @@ require "stringio"
 
         context "when verbose information includes an empty line" do
           subject { described_class.new(image_path(:empty_identify_line)) }
+
           it "skips the empty line" do
             if MiniMagick.cli == :imagemagick
               expect(subject.details["Properties"]).to have_key("date:create")
@@ -419,18 +419,18 @@ require "stringio"
           end
         end
 
-        context "when verbose information includes a badly encoded line do",
-          skip_cli: :graphicsmagick do
+        context "when verbose information includes a badly encoded line do", skip_cli: :graphicsmagick do
           subject { described_class.new(image_path(:badly_encoded_line)) }
+
           it "skips the badly encoded line" do
             expect(subject.details).not_to have_key("Software")
           end
         end
 
         # GraphicsMagick does not output the clipping path
-        context "when verbose information includes a clipping path",
-          skip_cli: :graphicsmagick do
+        context "when verbose information includes a clipping path", skip_cli: :graphicsmagick do
           subject { described_class.new(image_path(:clipping_path)) }
+
           it "does not hang when parsing verbose data" do
             # Retrieving .details should happen very quickly but as of v4.3.6
             # will hang indefinitely without the timeout
