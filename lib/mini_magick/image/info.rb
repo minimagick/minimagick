@@ -124,20 +124,22 @@ module MiniMagick
         @info["details"] ||= (
           details_string = identify(&:verbose)
           key_stack = []
-          details_string.lines.to_a[1..-1].each_with_object({}) do |line, details_hash|
-            next if !line.valid_encoding? || line.strip.length.zero?
+          lines_collapsed = []
 
-            level = line[/^\s*/].length / 2 - 1
-            if level >= 0
-              key_stack.pop until key_stack.size <= level
+          details_string.lines.to_a[1..-1].each do |line|
+            # Skip empty or invalid lines
+            next if !line.valid_encoding? || line.strip.length.zero?
+            if line[0] != " "
+              # Continuation line
+              lines_collapsed[-1] << line
             else
-              # Some metadata, such as SVG clipping paths, will be saved without
-              # indentation, resulting in a level of -1
-              last_key = details_hash.keys.last
-              details_hash[last_key] = '' if details_hash[last_key].empty?
-              details_hash[last_key] << line
-              next
+              lines_collapsed << line
             end
+          end
+
+          lines_collapsed.each_with_object({}) do |line, details_hash|
+            level = line[/^\s*/].length / 2 - 1
+            key_stack.pop until key_stack.size <= level
 
             key, _, value = line.partition(/:[\s\n]/).map(&:strip)
             hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
@@ -147,8 +149,7 @@ module MiniMagick
             else
               hash[key] = value
             end
-          end
-        )
+          end)
       end
 
       def data

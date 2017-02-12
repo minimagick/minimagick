@@ -439,6 +439,14 @@ require "stringio"
             end
           end
         end
+
+        context "when verbose information contains newlines",
+          skip_cli: :graphicsmagick do
+          subject { described_class.new(image_path(:metadata_newline)) }
+          it "reads continuation lines" do
+            expect(subject.details['Profiles']['Image Name[2,5]']).to eq("barba\npapa")
+          end
+        end
       end
 
       describe "#data" do
