@@ -542,37 +542,26 @@ module MiniMagick
     #
     # @example
     #   img = MiniMagick::Image.open 'image.jpg'
-    #   pix = image.get_pixels
+    #   pix = img.get_pixels
     #   pix[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
     #
-    # A rectangular region of pixels (rather than the whole image) can be
-    # retrieved by passing the appropriate coordinates as a string argument.
-    # The following, for example, gets pixels for a 40-column by 30-row area, with
-    # the top-left corner at column 10, row 5 (see ImageMagick's documentation for
-    # more image geometry options):
+    # It can also be called after applying transformations:
     #
     # @example
     #   img = MiniMagick::Image.open 'image.jpg'
-    #   pix = img.get_pixels '40x30+10+5'
+    #   img.crop '20x30+10+5'
+    #   img.colorspace 'Gray'
+    #   pix = img.get_pixels
+    #
+    # In this example, all pixels in pix should now have equal R, G, and B values
     #
     # @return [Array] Matrix of each color of each pixel
-    def get_pixels(region=nil)
-      convert = MiniMagick::Tool::Convert.new
-      convert << path
-      convert.crop(region) if region
-      convert.depth(8)
-      convert << "RGB:-"
-      pixels = convert.call.unpack("C*")
-      pixels.each_slice(3).each_slice(width_of region).to_a
-    end
-
-    private
-
-    def width_of(region)
-      return width unless region
-      # hackish trick to figure out desired width from the given geometry
-      region =~ /^(\d*)[^\+]*\+?(\d*)/ # extract width and X offset
-      $1=='' ? width - $2.to_i : $1.to_i
+    def get_pixels
+      cvt = MiniMagick::Tool::Convert.new
+      cvt << path
+      cvt.depth(8)
+      cvt << "RGB:-"
+      cvt.call.unpack("C*").each_slice(3).each_slice(width).to_a
     end
   end
 end

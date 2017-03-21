@@ -3,6 +3,7 @@ require "pathname"
 require "tempfile"
 require "fileutils"
 require "stringio"
+require 'byebug'
 
 ["ImageMagick", "GraphicsMagick"].each do |cli|
   RSpec.context "With #{cli}", cli: cli.downcase.to_sym do
@@ -614,93 +615,72 @@ require "stringio"
       end
 
       describe '#get_pixels' do
-        let(:img)     { described_class.new image_path :rgb }
         let(:magenta) { [255,   0, 255] }
         let(:gray)    { [128, 128, 128] }
         let(:green)   { [  0, 255,   0] }
         let(:cyan)    { [  0, 255, 255] }
+        let(:pix)     { img.get_pixels  }
 
-        context 'called without arguments (whole image)' do
-          let(:pix1) { img.get_pixels }
+        [:open, :new].each do |mode|
+          context "via ‘#{mode}’" do
+            let(:img) { eval "described_class.#{mode} image_path :rgb_tmp" }
 
-          it 'returns a width-by-height matrix' do
-            expect(pix1.length).to eq(img.height)
-            pix1.each do |row|
-              expect(row.length).to eq(img.width)
+            before { FileUtils.cp image_path(:rgb), image_path(:rgb_tmp) }
+
+            context 'without modifications' do
+              it 'returns a width-by-height matrix' do
+                pix.each do |row|
+                  expect(row.length).to eq(img.width)
+                end
+              end
+
+              it('returns a magenta pixel') { expect(pix[3][3]  ).to eq(magenta) }
+              it('returns a gray pixel')    { expect(pix[-4][-4]).to eq(gray)    }
+              it('returns a green pixel')   { expect(pix[3][-4] ).to eq(green)   }
+              it('returns a cyan pixel')    { expect(pix[-4][3] ).to eq(cyan)    }
             end
-          end
 
-          it 'returns a magenta pixel' do
-            expect(pix1[3][3]).to eq(magenta)
-          end
+            context 'after cropping' do
+              let(:cols)    { 10 }
+              let(:rows)    {  6 }
 
-          it 'returns a gray pixel' do
-            expect(pix1[-4][-4]).to eq(gray)
-          end
+              before { img.crop "#{cols}x#{rows}+3+3" }
 
-          it 'returns a green pixel' do
-            expect(pix1[3][-4]).to eq(green)
-          end
+              it 'returns a matrix of the requested height' do
+                expect(pix.length).to eq(rows)
+              end
 
-          it 'returns a cyan pixel' do
-            expect(pix1[-4][3]).to eq(cyan)
-          end
-        end
+              it 'returns a matrix of the requested width' do
+                pix.each do |x|
+                  expect(x.length).to eq(cols)
+                end
+              end
 
-        context 'for a portion of the image' do
-          let(:cols) { 10 }
-          let(:rows) {  6 }
-          let(:region) { "#{cols}x#{rows}+3+3" }
-          let(:pix)  { img.get_pixels region }
-
-          it 'raises an error with invalid arg' do
-            expect { img.get_pixels 'hello' }.to raise_error
-          end
-
-          it 'figures out the matrix width from a WxH geometry string' do
-            p = img.get_pixels '12x45'
-            expect(p.first.length).to eq(12)
-          end
-
-          it 'figures out the matrix width from a +X+Y geometry string' do
-            p = img.get_pixels '+10+0'
-            expect(p.first.length).to eq(6)
-          end
-
-          it 'figures out the matrix width from a WxH+X+Y geometry string' do
-            p = img.get_pixels '12x5+2+0'
-            expect(p.first.length).to eq(12)
-          end
-
-          pending 'raises an error if the requested region exceeds image size' do
-            p = img.get_pixels '12x5+10+0'
-            expect { p.first.length }.to raise_error(ArgumentError)
-          end
-
-          it 'returns a matrix of the requested height' do
-            expect(pix.length).to eq(rows)
-          end
-
-          it 'returns a matrix of the requested width' do
-            pix.each do |x|
-              expect(x.length).to eq(cols)
+              it('returns a magenta pixel') { expect(pix[0][0]  ).to eq(magenta)}
+              it('returns a gray pixel')    { expect(pix[-1][-1]).to eq(gray)   }
+              it('returns a cyan pixel')    { expect(pix[-1][0] ).to eq(cyan)   }
+              it('returns a green pixel')   { expect(pix[0][-1] ).to eq(green)  }
             end
-          end
 
-          it 'returns a magenta pixel' do
-            expect(pix[0][0]).to eq(magenta)
-          end
+            context 'after resizing and desaturating' do
+              let(:cols) { 8 }
+              let(:rows) { 6 }
 
-          it 'returns a gray pixel' do
-            expect(pix[-1][-1]).to eq(gray)
-          end
+              before {
+                img.resize '50%'
+                img.colorspace 'Gray'
+              }
 
-          it 'returns a cyan pixel' do
-            expect(pix[-1][0]).to eq(cyan)
-          end
+              it 'returns a matrix of the requested height' do
+                expect(pix.length).to eq(rows)
+              end
 
-          it 'returns a green pixel' do
-            expect(pix[0][-1]).to eq(green)
+              it 'returns a matrix of the requested width' do
+                pix.each do |x|
+                  expect(x.length).to eq(cols)
+                end
+              end
+            end
           end
         end
       end
