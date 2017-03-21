@@ -3,7 +3,6 @@ require "pathname"
 require "tempfile"
 require "fileutils"
 require "stringio"
-require 'byebug'
 
 ["ImageMagick", "GraphicsMagick"].each do |cli|
   RSpec.context "With #{cli}", cli: cli.downcase.to_sym do
@@ -678,6 +677,15 @@ require 'byebug'
               it 'returns a matrix of the requested width' do
                 pix.each do |x|
                   expect(x.length).to eq(cols)
+                end
+              end
+
+              it 'returns gray pixels' do
+                pix.each do |row|
+                  row.each do |px|
+                    expect(px[0]).to eq px[1]
+                    expect(px[0]).to eq px[2]
+                  end
                 end
               end
             end
