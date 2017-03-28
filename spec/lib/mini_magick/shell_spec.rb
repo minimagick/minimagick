@@ -75,6 +75,12 @@ RSpec.describe MiniMagick::Shell do
           expect(stream.read).to match /\[\d+.\d+s\] identify #{image_path(:gif)}/
         end
 
+        it "terminate long running commands if MiniMagick.timeout is set" do
+          MiniMagick.timeout = 0.1
+          expect { subject.execute(%w[sleep 0.2]) }.to raise_error(Timeout::Error)
+          MiniMagick.timeout = nil
+        end
+
         it "doesn't break on spaces" do
           stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
           expect(stdout).to match(/\d+ \d+/)

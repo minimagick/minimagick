@@ -41,28 +41,38 @@ module MiniMagick
     def execute_open3(command, options = {})
       require "open3"
 
-      Timeout.timeout(MiniMagick.timeout) do
-        Open3.capture3(*command, binmode: true, stdin_data: options[:stdin].to_s)
-      end
+      in_w, out_r, err_r, subprocess_thread = Open3.popen3(*command)
+
+      capture_command(in_w, out_r, err_r, subprocess_thread, options)
     end
 
     def execute_posix_spawn(command, options = {})
       require "posix-spawn"
 
-      pid = nil
-      Timeout.timeout(MiniMagick.timeout) do
-        pid, stdin, stdout, stderr = POSIX::Spawn.popen4(*command)
-        [stdin, stdout, stderr].each(&:binmode)
-        stdin.write(options[:stdin].to_s)
-        out = stdout.read
-        err = stderr.read
-        Process.waitpid(pid)
+      pid, in_w, out_r, err_r = POSIX::Spawn.popen4(*command)
+      subprocess_thread = Process.detach(pid)
 
-        [out, err, $?]
+      capture_command(in_w, out_r, err_r, subprocess_thread, options)
+    end
+
+    def capture_command(in_w, out_r, err_r, subprocess_thread, options)
+      [in_w, out_r, err_r].each(&:binmode)
+      stdout_reader = Thread.new { out_r.read }
+      stderr_reader = Thread.new { err_r.read }
+      begin
+        in_w.write options[:stdin].to_s
+      rescue Errno::EPIPE
       end
-    rescue => e
-      Process.kill('TERM', pid) if pid
-      raise e
+      in_w.close
+
+      Timeout.timeout(MiniMagick.timeout) { subprocess_thread.join }
+
+      [stdout_reader.value, stderr_reader.value, subprocess_thread.value]
+    rescue Timeout::Error => error
+      Process.kill("TERM", subprocess_thread.pid)
+      raise error
+    ensure
+      [out_r, err_r].each(&:close)
     end
 
     def log(command, &block)
