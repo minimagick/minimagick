@@ -326,8 +326,8 @@ module MiniMagick
     #
     # @example
     #   img = MiniMagick::Image.open 'image.jpg'
-    #   pix = img.get_pixels
-    #   pix[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
+    #   pixels = img.get_pixels
+    #   pixels[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
     #
     # It can also be called after applying transformations:
     #
@@ -335,9 +335,9 @@ module MiniMagick
     #   img = MiniMagick::Image.open 'image.jpg'
     #   img.crop '20x30+10+5'
     #   img.colorspace 'Gray'
-    #   pix = img.get_pixels
+    #   pixels = img.get_pixels
     #
-    # In this example, all pixels in pix should now have equal R, G, and B values
+    # In this example, all pixels in pix should now have equal R, G, and B values.
     #
     # @return [Array] Matrix of each color of each pixel
     def get_pixels

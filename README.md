@@ -201,6 +201,29 @@ Note that `MiniMagick::Image#data` is supported only on ImageMagick 6.8.8-3 or
 above, for GraphicsMagick or older versions of ImageMagick use
 `MiniMagick::Image#details`.
 
+### Pixels
+
+With MiniMagick you can retrieve a matrix of image pixels, where each member of
+the matrix is a 3-element array of numbers between 0-255, one for each range of
+the RGB color channels.
+
+```rb
+image = MiniMagick::Image.open("image.jpg")
+pixels = image.get_pixels
+pixels[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
+```
+
+It can also be called after applying transformations:
+
+```rb
+image = MiniMagick::Image.open("image.jpg")
+image.crop "20x30+10+5"
+image.colorspace "Gray"
+pixels = image.get_pixels
+```
+
+In this example, the returned pixels should now have equal R, G, and B values.
+
 ### Configuration
 
 ```ruby
