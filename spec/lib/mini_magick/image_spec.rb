@@ -482,6 +482,80 @@ require "stringio"
         end
       end
 
+      describe "#get_pixels" do
+        let(:magenta) { [255,   0, 255] }
+        let(:gray)    { [128, 128, 128] }
+        let(:green)   { [  0, 255,   0] }
+        let(:cyan)    { [  0, 255, 255] }
+        let(:pix)     { subject.get_pixels }
+
+        subject { described_class.open(image_path(:rgb)) }
+
+        context "without modifications" do
+          it "returns a width-by-height matrix" do
+            pix.each do |row|
+              expect(row.length).to eq(subject.width)
+            end
+          end
+
+          it("returns a magenta pixel") { expect(pix[3][3]  ).to eq(magenta) }
+          it("returns a gray pixel")    { expect(pix[-4][-4]).to eq(gray)    }
+          it("returns a green pixel")   { expect(pix[3][-4] ).to eq(green)   }
+          it("returns a cyan pixel")    { expect(pix[-4][3] ).to eq(cyan)    }
+        end
+
+        context "after cropping" do
+          let(:cols)    { 10 }
+          let(:rows)    {  6 }
+
+          before { subject.crop "#{cols}x#{rows}+3+3" }
+
+          it "returns a matrix of the requested height" do
+            expect(pix.length).to eq(rows)
+          end
+
+          it "returns a matrix of the requested width" do
+            pix.each do |x|
+              expect(x.length).to eq(cols)
+            end
+          end
+
+          it("returns a magenta pixel") { expect(pix[0][0]  ).to eq(magenta)}
+          it("returns a gray pixel")    { expect(pix[-1][-1]).to eq(gray)   }
+          it("returns a cyan pixel")    { expect(pix[-1][0] ).to eq(cyan)   }
+          it("returns a green pixel")   { expect(pix[0][-1] ).to eq(green)  }
+        end
+
+        context "after resizing and desaturating" do
+          let(:cols) { 8 }
+          let(:rows) { 6 }
+
+          before {
+            subject.resize "50%"
+            subject.colorspace "Gray"
+          }
+
+          it "returns a matrix of the requested height" do
+            expect(pix.length).to eq(rows)
+          end
+
+          it "returns a matrix of the requested width" do
+            pix.each do |x|
+              expect(x.length).to eq(cols)
+            end
+          end
+
+          it "returns gray pixels" do
+            pix.each do |row|
+              row.each do |px|
+                expect(px[0]).to eq px[1]
+                expect(px[0]).to eq px[2]
+              end
+            end
+          end
+        end
+      end
+
       describe "missing methods" do
         context "for a known method" do
           it "is executed by #method_missing" do

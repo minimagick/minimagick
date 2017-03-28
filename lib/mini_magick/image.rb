@@ -317,6 +317,47 @@ module MiniMagick
     alias frames layers
 
     ##
+    # Returns a matrix of pixels from the image. The matrix is constructed as
+    # an array (1) of arrays (2) of arrays (3) of unsigned integers:
+    #
+    # 1) one for each row of pixels
+    # 2) one for each column of pixels
+    # 3) three elements in the range 0-255, one for each of the RGB color channels
+    #
+    # @example
+    #   img = MiniMagick::Image.open 'image.jpg'
+    #   pix = img.get_pixels
+    #   pix[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
+    #
+    # It can also be called after applying transformations:
+    #
+    # @example
+    #   img = MiniMagick::Image.open 'image.jpg'
+    #   img.crop '20x30+10+5'
+    #   img.colorspace 'Gray'
+    #   pix = img.get_pixels
+    #
+    # In this example, all pixels in pix should now have equal R, G, and B values
+    #
+    # @return [Array] Matrix of each color of each pixel
+    def get_pixels
+      output = MiniMagick::Tool::Convert.new do |convert|
+        convert << path
+        convert.depth(8)
+        convert << "RGB:-"
+      end
+
+      pixels_array = output.unpack("C*")
+      pixels = pixels_array.each_slice(3).each_slice(width).to_a
+
+      # deallocate large intermediary objects
+      output.clear
+      pixels_array.clear
+
+      pixels
+    end
+
+    ##
     # This is used to change the format of the image. That is, from "tiff to
     # jpg" or something like that. Once you run it, the instance is pointing to
     # a new file with a new extension!
@@ -531,6 +572,5 @@ module MiniMagick
     def layer?
       path =~ /\[\d+\]$/
     end
-
   end
 end
