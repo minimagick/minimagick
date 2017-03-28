@@ -13,12 +13,9 @@ module MiniMagick
     def run(command, options = {})
       stdout, stderr, status = execute(command, stdin: options[:stdin])
 
-      case status
-      when 1
+      if status != 0 && options.fetch(:whiny, MiniMagick.whiny)
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
-      when 127
-        fail MiniMagick::Error, stderr
-      end if options.fetch(:whiny, MiniMagick.whiny)
+      end
 
       $stderr.print(stderr) unless options[:stderr] == false
 
