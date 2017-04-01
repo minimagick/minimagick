@@ -10,6 +10,8 @@ require 'mini_magick/utilities'
 module MiniMagick
   class Image
 
+    ACCESS_MODES = "rb"
+
     ##
     # This is the primary loading method used by all of the other class
     # methods.
@@ -86,10 +88,41 @@ module MiniMagick
           File.extname(URI(path_or_url).path)
         end
 
-      Kernel.open(path_or_url, "rb") do |file|
+      Kernel.open(path_or_url, ACCESS_MODES) do |file|
         read(file, ext)
       end
     end
+
+    ##
+    # Opens a specific image file at a URI with an OAuth token in `Authorization` header.
+    # Use this if you don't want to overwrite the image file.
+    #
+    # Extension is either guessed from the path or you can specify it as a
+    # third parameter.
+    #
+    # @param url [String] A URL that open-uri can read
+    # @param oauth_token [String] A OAuth token that needs to be passed in as a Bearer string 
+    #  with Authorization header
+    # @param ext [String] Specify the extension you want to read it as
+    # @return [MiniMagick::Image] The loaded image
+    # 
+    # appended header would be #=>'Authorization': 'Bearer <oauth_token>'
+    #
+    def self.open_with_token(url, oauth_token, ext = nil)
+      ext ||= File.extname(URI(url).path)
+      begin
+        Kernel.open(url, ACCESS_MODES, "Authorization" => "Bearer #{oauth_token}") do |file|
+          read(file, ext)
+        end
+      rescue OpenURI::HTTPError => e
+        if e.exception.to_s.match(/401|unauthorized/i)
+          raise MiniMagick::Unauthorized, "#{e.message}"
+        else
+          raise MiniMagick::Error, "#{e.message}"
+        end
+      end
+    end
+
 
     ##
     # Used to create a new Image object data-copy. Not used to "paint" or

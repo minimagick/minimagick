@@ -35,6 +35,29 @@ module Helpers
     @tempfile = Tempfile.open(basename)
     @tempfile.path
   end
+
+  def valid_bearer_token
+    'valid_test_bearer_token'
+  end
+
+  def invalid_bearer_token
+    'invalid_test_bearer_token'
+  end
+
+  def download_url_with_token
+    "https://www.example.com/stubbed/valid/image/url"
+  end
+
+  def stub_tokenized_requests
+
+    stub_request(:get, download_url_with_token).
+      with(:headers => {'Authorization' => "Bearer " + valid_bearer_token }).
+      to_return(:body => File.new(File.expand_path("../../fixtures/default.jpg", __FILE__)), :status => 200)
+
+    stub_request(:get, download_url_with_token).
+      with(:headers => {'Authorization' => "Bearer " + invalid_bearer_token }).
+      to_return(:body => '401 Unauthorized', :status => [401, "Unauthorized"])
+  end
 end
 
 RSpec.configure do |config|

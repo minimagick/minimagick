@@ -69,6 +69,14 @@ image.resize "100x100"
 image.format "png"
 image.write "output.png"
 ```
+### Usage with oAuth token
+##### Will add a Header "Authoriation": "Bearer <token>" to request you make
+```ruby
+image = MiniMagick::Image.open_with_token("http://url/to/authorized/file", "authorization_token")
+image.resize "100x100"
+image.format "png"
+image.write "output.png"
+```
 
 `MiniMagick::Image.open` makes a copy of the image, and further methods modify
 that copy (the original stays untouched). We then
@@ -83,6 +91,13 @@ to the image.
 image = MiniMagick::Image.open("http://example.com/image.jpg")
 image.contrast
 image.write("from_internets.jpg")
+```
+
+`MiniMagick::Image.open_with_token` accepts only URLs with an access_token.
+```ruby
+image = MiniMagick::Image.open_with_token("http://example.com/image.jpg", "access_token")
+image.contrast
+image.write("from_internets_with_token.jpg")
 ```
 
 On the other hand, if we want the original image to actually *get* modified,

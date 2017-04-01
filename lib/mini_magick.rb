@@ -48,6 +48,7 @@ module MiniMagick
   end
 
   class Error < RuntimeError; end
+  class Unauthorized < StandardError; end
   class Invalid < StandardError; end
 
 end
