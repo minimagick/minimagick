@@ -27,10 +27,6 @@ module Helpers
     end
   end
 
-  def image_url
-    "https://avatars2.githubusercontent.com/u/795488?v=2&s=40"
-  end
-
   def random_path(basename = "")
     @tempfile = Tempfile.open(basename)
     @tempfile.path

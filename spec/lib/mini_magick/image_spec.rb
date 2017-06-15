@@ -3,6 +3,7 @@ require "pathname"
 require "tempfile"
 require "fileutils"
 require "stringio"
+require "webmock/rspec"
 
 ["ImageMagick", "GraphicsMagick"].each do |cli|
   RSpec.context "With #{cli}", cli: cli.downcase.to_sym do
@@ -59,6 +60,7 @@ require "stringio"
           image = described_class.open(image_path)
           expect(image.path).not_to eq image_path
           expect(image).to be_valid
+          expect(File.extname(image.path)).to eq File.extname(image_path)
         end
 
         it "accepts a Pathname" do
@@ -67,11 +69,16 @@ require "stringio"
         end
 
         it "loads a remote image" do
-          begin
-            image = described_class.open(image_url)
-            expect(image).to be_valid
-          rescue SocketError
-          end
+          stub_request(:get, "http://example.com/image.jpg").to_return(body: File.read(image_path))
+          image = described_class.open("http://example.com/image.jpg")
+          expect(image).to be_valid
+          expect(File.extname(image.path)).to eq ".jpg"
+        end
+
+        it "strips out colons from URL" do
+          stub_request(:get, "http://example.com/image.jpg:large").to_return(body: File.read(image_path))
+          image = described_class.open("http://example.com/image.jpg:large")
+          expect(File.extname(image.path)).to eq ".jpg"
         end
 
         it "validates the image" do

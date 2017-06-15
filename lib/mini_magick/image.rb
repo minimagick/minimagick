@@ -86,6 +86,8 @@ module MiniMagick
           File.extname(URI(path_or_url).path)
         end
 
+      ext.sub!(/:.*/, '') # hack for filenames or URLs that include a colon
+
       Kernel.open(path_or_url, "rb") do |file|
         read(file, ext)
       end
