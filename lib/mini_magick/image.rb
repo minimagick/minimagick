@@ -555,13 +555,7 @@ module MiniMagick
     end
 
     def mogrify(page = nil)
-      MiniMagick::Tool::Mogrify.new do |builder|
-        builder.instance_eval do
-          def format(*args)
-            fail NoMethodError,
-              "you must call #format on a MiniMagick::Image directly"
-          end
-        end
+      MiniMagick::Tool::MogrifyRestricted.new do |builder|
         yield builder if block_given?
         builder << (page ? "#{path}[#{page}]" : path)
       end
