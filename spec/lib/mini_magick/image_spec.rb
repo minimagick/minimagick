@@ -601,13 +601,6 @@ require "webmock/rspec"
         it "returns self" do
           expect(subject.combine_options {}).to eq subject
         end
-
-        if defined?(RubyVM.stat)
-          it 'does not clear MRI method cache' do
-            expect { subject.combine_options }
-              .to_not change { RubyVM.stat[:class_serial] }
-          end
-        end
       end
 
       describe "#composite" do
