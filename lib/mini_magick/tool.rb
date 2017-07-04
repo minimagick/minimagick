@@ -92,7 +92,7 @@ module MiniMagick
       stdout, stderr, status = shell.run(command, options)
       yield stdout, stderr, status if block_given?
 
-      stdout.strip
+      stdout.chomp("\n")
     end
 
     ##
