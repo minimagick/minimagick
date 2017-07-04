@@ -77,7 +77,8 @@ the image, and write it to a file. The writing part is necessary because
 the copy is just temporary, it gets garbage collected when we lose reference
 to the image.
 
-`MiniMagick::Image.open` also accepts URLs.
+`MiniMagick::Image.open` also accepts URLs, and options passed in will be
+forwarded to open-uri.
 
 ```ruby
 image = MiniMagick::Image.open("http://example.com/image.jpg")

@@ -69,14 +69,24 @@ require "webmock/rspec"
         end
 
         it "loads a remote image" do
-          stub_request(:get, "http://example.com/image.jpg").to_return(body: File.read(image_path))
+          stub_request(:get, "http://example.com/image.jpg")
+            .to_return(body: File.read(image_path))
           image = described_class.open("http://example.com/image.jpg")
           expect(image).to be_valid
           expect(File.extname(image.path)).to eq ".jpg"
         end
 
+        it "accepts open-uri options" do
+          stub_request(:get, "http://example.com/image.jpg")
+            .with(headers: {"Foo" => "Bar"})
+            .to_return(body: File.read(image_path))
+          described_class.open("http://example.com/image.jpg", {"Foo" => "Bar"})
+          described_class.open("http://example.com/image.jpg", "jpg", {"Foo" => "Bar"})
+        end
+
         it "strips out colons from URL" do
-          stub_request(:get, "http://example.com/image.jpg:large").to_return(body: File.read(image_path))
+          stub_request(:get, "http://example.com/image.jpg:large")
+            .to_return(body: File.read(image_path))
           image = described_class.open("http://example.com/image.jpg:large")
           expect(File.extname(image.path)).to eq ".jpg"
         end
