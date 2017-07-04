@@ -76,9 +76,10 @@ module MiniMagick
     # @param path_or_url [String] Either a local file path or a URL that
     #   open-uri can read
     # @param ext [String] Specify the extension you want to read it as
+    # @param options [Hash] Specify options for the open method
     # @return [MiniMagick::Image] The loaded image
     #
-    def self.open(path_or_url, ext = nil)
+    def self.open(path_or_url, ext = nil, options = {})
       ext ||=
         if File.exist?(path_or_url)
           File.extname(path_or_url)
@@ -88,7 +89,7 @@ module MiniMagick
 
       ext.sub!(/:.*/, '') # hack for filenames or URLs that include a colon
 
-      Kernel.open(path_or_url, "rb") do |file|
+      Kernel.open(path_or_url, "rb", options) do |file|
         read(file, ext)
       end
     end
