@@ -6,7 +6,7 @@ module Helpers
       File.join("spec/fixtures",
         case type
         when :default, :jpg       then "default.jpg"
-        when :png                 then "engine.png"  
+        when :png                 then "engine.png"
         when :animation, :gif     then "animation.gif"
         when :exif                then "exif.jpg"
         when :empty_identify_line then "empty_identify_line.png"
@@ -14,6 +14,7 @@ module Helpers
         when :not                 then "not_an_image.rb"
         when :colon               then "with:colon.jpg"
         when :clipping_path       then "clipping_path.jpg"
+        when :get_pixels          then "get_pixels.png"
         when :rgb                 then "rgb.png"
         when :rgb_tmp             then "rgb_tmp.png"
         else

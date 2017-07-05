@@ -571,6 +571,18 @@ require "webmock/rspec"
             end
           end
         end
+
+        context 'when first or last byte could be interpreted as control characters' do
+          subject { described_class.open(image_path(:get_pixels)) }
+
+          it "returns a matrix where all pixel has 3 values" do
+            pix.each do |row|
+              row.each do |px|
+                expect(px.length).to eq(3)
+              end
+            end
+          end
+        end
       end
 
       describe "missing methods" do

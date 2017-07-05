@@ -346,11 +346,14 @@ module MiniMagick
     #
     # @return [Array] Matrix of each color of each pixel
     def get_pixels
-      output = MiniMagick::Tool::Convert.new do |convert|
-        convert << path
-        convert.depth(8)
-        convert << "RGB:-"
-      end
+      convert = MiniMagick::Tool::Convert.new
+      convert << path
+      convert.depth(8)
+      convert << "RGB:-"
+
+      # Do not use `convert.call` here. We need the whole binary (unstripped) output here.
+      shell = MiniMagick::Shell.new
+      output, _, _ = shell.run(convert.command)
 
       pixels_array = output.unpack("C*")
       pixels = pixels_array.each_slice(3).each_slice(width).to_a
