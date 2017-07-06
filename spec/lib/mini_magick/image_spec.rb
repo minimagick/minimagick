@@ -572,7 +572,7 @@ require "webmock/rspec"
           end
         end
 
-        context 'when first or last byte could be interpreted as control characters' do
+        context "when first or last byte could be interpreted as control characters" do
           subject { described_class.open(image_path(:get_pixels)) }
 
           it "returns a matrix where all pixel has 3 values" do
