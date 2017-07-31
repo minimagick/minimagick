@@ -101,6 +101,7 @@ module MiniMagick
               end
             when :graphicsmagick
               key, value = line.split("=", 2)
+              next unless value
               value.gsub!("\\012", "\n") # convert "\012" characters to newlines
               hash[key] = value
             end
