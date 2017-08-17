@@ -174,7 +174,7 @@ module MiniMagick
       if instance_variable_defined?("@cli_path")
         instance_variable_get("@cli_path")
       else
-        processor_path = instance_variable_get("@processor_path")
+        processor_path = instance_variable_get("@processor_path") if instance_variable_defined?("@processor_path")
 
         instance_variable_set("@cli_path", processor_path)
       end
