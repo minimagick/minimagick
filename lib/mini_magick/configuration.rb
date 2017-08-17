@@ -16,9 +16,7 @@ module MiniMagick
     # If you don't have the CLI tools in your PATH, you can set the path to the
     # executables.
     #
-    # @return [String]
-    #
-    attr_accessor :cli_path
+    attr_writer :cli_path
     # @private (for backwards compatibility)
     attr_accessor :processor_path
 
@@ -160,6 +158,12 @@ module MiniMagick
       end
     end
 
+    ##
+    # If you set the path of CLI tools, you can get the path of the
+    # executables.
+    #
+    # @return [String]
+    #
     def cli_path
       @cli_path || @processor_path
     end
