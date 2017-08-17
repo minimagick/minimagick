@@ -11,8 +11,6 @@ module MiniMagick
     # @return [Symbol] `:imagemagick`, `:imagemagick7`, or `:graphicsmagick`
     #
     attr_accessor :cli
-    # @private (for backwards compatibility)
-    attr_accessor :processor
 
     ##
     # If you don't have the CLI tools in your PATH, you can set the path to the
@@ -119,12 +117,14 @@ module MiniMagick
       imagemagick7:   "magick",
     }
 
+    # @private (for backwards compatibility)
     def processor
       @processor ||= CLI_DETECTION.values.detect do |processor|
         MiniMagick::Utilities.which(processor)
       end
     end
 
+    # @private (for backwards compatibility)
     def processor=(processor)
       @processor = processor.to_s
 
