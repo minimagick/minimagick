@@ -135,11 +135,21 @@ module MiniMagick
       end
     end
 
+    ##
+    # Get [ImageMagick](http://www.imagemagick.org) or
+    # [GraphicsMagick](http://www.graphicsmagick.org).
+    #
+    # @return [Symbol] `:imagemagick` or `:graphicsmagick`
+    #
     def cli
       @cli || CLI_DETECTION.key(processor) or
         fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
     end
 
+    ##
+    # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
+    # [GraphicsMagick](http://www.graphicsmagick.org).
+    #
     def cli=(value)
       @cli = value
 
