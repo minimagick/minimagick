@@ -141,7 +141,7 @@ module MiniMagick
             end
 
             key, _, value = line.partition(/:[\s]/).map(&:strip)
-            hash = key_stack.inject(details_hash) { |h, k| h.fetch(k) }
+            hash = key_stack.inject(details_hash) { |_hash, _key| _hash.fetch(_key) }
             if value.empty?
               hash[key] = {}
               key_stack.push key
