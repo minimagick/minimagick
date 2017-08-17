@@ -140,8 +140,14 @@ module MiniMagick
     # @return [Symbol] `:imagemagick` or `:graphicsmagick`
     #
     def cli
-      @cli || CLI_DETECTION.key(processor) or
-        fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
+      if instance_variable_defined?("@cli")
+        instance_variable_get("@cli")
+      else
+        cli = CLI_DETECTION.key(processor) or
+          fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
+
+        instance_variable_set("@cli", cli)
+      end
     end
 
     ##
