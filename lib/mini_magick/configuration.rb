@@ -171,7 +171,13 @@ module MiniMagick
     # @return [String]
     #
     def cli_path
-      @cli_path || @processor_path
+      if instance_variable_defined?("@cli_path")
+        instance_variable_get("@cli_path")
+      else
+        processor_path = instance_variable_get("@processor_path")
+
+        instance_variable_set("@cli_path", processor_path)
+      end
     end
 
     ##
