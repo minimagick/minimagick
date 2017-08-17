@@ -39,12 +39,12 @@ module MiniMagick
     #
     attr_accessor :timeout
     ##
-    # When set to `true`, it outputs each command to STDOUT in their shell
+    # When get to `true`, it outputs each command to STDOUT in their shell
     # version.
     #
     # @return [Boolean]
     #
-    attr_accessor :debug
+    attr_reader :debug
     ##
     # Logger for {#debug}, default is `MiniMagick::Logger.new(STDOUT)`, but
     # you can override it, for example if you want the logs to be written to
@@ -168,6 +168,10 @@ module MiniMagick
       @cli_path || @processor_path
     end
 
+    ##
+    # When set to `true`, it outputs each command to STDOUT in their shell
+    # version.
+    #
     def debug=(value)
       warn "MiniMagick.debug is deprecated and will be removed in MiniMagick 5. Use `MiniMagick.logger.level = Logger::DEBUG` instead."
       logger.level = value ? Logger::DEBUG : Logger::INFO
