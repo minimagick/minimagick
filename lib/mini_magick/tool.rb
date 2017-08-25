@@ -17,7 +17,7 @@ module MiniMagick
 
     CREATION_OPERATORS = %w[
       xc canvas logo rose gradient radial-gradient plasma pattern label caption
-      text
+      text pango
     ]
 
     ##
