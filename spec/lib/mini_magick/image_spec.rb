@@ -386,15 +386,20 @@ require "webmock/rspec"
       end
 
       describe "#exif" do
-        subject { described_class.new(image_path(:exif)) }
-
         it "returns a hash of EXIF data" do
+          subject = described_class.new(image_path(:exif))
           expect(subject.exif["DateTimeOriginal"]).to be_a(String)
         end
 
         it "decodes the ExifVersion" do
+          subject = described_class.new(image_path(:exif))
           expect(subject.exif["ExifVersion"]).to eq("0220")
         end unless ENV["CI"]
+
+        it "handles no EXIF data" do
+          subject = described_class.new(image_path(:no_exif))
+          expect(subject.exif).to eq({})
+        end
       end
 
       describe "#resolution" do
