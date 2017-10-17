@@ -1,5 +1,6 @@
 # MiniMagick
-
+[![Gem Version](https://img.shields.io/gem/v/mini_magick.svg)](http://rubygems.org/gems/mini_magick)
+[![Gem Downloads](https://img.shields.io/gem/dt/mini_magick.svg)](http://rubygems.org/gems/mini_magick)
 [![Build Status](https://travis-ci.org/minimagick/minimagick.svg?branch=master)](http://travis-ci.org/minimagick/minimagick)
 [![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
 
