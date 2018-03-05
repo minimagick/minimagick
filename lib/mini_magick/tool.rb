@@ -15,10 +15,8 @@ module MiniMagick
   #
   class Tool
 
-    CREATION_OPERATORS = %w[
-      xc canvas logo rose gradient radial-gradient plasma pattern label caption
-      text pango
-    ]
+    CREATION_OPERATORS = %w[xc canvas logo rose gradient radial-gradient plasma
+                            pattern text pango]
 
     ##
     # Aside from classic instantiation, it also accepts a block, and then
