@@ -492,7 +492,7 @@ setting the following variables in your application's process environment:
 * `MAGICK_TIME_LIMIT=30`
 
 For a full list of variables and description, see [ImageMagick's resources
-documentation](http://www.imagemagick.org/script/resources.php).
+documentation](http://www.imagemagick.org/script/resources.php#environment).
 
 ## Troubleshooting
 
