@@ -110,7 +110,8 @@ module MiniMagick
 
     ##
     # The executable used for this tool. Respects
-    # {MiniMagick::Configuration#cli} and {MiniMagick::Configuration#cli_path}.
+    # {MiniMagick::Configuration#cli}, {MiniMagick::Configuration#cli_path},
+    # and {MiniMagick::Configuration#cli_prefix}.
     #
     # @return [Array<String>]
     #
@@ -119,10 +120,21 @@ module MiniMagick
     #   identify = MiniMagick::Tool::Identify.new
     #   identify.executable #=> ["gm", "identify"]
     #
+    # @example
+    #   MiniMagick.configure do |config|
+    #     config.cli = :graphicsmagick
+    #     config.cli_prefix = ['firejail', '--force']
+    #   end
+    #   identify = MiniMagick::Tool::Identify.new
+    #   identify.executable #=> ["firejail", "--force", "gm", "identify"]
+    #
     def executable
       exe = [name]
       exe.unshift "gm" if MiniMagick.graphicsmagick?
       exe.unshift File.join(MiniMagick.cli_path, exe.shift) if MiniMagick.cli_path
+      if MiniMagick.cli_prefix
+        Array(MiniMagick.cli_prefix).reverse.each { |p| exe.unshift p }
+      end
       exe
     end
 

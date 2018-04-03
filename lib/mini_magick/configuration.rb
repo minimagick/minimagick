@@ -25,6 +25,17 @@ module MiniMagick
     attr_accessor :processor_path
 
     ##
+    # Adds a prefix to the CLI command.
+    # For example, you could use `firejail` to run all commands in a sandbox.
+    # Can be a string, or an array of strings.
+    # e.g. 'firejail', or ['firejail', '--force']
+    #
+    # @return [String]
+    # @return [Array<String>]
+    #
+    attr_accessor :cli_prefix
+
+    ##
     # If you don't want commands to take too long, you can set a timeout (in
     # seconds).
     #

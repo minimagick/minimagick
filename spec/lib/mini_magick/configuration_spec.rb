@@ -39,6 +39,13 @@ RSpec.describe MiniMagick::Configuration do
     end
   end
 
+  describe "#cli_prefix" do
+    it "can be assigned" do
+      subject.cli_prefix = 'firejail'
+      expect(subject.cli_prefix).to eq 'firejail'
+    end
+  end
+
   describe "#processor" do
     it "assigns :mogrify by default" do
       expect(subject.processor).to eq "mogrify"

@@ -61,6 +61,18 @@ RSpec.describe MiniMagick::Tool do
       allow(MiniMagick).to receive(:cli_path).and_return("path/to/cli")
       expect(subject.executable).to eq %W[path/to/cli/identify]
     end
+
+    it "respects #cli_prefix as a string" do
+      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
+      allow(MiniMagick).to receive(:cli_prefix).and_return('firejail')
+      expect(subject.executable).to eq %W[firejail identify]
+    end
+
+    it "respects #cli_prefix as an array" do
+      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
+      allow(MiniMagick).to receive(:cli_prefix).and_return(['firejail', '--force'])
+      expect(subject.executable).to eq %W[firejail --force identify]
+    end
   end
 
   describe "#<<" do
