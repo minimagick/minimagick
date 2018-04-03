@@ -45,11 +45,10 @@ module MiniMagick
 
     def execute_posix_spawn(command, options = {})
       require "posix-spawn"
-
-      pid, in_w, out_r, err_r = POSIX::Spawn.popen4(*command)
-      subprocess_thread = Process.detach(pid)
-
-      capture_command(in_w, out_r, err_r, subprocess_thread, options)
+      child = POSIX::Spawn::Child.new(*command, input: options[:stdin].to_s, timeout: MiniMagick.timeout)
+      [child.out, child.err, child.status]
+    rescue POSIX::Spawn::TimeoutExceeded
+      raise Timeout::Error
     end
 
     def capture_command(in_w, out_r, err_r, subprocess_thread, options)
