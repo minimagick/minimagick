@@ -140,8 +140,8 @@ module MiniMagick
               next
             end
 
-            key, _, value = line.partition(/:[\s\n]/).map(&:strip)
-            hash = key_stack.inject(details_hash) { |hash, key| hash.fetch(key) }
+            key, _, value = line.partition(/:[\s]/).map(&:strip)
+            hash = key_stack.inject(details_hash) { |h, k| h.fetch(k) }
             if value.empty?
               hash[key] = {}
               key_stack.push key
