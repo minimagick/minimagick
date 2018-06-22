@@ -1,6 +1,5 @@
 require "bundler/setup"
 require "mini_magick"
-require "pry"
 
 require_relative "support/helpers"
 
