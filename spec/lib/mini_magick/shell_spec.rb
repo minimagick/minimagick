@@ -51,7 +51,7 @@ RSpec.describe MiniMagick::Shell do
           stdout, stderr, status = subject.execute(%W[identify foo])
 
           expect(stdout).to eq ""
-          expect(stderr).to match("unable to open image 'foo'")
+          expect(stderr).to match("unable to open image")
           expect(status).to eq 1
         end
 
