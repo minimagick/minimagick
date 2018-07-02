@@ -10,11 +10,17 @@ rvm:
   - 2.5
   - jruby
   - ruby-head
+env:
+  - IM_VERSION=7.0.8-3
+  - IM_VERSION=
 matrix:
   allow_failures:
     - rvm: ruby-head
 before_install:
   - sudo apt-get update
-  - sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev
   - sudo apt-get install -qq graphicsmagick
+  - if [[ -z "$IM_VERSION" ]]; then sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev; fi
+  - if [[ -n "$IM_VERSION" ]]; then curl "https://www.imagemagick.org/download/ImageMagick-${IM_VERSION}.tar.gz" -O; fi
+  - if [[ -n "$IM_VERSION" ]]; then tar xzf "ImageMagick-${IM_VERSION}.tar.gz"; fi
+  - if [[ -n "$IM_VERSION" ]]; then pushd "ImageMagick-${IM_VERSION}" && ./configure --prefix=/usr && sudo make install && popd; fi
   - gem update bundler
