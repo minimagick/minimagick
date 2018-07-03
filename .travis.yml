@@ -10,11 +10,14 @@ rvm:
   - 2.5
   - jruby
   - ruby-head
+env:
+  - IM_VERSION=7
+  - IM_VERSION=6
 matrix:
   allow_failures:
     - rvm: ruby-head
 before_install:
   - sudo apt-get update
-  - sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev
   - sudo apt-get install -qq graphicsmagick
+  - bash install/imagemagick.sh
   - gem update bundler
