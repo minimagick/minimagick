@@ -65,7 +65,11 @@ module MiniMagick
 
       [stdout_reader.value, stderr_reader.value, subprocess_thread.value]
     rescue Timeout::Error => error
-      Process.kill("TERM", subprocess_thread.pid)
+      begin
+        Process.kill("TERM", subprocess_thread.pid)
+      rescue Errno::ESRCH
+        # ignore if the PID doesn't exist
+      end
       raise error
     ensure
       [out_r, err_r].each(&:close)
