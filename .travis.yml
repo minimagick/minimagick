@@ -11,8 +11,8 @@ rvm:
   - jruby
   - ruby-head
 env:
-  - IM_VERSION=7
-  - IM_VERSION=6
+  - IM_VERSION=7.0.8-11
+  - IM_VERSION=6.9.10-11
 matrix:
   allow_failures:
     - rvm: ruby-head
