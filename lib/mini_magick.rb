@@ -31,6 +31,14 @@ module MiniMagick
   end
 
   ##
+  # Checks whether the CLI used is ImageMagick 7.
+  #
+  # @return [Boolean]
+  def self.imagemagick7?
+    cli == :imagemagick7
+  end
+
+  ##
   # Checks whether the CLI used is GraphicsMagick.
   #
   # @return [Boolean]

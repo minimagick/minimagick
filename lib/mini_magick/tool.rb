@@ -130,11 +130,10 @@ module MiniMagick
     #
     def executable
       exe = [name]
+      exe.unshift "magick" if MiniMagick.imagemagick7? && name != "magick"
       exe.unshift "gm" if MiniMagick.graphicsmagick?
       exe.unshift File.join(MiniMagick.cli_path, exe.shift) if MiniMagick.cli_path
-      if MiniMagick.cli_prefix
-        Array(MiniMagick.cli_prefix).reverse.each { |p| exe.unshift p }
-      end
+      Array(MiniMagick.cli_prefix).reverse_each { |p| exe.unshift p } if MiniMagick.cli_prefix
       exe
     end
 
@@ -295,6 +294,7 @@ require "mini_magick/tool/convert"
 require "mini_magick/tool/display"
 require "mini_magick/tool/identify"
 require "mini_magick/tool/import"
+require "mini_magick/tool/magick"
 require "mini_magick/tool/mogrify"
 require "mini_magick/tool/mogrify_restricted"
 require "mini_magick/tool/montage"

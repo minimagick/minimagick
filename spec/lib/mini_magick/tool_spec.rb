@@ -56,6 +56,12 @@ RSpec.describe MiniMagick::Tool do
       expect(subject.executable).to eq %W[gm identify]
     end
 
+    it "prepends 'magick' to the command list when using ImageMagick 7" do
+      allow(MiniMagick).to receive(:cli).and_return(:imagemagick7)
+      expect(subject.executable).to eq %W[magick identify]
+      expect(MiniMagick::Tool::Magick.new.executable).to eq %W[magick]
+    end
+
     it "respects #cli_path" do
       allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
       allow(MiniMagick).to receive(:cli_path).and_return("path/to/cli")

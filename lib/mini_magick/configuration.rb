@@ -8,7 +8,7 @@ module MiniMagick
     # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
     # [GraphicsMagick](http://www.graphicsmagick.org).
     #
-    # @return [Symbol] `:imagemagick` or `:graphicsmagick`
+    # @return [Symbol] `:imagemagick`, `:imagemagick7`, or `:graphicsmagick`
     #
     attr_accessor :cli
     # @private (for backwards compatibility)
@@ -113,8 +113,14 @@ module MiniMagick
       yield self
     end
 
+    CLI_DETECTION = {
+      imagemagick:    "mogrify",
+      graphicsmagick: "gm",
+      imagemagick7:   "magick",
+    }
+
     def processor
-      @processor ||= ["mogrify", "gm"].detect do |processor|
+      @processor ||= CLI_DETECTION.values.detect do |processor|
         MiniMagick::Utilities.which(processor)
       end
     end
@@ -122,29 +128,24 @@ module MiniMagick
     def processor=(processor)
       @processor = processor.to_s
 
-      unless ["mogrify", "gm"].include?(@processor)
+      unless CLI_DETECTION.value?(@processor)
         raise ArgumentError,
-          "processor has to be set to either \"mogrify\" or \"gm\"" \
+          "processor has to be set to either \"magick\", \"mogrify\" or \"gm\"" \
           ", was set to #{@processor.inspect}"
       end
     end
 
     def cli
-      @cli ||
-        case processor.to_s
-        when "mogrify" then :imagemagick
-        when "gm"      then :graphicsmagick
-        else
-          raise MiniMagick::Error, "ImageMagick/GraphicsMagick is not installed"
-        end
+      @cli || CLI_DETECTION.key(processor) or
+        fail MiniMagick::Error, "ImageMagick/GraphicsMagick is not installed"
     end
 
     def cli=(value)
       @cli = value
 
-      if not [:imagemagick, :graphicsmagick].include?(@cli)
+      if not CLI_DETECTION.key?(@cli)
         raise ArgumentError,
-          "CLI has to be set to either :imagemagick or :graphicsmagick" \
+          "CLI has to be set to either :imagemagick, :imagemagick7 or :graphicsmagick" \
           ", was set to #{@cli.inspect}"
       end
     end

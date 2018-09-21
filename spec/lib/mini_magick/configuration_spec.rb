@@ -47,19 +47,28 @@ RSpec.describe MiniMagick::Configuration do
   end
 
   describe "#processor" do
-    it "assigns :mogrify by default" do
+    it "assigns 'mogrify' if ImageMagick 6 is available" do
+      allow(MiniMagick::Utilities).to receive(:which).with("mogrify").and_return(true)
       expect(subject.processor).to eq "mogrify"
     end
 
-    it "assigns :gm if ImageMagick is not available" do
+    it "assigns 'gm' if ImageMagick 6 is not available" do
       allow(MiniMagick::Utilities).to receive(:which).with("mogrify").and_return(nil)
       allow(MiniMagick::Utilities).to receive(:which).with("gm").and_return(true)
       expect(subject.processor).to eq "gm"
     end
 
+    it "assigns 'magick' if ImageMagick 6 and GraphicsMagick are not available" do
+      allow(MiniMagick::Utilities).to receive(:which).with("mogrify").and_return(nil)
+      allow(MiniMagick::Utilities).to receive(:which).with("gm").and_return(nil)
+      allow(MiniMagick::Utilities).to receive(:which).with("magick").and_return(true)
+      expect(subject.processor).to eq "magick"
+    end
+
     it "returns nil if neither ImageMagick nor GraphicsMagick are available" do
       allow(MiniMagick::Utilities).to receive(:which).with("mogrify").and_return(nil)
       allow(MiniMagick::Utilities).to receive(:which).with("gm").and_return(nil)
+      allow(MiniMagick::Utilities).to receive(:which).with("magick").and_return(nil)
       expect(subject.processor).to eq nil
     end
   end
