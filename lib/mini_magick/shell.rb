@@ -38,9 +38,30 @@ module MiniMagick
     def execute_open3(command, options = {})
       require "open3"
 
-      in_w, out_r, err_r, subprocess_thread = Open3.popen3(*command)
+      # We would ideally use Open3.capture3, but it wouldn't allow us to
+      # terminate the command after timing out.
+      Open3.popen3(*command) do |in_w, out_r, err_r, thread|
+        [in_w, out_r, err_r].each(&:binmode)
+        stdout_reader = Thread.new { out_r.read }
+        stderr_reader = Thread.new { err_r.read }
+        begin
+          in_w.write options[:stdin].to_s
+        rescue Errno::EPIPE
+        end
+        in_w.close
 
-      capture_command(in_w, out_r, err_r, subprocess_thread, options)
+        begin
+          Timeout.timeout(MiniMagick.timeout) { thread.join }
+        ensure
+          begin
+            Process.kill("TERM", thread.pid) if thread.pid
+          rescue Errno::ESRCH
+          # ignore if the PID doesn't exist
+          end
+        end
+
+        [stdout_reader.value, stderr_reader.value, thread.value]
+      end
     end
 
     def execute_posix_spawn(command, options = {})
@@ -48,31 +69,7 @@ module MiniMagick
       child = POSIX::Spawn::Child.new(*command, input: options[:stdin].to_s, timeout: MiniMagick.timeout)
       [child.out, child.err, child.status]
     rescue POSIX::Spawn::TimeoutExceeded
-      raise Timeout::Error
-    end
-
-    def capture_command(in_w, out_r, err_r, subprocess_thread, options)
-      [in_w, out_r, err_r].each(&:binmode)
-      stdout_reader = Thread.new { out_r.read }
-      stderr_reader = Thread.new { err_r.read }
-      begin
-        in_w.write options[:stdin].to_s
-      rescue Errno::EPIPE
-      end
-      in_w.close
-
-      Timeout.timeout(MiniMagick.timeout) { subprocess_thread.join }
-
-      [stdout_reader.value, stderr_reader.value, subprocess_thread.value]
-    rescue Timeout::Error => error
-      begin
-        Process.kill("TERM", subprocess_thread.pid)
-      rescue Errno::ESRCH
-        # ignore if the PID doesn't exist
-      end
-      raise error
-    ensure
-      [out_r, err_r].each(&:close)
+      raise Timeout::Error, "command timed out: #{command}"
     end
 
     def log(command, &block)
