@@ -137,7 +137,7 @@ module MiniMagick
 
     def cli
       @cli || CLI_DETECTION.key(processor) or
-        fail MiniMagick::Error, "ImageMagick/GraphicsMagick is not installed"
+        fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
     end
 
     def cli=(value)
