@@ -53,11 +53,8 @@ module MiniMagick
         begin
           Timeout.timeout(MiniMagick.timeout, nil, "MiniMagick command timed out: #{command}") { thread.join }
         ensure
-          begin
-            Process.kill("TERM", thread.pid) if thread.pid
-          rescue Errno::ESRCH
-          # ignore if the PID doesn't exist
-          end
+          Process.kill("TERM", thread.pid) rescue nil
+          Process.waitpid(thread.pid)      rescue nil
         end
 
         [stdout_reader.value, stderr_reader.value, thread.value]
