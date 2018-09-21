@@ -51,7 +51,7 @@ module MiniMagick
         in_w.close
 
         begin
-          Timeout.timeout(MiniMagick.timeout) { thread.join }
+          Timeout.timeout(MiniMagick.timeout, nil, "MiniMagick command timed out: #{command}") { thread.join }
         ensure
           begin
             Process.kill("TERM", thread.pid) if thread.pid
@@ -69,7 +69,7 @@ module MiniMagick
       child = POSIX::Spawn::Child.new(*command, input: options[:stdin].to_s, timeout: MiniMagick.timeout)
       [child.out, child.err, child.status]
     rescue POSIX::Spawn::TimeoutExceeded
-      raise Timeout::Error, "command timed out: #{command}"
+      raise Timeout::Error, "MiniMagick command timed out: #{command}"
     end
 
     def log(command, &block)
