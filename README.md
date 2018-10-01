@@ -96,7 +96,7 @@ we can use `MiniMagick::Image.new`.
 image = MiniMagick::Image.new("input.jpg")
 image.path #=> "input.jpg"
 image.resize "100x100"
-# No calling #write, because it's no a copy
+# Not calling #write, because it's not a copy
 ```
 
 ### Combine options
