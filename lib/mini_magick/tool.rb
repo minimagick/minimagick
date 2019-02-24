@@ -263,10 +263,6 @@ module MiniMagick
       self
     end
 
-    def respond_to_missing?(method_name, include_private = false)
-      true
-    end
-
     def self.option_methods
       @option_methods ||= (
         tool = new(whiny: false)
