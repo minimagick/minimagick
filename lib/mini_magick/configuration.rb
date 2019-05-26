@@ -11,16 +11,12 @@ module MiniMagick
     # @return [Symbol] `:imagemagick`, `:imagemagick7`, or `:graphicsmagick`
     #
     attr_accessor :cli
-    # @private (for backwards compatibility)
-    attr_accessor :processor
 
     ##
     # If you don't have the CLI tools in your PATH, you can set the path to the
     # executables.
     #
-    # @return [String]
-    #
-    attr_accessor :cli_path
+    attr_writer :cli_path
     # @private (for backwards compatibility)
     attr_accessor :processor_path
 
@@ -43,12 +39,12 @@ module MiniMagick
     #
     attr_accessor :timeout
     ##
-    # When set to `true`, it outputs each command to STDOUT in their shell
+    # When get to `true`, it outputs each command to STDOUT in their shell
     # version.
     #
     # @return [Boolean]
     #
-    attr_accessor :debug
+    attr_reader :debug
     ##
     # Logger for {#debug}, default is `MiniMagick::Logger.new(STDOUT)`, but
     # you can override it, for example if you want the logs to be written to
@@ -119,12 +115,14 @@ module MiniMagick
       imagemagick7:   "magick",
     }
 
+    # @private (for backwards compatibility)
     def processor
       @processor ||= CLI_DETECTION.values.detect do |processor|
         MiniMagick::Utilities.which(processor)
       end
     end
 
+    # @private (for backwards compatibility)
     def processor=(processor)
       @processor = processor.to_s
 
@@ -135,11 +133,27 @@ module MiniMagick
       end
     end
 
+    ##
+    # Get [ImageMagick](http://www.imagemagick.org) or
+    # [GraphicsMagick](http://www.graphicsmagick.org).
+    #
+    # @return [Symbol] `:imagemagick` or `:graphicsmagick`
+    #
     def cli
-      @cli || CLI_DETECTION.key(processor) or
-        fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
+      if instance_variable_defined?("@cli")
+        instance_variable_get("@cli")
+      else
+        cli = CLI_DETECTION.key(processor) or
+          fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
+
+        instance_variable_set("@cli", cli)
+      end
     end
 
+    ##
+    # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
+    # [GraphicsMagick](http://www.graphicsmagick.org).
+    #
     def cli=(value)
       @cli = value
 
@@ -150,10 +164,26 @@ module MiniMagick
       end
     end
 
+    ##
+    # If you set the path of CLI tools, you can get the path of the
+    # executables.
+    #
+    # @return [String]
+    #
     def cli_path
-      @cli_path || @processor_path
+      if instance_variable_defined?("@cli_path")
+        instance_variable_get("@cli_path")
+      else
+        processor_path = instance_variable_get("@processor_path") if instance_variable_defined?("@processor_path")
+
+        instance_variable_set("@cli_path", processor_path)
+      end
     end
 
+    ##
+    # When set to `true`, it outputs each command to STDOUT in their shell
+    # version.
+    #
     def debug=(value)
       warn "MiniMagick.debug is deprecated and will be removed in MiniMagick 5. Use `MiniMagick.logger.level = Logger::DEBUG` instead."
       logger.level = value ? Logger::DEBUG : Logger::INFO
