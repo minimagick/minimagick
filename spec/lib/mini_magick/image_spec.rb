@@ -76,6 +76,14 @@ require "webmock/rspec"
           expect(File.extname(image.path)).to eq ".jpg"
         end
 
+        it "doesn't allow remote shell execution" do
+          expect {
+            described_class.open("| touch file.txt") # Kernel#open accepts this
+          }.to raise_error(URI::InvalidURIError)
+
+          expect(File.exist?("file.txt")).to eq(false)
+        end
+
         it "accepts open-uri options" do
           stub_request(:get, "http://example.com/image.jpg")
             .with(headers: {"Foo" => "Bar"})
