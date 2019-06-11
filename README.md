@@ -39,12 +39,14 @@ Delegates: bzlib fftw freetype jng jpeg lcms ltdl lzma png tiff xml zlib
 
 MiniMagick has been tested on following Rubies:
 
-* MRI 1.9.3
-* MRI 2.0
-* MRI 2.1
-* MRI 2.2
-* MRI 2.3
+* MRI 2.6
+* MRI 2.5
 * MRI 2.4
+* MRI 2.3
+* MRI 2.2
+* MRI 2.1
+* MRI 2.0
+* MRI 1.9.3
 * JRuby 9k
 
 ## Installation
