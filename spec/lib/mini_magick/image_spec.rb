@@ -68,6 +68,11 @@ require "webmock/rspec"
           expect(image).to be_valid
         end
 
+        it "accepts a non-ascii filename" do
+          image = described_class.open(image_path(:non_ascii_filename))
+          expect(image).to be_valid
+        end
+
         it "loads a remote image" do
           stub_request(:get, "http://example.com/image.jpg")
             .to_return(body: File.read(image_path))
