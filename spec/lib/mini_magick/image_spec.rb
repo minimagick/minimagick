@@ -84,7 +84,7 @@ require "webmock/rspec"
         it "doesn't allow remote shell execution" do
           expect {
             described_class.open("| touch file.txt") # Kernel#open accepts this
-          }.to raise_error(URI::InvalidURIError)
+          }.to raise_error(Errno::ENOENT)
 
           expect(File.exist?("file.txt")).to eq(false)
         end
