@@ -82,21 +82,27 @@ module MiniMagick
     def self.open(path_or_url, ext = nil, options = {})
       options, ext = ext, nil if ext.is_a?(Hash)
 
-      uri = nil
-      begin
-        uri = URI(path_or_url.to_s)
-        ext ||= File.extname(uri.path)
-      rescue URI::InvalidURIError
-        ext ||= File.extname(path_or_url)
-      end
+      # Don't use Kernel#open, but reuse its logic
+      openable =
+        if path_or_url.respond_to?(:open)
+          path_or_url
+        elsif path_or_url.respond_to?(:to_str) &&
+              %r{\A[A-Za-z][A-Za-z0-9+\-\.]*://} =~ path_or_url &&
+              (uri = URI.parse(path_or_url)).respond_to?(:open)
+          uri
+        else
+          options = { binmode: true }.merge(options)
+          Pathname(path_or_url)
+        end
 
+      if openable.is_a?(URI::Generic)
+        ext ||= File.extname(openable.path)
+      else
+        ext ||= File.extname(openable.to_s)
+      end
       ext.sub!(/:.*/, '') # hack for filenames or URLs that include a colon
 
-      if uri.is_a?(URI::HTTP) || uri.is_a?(URI::FTP)
-        uri.open(options) { |file| read(file, ext) }
-      else
-        File.open(path_or_url, "rb", options) { |file| read(file, ext) }
-      end
+      openable.open(options) { |file| read(file, ext) }
     end
 
     ##
