@@ -68,6 +68,11 @@ require "webmock/rspec"
           expect(image).to be_valid
         end
 
+        it "accepts a non-ascii filename" do
+          image = described_class.open(image_path(:non_ascii_filename))
+          expect(image).to be_valid
+        end
+
         it "loads a remote image" do
           stub_request(:get, "http://example.com/image.jpg")
             .to_return(body: File.read(image_path))
@@ -79,7 +84,7 @@ require "webmock/rspec"
         it "doesn't allow remote shell execution" do
           expect {
             described_class.open("| touch file.txt") # Kernel#open accepts this
-          }.to raise_error(URI::InvalidURIError)
+          }.to raise_error(Errno::ENOENT)
 
           expect(File.exist?("file.txt")).to eq(false)
         end

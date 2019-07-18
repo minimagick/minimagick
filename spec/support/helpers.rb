@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require "tempfile"
 
 module Helpers
@@ -18,6 +20,7 @@ module Helpers
         when :get_pixels          then "get_pixels.png"
         when :rgb                 then "rgb.png"
         when :rgb_tmp             then "rgb_tmp.png"
+        when :non_ascii_filename  then "スクリーンショット 2019-07-13 1.32.01.png"
         else
           fail "image #{type.inspect} doesn't exist"
         end
