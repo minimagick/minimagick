@@ -110,9 +110,9 @@ module MiniMagick
     end
 
     CLI_DETECTION = {
-      imagemagick:    "mogrify",
-      graphicsmagick: "gm",
       imagemagick7:   "magick",
+      graphicsmagick: "gm",
+      imagemagick:    "mogrify",
     }
 
     # @private (for backwards compatibility)
