@@ -583,5 +583,31 @@ module MiniMagick
     def layer?
       path =~ /\[\d+\]$/
     end
+
+    ##
+    # Compares if image width
+    # is greater than height
+    # ============
+    # |          |
+    # |          |
+    # ============
+    # @return [Boolean]
+    def landscape?
+      width > height
+    end
+
+    ##
+    # Compares if image height
+    # is greater than width
+    # ======
+    # |    |
+    # |    |
+    # |    |
+    # |    |
+    # ======
+    # @return [Boolean]
+    def portrait?
+      height > width
+    end
   end
 end
