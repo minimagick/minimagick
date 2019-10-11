@@ -749,6 +749,31 @@ require "webmock/rspec"
           expect(output).to eq subject.width.to_s
         end
       end
+
+      describe "#landscape?" do
+        it "returns true if image width greater than height" do
+          image = described_class.open(image_path(:clipping_path))
+          expect(image.landscape?).to eql true
+        end
+
+        it "returns false if image width less than height" do
+          image = described_class.open(image_path(:default))
+          expect(image.landscape?).to eql false
+        end
+      end
+
+      describe "#portrait?" do
+        it "returns true if image width greater than height" do
+          image = described_class.open(image_path(:default))
+          expect(image.portrait?).to eql true
+        end
+
+        it "returns false if image width less than height" do
+          image = described_class.open(image_path(:clipping_path))
+          expect(image.portrait?).to eql false
+        end
+      end
+
     end
   end
 end
