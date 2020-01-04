@@ -19,6 +19,8 @@ Gem::Specification.new do |s|
   s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.require_paths = ['lib']
 
+  s.required_ruby_version = '>= 2.0'
+
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.5.0'
   s.add_development_dependency 'guard'
