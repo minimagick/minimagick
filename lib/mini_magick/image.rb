@@ -102,7 +102,11 @@ module MiniMagick
       end
       ext.sub!(/:.*/, '') # hack for filenames or URLs that include a colon
 
-      openable.open(options) { |file| read(file, ext) }
+      if openable.is_a?(URI::Generic)
+        openable.open(options) { |file| read(file, ext) }
+      else
+        openable.open(**options) { |file| read(file, ext) }
+      end
     end
 
     ##
