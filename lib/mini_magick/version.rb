@@ -8,8 +8,8 @@ module MiniMagick
 
   module VERSION
     MAJOR = 4
-    MINOR = 9
-    TINY  = 5
+    MINOR = 10
+    TINY  = 0
     PRE   = nil
 
     STRING = [MAJOR, MINOR, TINY, PRE].compact.join('.')
