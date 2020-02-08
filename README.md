@@ -30,7 +30,7 @@ ImageMagick or GraphicsMagick command-line tool has to be installed. You can
 check if you have it installed by running
 
 ```sh
-$ convert -version
+$ magick -version
 Version: ImageMagick 6.8.9-7 Q16 x86_64 2014-09-11 http://www.imagemagick.org
 Copyright: Copyright (C) 1999-2014 ImageMagick Studio LLC
 Features: DPC Modules
