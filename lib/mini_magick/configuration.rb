@@ -5,14 +5,6 @@ module MiniMagick
   module Configuration
 
     ##
-    # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
-    # [GraphicsMagick](http://www.graphicsmagick.org).
-    #
-    # @return [Symbol] `:imagemagick`, `:imagemagick7`, or `:graphicsmagick`
-    #
-    attr_accessor :cli
-
-    ##
     # If you don't have the CLI tools in your PATH, you can set the path to the
     # executables.
     #
