@@ -46,7 +46,6 @@ MiniMagick has been tested on following Rubies:
 * MRI 2.2
 * MRI 2.1
 * MRI 2.0
-* MRI 1.9.3
 * JRuby 9k
 
 ## Installation
