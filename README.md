@@ -236,7 +236,7 @@ pixels = image.get_pixels
 depth = 8
 dimension = [image.width, image.height]
 map = 'rgb'
-image = MiniMagick::Image.get_image_from_pixels(pixels, diemnsion, map, depth ,'jpg')
+image = MiniMagick::Image.get_image_from_pixels(pixels, dimension, map, depth ,'jpg')
 image.write('/Users/rabin/output.jpg')
 
 ```
