@@ -15,7 +15,7 @@ module MiniMagick
     # methods.
     #
     # Use this to pass in a stream object. Must respond to #read(size) or be a
-    # binary string object (BLOBBBB)
+    # binary string object (BLOB)
     #
     # Probably easier to use the {.open} method if you want to open a file or a
     # URL.
