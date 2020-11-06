@@ -128,6 +128,11 @@ RSpec.describe MiniMagick::Tool do
       end
       expect(subject.args).to eq %W[( foo bar )]
     end
+
+    it "accepts hash of options" do
+      subject.stack({ foo: "bar", a: ["b", "c"] }, "foo.gif")
+      expect(subject.args).to eq %W[( -foo bar -a b c foo.gif )]
+    end
   end
 
   describe "#clone" do

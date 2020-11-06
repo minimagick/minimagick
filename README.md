@@ -452,15 +452,20 @@ convert input.jpg +repage +distort Perspective 'more args'
 ```rb
 MiniMagick::Tool::Convert.new do |convert|
   convert << "wand.gif"
+
   convert.stack do |stack|
     stack << "wand.gif"
     stack.rotate(30)
+    stack.foo("bar", "baz")
   end
+  # or
+  convert.stack("wand.gif", { rotate: 30, foo: ["bar", "baz"] })
+
   convert << "images.gif"
 end
 ```
 ```
-convert wand.gif \( wand.gif -rotate 90 \) images.gif
+convert wand.gif \( wand.gif -rotate 90 -foo bar baz \) images.gif
 ```
 
 #### STDIN and STDOUT

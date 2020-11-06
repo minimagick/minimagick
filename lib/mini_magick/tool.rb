@@ -192,9 +192,15 @@ module MiniMagick
     #   end
     #   # executes `convert wand.gif \( wizard.gif -rotate 30 \) +append images.gif`
     #
-    def stack
+    def stack(*args)
       self << "("
-      yield self
+      args.each do |value|
+        case value
+        when Hash   then value.each { |key, value| send(key, *value) }
+        when String then self << value
+        end
+      end
+      yield self if block_given?
       self << ")"
     end
 
