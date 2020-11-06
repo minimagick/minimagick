@@ -227,6 +227,20 @@ image.colorspace "Gray"
 pixels = image.get_pixels
 ```
 
+### Pixels To Image
+
+Sometimes when you have pixels and want to create image from pixels, you can do this to form an image:
+```rb
+image = MiniMagick::Image.open('/Users/rabin/input.jpg')
+pixels = image.get_pixels
+depth = 8
+dimension = [image.width, image.height]
+map = 'rgb'
+image = MiniMagick::Image.get_image_from_pixels(pixels, dimension, map, depth ,'jpg')
+image.write('/Users/rabin/output.jpg')
+
+```
+
 In this example, the returned pixels should now have equal R, G, and B values.
 
 ### Configuration

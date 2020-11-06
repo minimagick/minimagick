@@ -379,6 +379,23 @@ module MiniMagick
     end
 
     ##
+    # This is used to create image from pixels. This might be required if you
+    # create pixels for some image processing reasons and you want to form 
+    # image from those pixels.
+    #
+    # *DANGER*: This operation can be very expensive. Please try to use with
+    # caution. 
+    # 
+    # @example
+    #   # It is given in readme.md file
+    ##
+    def self.get_image_from_pixels(pixels, dimension, map, depth, mime_type)
+      pixels = pixels.flatten
+      blob = pixels.pack('C*')
+      import_pixels(blob, *dimension, depth, map, mime_type)
+    end
+
+    ##
     # This is used to change the format of the image. That is, from "tiff to
     # jpg" or something like that. Once you run it, the instance is pointing to
     # a new file with a new extension!
