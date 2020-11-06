@@ -44,8 +44,10 @@ module MiniMagick
     # @private
     attr_reader :name, :args
 
-    # @param whiny [Boolean] Whether to raise errors on exit codes different
-    #   than 0.
+    # @param name [String]
+    # @param options [Hash]
+    # @option options [Boolean] :whiny Whether to raise errors on non-zero
+    #   exit codes.
     # @example
     #   MiniMagick::Tool::Identify.new(whiny: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
@@ -227,6 +229,7 @@ module MiniMagick
     ##
     # Define creator operator methods
     #
+    # @example
     #   mogrify = MiniMagick::Tool.new("mogrify")
     #   mogrify.canvas("khaki")
     #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
@@ -251,10 +254,11 @@ module MiniMagick
     ##
     # Any undefined method will be transformed into a CLI option
     #
+    # @example
     #   mogrify = MiniMagick::Tool.new("mogrify")
     #   mogrify.adaptive_blur("...")
     #   mogrify.foo_bar
-    #   mogrify.command.join(" ") "mogrify -adaptive-blur ... -foo-bar"
+    #   mogrify.command.join(" ") # => "mogrify -adaptive-blur ... -foo-bar"
     #
     def method_missing(name, *args)
       option = "-#{name.to_s.tr('_', '-')}"
