@@ -774,6 +774,22 @@ require "webmock/rspec"
         end
       end
 
+      describe "#secure_path" do
+        it "returns a secure image path with a module prefix" do
+          expect(subject.secure_path).to match(/^[A-Z]+:.+$/)
+        end
+
+        context "when the secure path prefix does not match the actual image format" do
+          let(:image) { described_class.open(image_path(:jpg)) }
+
+          before { allow(image).to receive(:secure_path).and_return("PNG:#{image.path}") }
+
+          it "fails with an error" do
+            expect{ image.resize "100x100" }.to raise_error(MiniMagick::Error)
+          end
+        end
+      end
+
     end
   end
 end

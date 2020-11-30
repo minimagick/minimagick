@@ -360,7 +360,7 @@ module MiniMagick
     # @return [Array] Matrix of each color of each pixel
     def get_pixels
       convert = MiniMagick::Tool::Convert.new
-      convert << path
+      convert << secure_path
       convert.depth(8)
       convert << "RGB:-"
 
@@ -504,7 +504,7 @@ module MiniMagick
       when String, Pathname
         if layer?
           MiniMagick::Tool::Convert.new do |builder|
-            builder << path
+            builder << secure_path
             builder << output_to
           end
         else
@@ -532,9 +532,9 @@ module MiniMagick
 
       MiniMagick::Tool::Composite.new do |composite|
         yield composite if block_given?
-        composite << other_image.path
-        composite << path
-        composite << mask.path if mask
+        composite << other_image.secure_path
+        composite << secure_path
+        composite << mask.secure_path if mask
         composite << output_tempfile.path
       end
 
@@ -577,7 +577,7 @@ module MiniMagick
     def identify
       MiniMagick::Tool::Identify.new do |builder|
         yield builder if block_given?
-        builder << path
+        builder << secure_path
       end
     end
 
@@ -593,7 +593,7 @@ module MiniMagick
     def mogrify(page = nil)
       MiniMagick::Tool::MogrifyRestricted.new do |builder|
         yield builder if block_given?
-        builder << (page ? "#{path}[#{page}]" : path)
+        builder << (page ? "#{secure_path}[#{page}]" : secure_path)
       end
 
       @info.clear
@@ -629,6 +629,19 @@ module MiniMagick
     # @return [Boolean]
     def portrait?
       height > width
+    end
+
+    ##
+    # As a security precaution, specify a module prefix on the filename when processing.
+    # This is recommended by both ImageMagick and GraphicsMagick.
+    # Read the file extension and then use that as the type when processing
+    # to ensure we are interpreting the image in the expected format.
+    # So, if an Image with .jpg extension is opened, do not process with:
+    #   mogrify filename.jpg -resize 300x300
+    # Instead, process with:
+    #   mogrify jpg:filename.jpg -resize 300x300.
+    def secure_path
+      "#{type}:#{path}"
     end
   end
 end
