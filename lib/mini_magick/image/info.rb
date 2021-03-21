@@ -61,13 +61,13 @@ module MiniMagick
       rescue ArgumentError, TypeError
         raise MiniMagick::Invalid, "image data can't be read"
       end
-            
+
       def parse_warnings(raw_info)
         return raw_info unless raw_info.split("\n").size > 1
 
         raw_info.split("\n").each do |line|
           # must match "%m %w %h %b"
-          return line if line.match? /^[A-Z]+ \d+ \d+ \d+B$/
+          return line if line.match?(/^[A-Z]+ \d+ \d+ \d+B$/)
         end
         raise TypeError
       end
