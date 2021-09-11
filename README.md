@@ -560,7 +560,7 @@ end
 Unlike RMagick, MiniMagick is a much thinner wrapper around ImageMagick.
 
 * To piece together MiniMagick commands refer to the [Mogrify
-  Documentation](https://imagemagick.org/script/develop.php). For instance
+  Documentation](https://imagemagick.org/script/mogrify.php). For instance
   you can use the `-flop` option as `image.flop`.
 * Operations on a MiniMagick image tend to happen in-place as `image.trim`,
   whereas RMagick has both copying and in-place methods like `image.trim` and
