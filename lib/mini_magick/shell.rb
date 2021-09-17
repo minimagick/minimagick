@@ -50,9 +50,7 @@ module MiniMagick
         end
         in_w.close
 
-        begin
-          Timeout.timeout(MiniMagick.timeout) { thread.join }
-        rescue Timeout::Error
+        unless thread.join(MiniMagick.timeout)
           Process.kill("TERM", thread.pid) rescue nil
           Process.waitpid(thread.pid)      rescue nil
           raise Timeout::Error, "MiniMagick command timed out: #{command}"
