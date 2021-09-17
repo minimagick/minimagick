@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "2.0"
+          - "2.1"
+          - "2.2"
+          - "2.3"
+          - "2.4"
+          - "2.5"
+          - "2.6"
+          - "2.7"
+          - "3.0"
+          - "jruby-9.2"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Update apt
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run:
+          sudo apt-get update -qq -o Acquire::Retries=3
+
+      - name: Install ImageMagick
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run:
+          sudo apt-get install -qq -o Acquire::Retries=3 imagemagick graphicsmagick
+
+      - name: Run tests
+        run: bundle exec rake test
