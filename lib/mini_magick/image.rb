@@ -340,12 +340,17 @@ module MiniMagick
     #
     # 1) one for each row of pixels
     # 2) one for each column of pixels
-    # 3) three elements in the range 0-255, one for each of the RGB color channels
+    # 3) three or four elements in the range 0-255, one for each of the RGB(A) color channels
     #
     # @example
     #   img = MiniMagick::Image.open 'image.jpg'
     #   pixels = img.get_pixels
     #   pixels[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
+    #
+    # @example
+    #   img = MiniMagick::Image.open 'image.jpg'
+    #   pixels = img.get_pixels("RGBA")
+    #   pixels[3][2][3] # the alpha channel value from the 4th-row, 3rd-column pixel
     #
     # It can also be called after applying transformations:
     #
@@ -357,19 +362,22 @@ module MiniMagick
     #
     # In this example, all pixels in pix should now have equal R, G, and B values.
     #
+    # @param map [String] A code for the mapping of the pixel data. Must be either
+    #   'RGB' or 'RGBA'. Default to 'RGB'
     # @return [Array] Matrix of each color of each pixel
-    def get_pixels
+    def get_pixels(map="RGB")
+      raise ArgumentError, "Invalid map value" unless ["RGB", "RGBA"].include?(map)
       convert = MiniMagick::Tool::Convert.new
       convert << path
       convert.depth(8)
-      convert << "RGB:-"
+      convert << "#{map}:-"
 
       # Do not use `convert.call` here. We need the whole binary (unstripped) output here.
       shell = MiniMagick::Shell.new
       output, * = shell.run(convert.command)
 
       pixels_array = output.unpack("C*")
-      pixels = pixels_array.each_slice(3).each_slice(width).to_a
+      pixels = pixels_array.each_slice(map.length).each_slice(width).to_a
 
       # deallocate large intermediary objects
       output.clear
