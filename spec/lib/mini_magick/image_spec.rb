@@ -138,6 +138,19 @@ require "webmock/rspec"
           expect { create(image_path(:not)) }
             .not_to raise_error
         end
+
+        context "when a tmpdir is configured" do
+          before { FileUtils.mkdir_p(new_tmp_dir) }
+          after { FileUtils.rm_rf(new_tmp_dir) }
+
+          let(:new_tmp_dir) { File.join(Dir.tmpdir, "new_tmp_dir") }
+
+          it "uses the tmpdir to create the file" do
+            allow(MiniMagick).to receive(:tmpdir).and_return(new_tmp_dir)
+            image = create
+            expect(File.dirname(image.path)).to eq new_tmp_dir
+          end
+        end
       end
 
       describe "#initialize" do
