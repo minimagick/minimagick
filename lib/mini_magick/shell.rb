@@ -14,7 +14,7 @@ module MiniMagick
       stdout, stderr, status = execute(command, stdin: options[:stdin])
 
       if status != 0 && options.fetch(:whiny, MiniMagick.whiny)
-        fail MiniMagick::Error, "`#{command.join(" ")}` failed with error:\n#{stderr}"
+        fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status} and error:\n#{stderr}"
       end
 
       $stderr.print(stderr) unless options[:stderr] == false
