@@ -25,7 +25,7 @@ module MiniMagick
     def execute(command, options = {})
       stdout, stderr, status =
         log(command.join(" ")) do
-          send("execute_#{MiniMagick.shell_api.gsub("-", "_")}", command, options)
+          send("execute_#{MiniMagick.shell_api.tr("-", "_")}", command, options)
         end
 
       [stdout, stderr, status.exitstatus]

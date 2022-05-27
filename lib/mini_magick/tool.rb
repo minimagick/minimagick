@@ -241,7 +241,7 @@ module MiniMagick
     #   mogrify.command.join(" ") #=> "mogrify canvas:khaki"
     #
     CREATION_OPERATORS.each do |operator|
-      define_method(operator.gsub('-', '_')) do |value = nil|
+      define_method(operator.tr('-', '_')) do |value = nil|
         self << "#{operator}:#{value}"
         self
       end
