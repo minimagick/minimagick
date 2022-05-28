@@ -91,6 +91,14 @@ module MiniMagick
           end
         end
         [out_buffer.string, err_buffer.string, thread.value]
+      rescue ::Object => e
+        # clean up
+        [in_w, out_r, err_r].each do |io|
+          io.close rescue nil
+        end
+        ::Process.kill('TERM', thread.pid) rescue nil
+        ::Process.waitpid(thread.pid) rescue nil
+        raise e
       end
     end
 
