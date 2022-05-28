@@ -518,6 +518,20 @@ setting the following variables in your application's process environment:
 For a full list of variables and description, see [ImageMagick's resources
 documentation](http://www.imagemagick.org/script/resources.php#environment).
 
+## Changing temporary directory
+
+ImageMagick allows you to change the temporary directory to process the image file:
+
+```rb
+MiniMagick.configure do |config|
+  config.tmpdir = File.join(Dir.tmpdir, "/my/new/tmp_dir")
+end
+```
+
+The example directory `/my/new/tmp_dir` must exist and must be writable.
+
+If not configured, it will default to `Dir.tmpdir`.
+
 ## Troubleshooting
 
 ### Errors being raised when they shouldn't

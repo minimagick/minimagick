@@ -45,6 +45,13 @@ module MiniMagick
     # @return [Logger]
     #
     attr_accessor :logger
+    ##
+    # Temporary directory used by MiniMagick, default is `Dir.tmpdir`, but
+    # you can override it.
+    #
+    # @return [String]
+    #
+    attr_accessor :tmpdir
 
     ##
     # If set to `true`, it will `identify` every newly created image, and raise
@@ -82,6 +89,7 @@ module MiniMagick
     attr_accessor :shell_api
 
     def self.extended(base)
+      base.tmpdir = Dir.tmpdir
       base.validate_on_create = true
       base.validate_on_write = true
       base.whiny = true
