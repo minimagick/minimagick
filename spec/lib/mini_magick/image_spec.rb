@@ -411,6 +411,13 @@ require "webmock/rspec"
         subject.size("20x20")
       end
 
+      describe "#size" do
+        it "returns the correct value even if the log contains unit prefixes" do
+          subject = described_class.new(image_path(:large_webp))
+          expect(subject.size).to be_a(Integer)
+        end
+      end
+
       describe "#exif" do
         it "returns a hash of EXIF data" do
           subject = described_class.new(image_path(:exif))

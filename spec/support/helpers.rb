@@ -21,6 +21,7 @@ module Helpers
         when :rgb                 then "rgb.png"
         when :rgb_tmp             then "rgb_tmp.png"
         when :non_ascii_filename  then "スクリーンショット 2019-07-13 1.32.01.png"
+        when :large_webp          then "large_webp.webp"
         else
           fail "image #{type.inspect} doesn't exist"
         end

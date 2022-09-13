@@ -67,7 +67,7 @@ module MiniMagick
 
         raw_info.split("\n").each do |line|
           # must match "%m %w %h %b"
-          return line if line.match?(/^[A-Z]+ \d+ \d+ \d+B$/)
+          return line if line.match?(/^[A-Z]+ \d+ \d+ \d+(|\.\d+)([KMGTPEZY]{0,1})B$/)
         end
         raise TypeError
       end
