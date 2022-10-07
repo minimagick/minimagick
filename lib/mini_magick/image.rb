@@ -461,6 +461,9 @@ module MiniMagick
       @info.clear
 
       self
+    rescue MiniMagick::Invalid, MiniMagick::Error => e
+      new_tempfile.unlink
+      raise e
     end
 
     ##
