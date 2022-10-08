@@ -462,7 +462,7 @@ module MiniMagick
 
       self
     rescue MiniMagick::Invalid, MiniMagick::Error => e
-      new_tempfile.unlink
+      new_tempfile.unlink if new_tempfile && @tempfile != new_tempfile
       raise e
     end
 
