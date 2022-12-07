@@ -306,7 +306,17 @@ require "webmock/rspec"
           layer = subject.layers.first
           layer.format('jpg', nil, {density: '300'})
           expect(layer).to be_valid
+        end
 
+        it "not change tempfile when convert failed" do
+          subject = described_class.create(nil, false) { |f| f.write(File.binread(image_path(:not))) }
+          current_path = subject.path
+          new_tempfile = MiniMagick::Utilities.tempfile('png')
+          new_path = new_tempfile.path
+          allow(MiniMagick::Utilities).to receive(:tempfile).and_return(new_tempfile)
+          expect { begin; subject.format('png'); rescue; end }.not_to change(subject, :tempfile)
+          expect(File.exist?(current_path)).to eq true
+          expect(File.exist?(new_path)).to eq false
         end
       end
 
