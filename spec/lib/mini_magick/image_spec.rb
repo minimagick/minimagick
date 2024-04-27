@@ -109,6 +109,13 @@ require "webmock/rspec"
             .to raise_error(MiniMagick::Invalid)
         end
 
+        it "saves cheap info when validating to avoid an unnecessary second identify call" do
+          expect_any_instance_of(MiniMagick::Tool::Identify).to receive(:call).exactly(:once).and_call_original
+
+          image = described_class.open(image_path)
+          expect(image[:dimensions]).to all(be_a(Integer))
+        end
+
         it "does not mistake a path with a colon for a URI schema" do
           expect { described_class.open(image_path(:colon)) }
             .not_to raise_error
