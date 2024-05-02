@@ -558,7 +558,7 @@ end
 
 ### `Errno::ENOMEM`
 
-It can happen that, when dealing with very large images, the process runs out of
+For clients using Ruby < 2.2, it can happen that, when dealing with very large images, the process runs out of
 memory, and `Errno::ENOMEM` is raised in your code. In that case try installing
 the [posix-spawn](https://github.com/rtomayko/posix-spawn) gem, and tell MiniMagick
 to use it when executing shell commands.
