@@ -19,13 +19,4 @@ RSpec.configure do |config|
       example.run unless example.metadata[:cli] == cli
     end
   end
-
-  ["open3", "posix-spawn"].each do |shell_api|
-    config.before(shell_api: shell_api) do |example|
-      allow(MiniMagick).to receive(:shell_api).and_return(shell_api)
-    end
-  end
 end
-
-SHELL_APIS = ["open3"]
-SHELL_APIS << "posix-spawn" unless RUBY_PLATFORM == "java"

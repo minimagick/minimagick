@@ -79,21 +79,11 @@ module MiniMagick
     #
     attr_accessor :whiny
 
-    ##
-    # Instructs MiniMagick how to execute the shell commands. Available
-    # APIs are "open3" (default) and "posix-spawn" (requires the "posix-spawn"
-    # gem).
-    #
-    # @return [String]
-    #
-    attr_accessor :shell_api
-
     def self.extended(base)
       base.tmpdir = Dir.tmpdir
       base.validate_on_create = true
       base.validate_on_write = true
       base.whiny = true
-      base.shell_api = "open3"
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
     end
 
@@ -187,6 +177,15 @@ module MiniMagick
     def debug=(value)
       warn "MiniMagick.debug is deprecated and will be removed in MiniMagick 5. Use `MiniMagick.logger.level = Logger::DEBUG` instead."
       logger.level = value ? Logger::DEBUG : Logger::INFO
+    end
+
+    def shell_api=(value)
+      warn "MiniMagick.shell_api is deprecated and will be removed in MiniMagick 5. The posix-spawn gem doesn't improve performance recent Ruby versions anymore, so support for it will be removed."
+      @shell_api = value
+    end
+
+    def shell_api
+      @shell_api || "open3"
     end
 
     # Backwards compatibility

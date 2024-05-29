@@ -42,53 +42,49 @@ RSpec.describe MiniMagick::Shell do
   end
 
   describe "#execute" do
-    SHELL_APIS.each do |shell_api|
-      context "with #{shell_api}", shell_api: shell_api do
-        it "executes the command in the shell" do
-          stdout, stderr, status = subject.execute(%W[identify #{image_path(:gif)}])
+    it "executes the command in the shell" do
+      stdout, stderr, status = subject.execute(%W[identify #{image_path(:gif)}])
 
-          expect(stdout).to match("GIF")
-          expect(stderr).to eq ""
-          expect(status).to eq 0
+      expect(stdout).to match("GIF")
+      expect(stderr).to eq ""
+      expect(status).to eq 0
 
-          stdout, stderr, status = subject.execute(%W[identify foo])
+      stdout, stderr, status = subject.execute(%W[identify foo])
 
-          expect(stdout).to eq ""
-          expect(stderr).to match("unable to open image")
-          expect(status).to eq 1
-        end
+      expect(stdout).to eq ""
+      expect(stderr).to match("unable to open image")
+      expect(status).to eq 1
+    end
 
-        it "handles larger output" do
-          Timeout.timeout(1) do
-            stdout, _, _ = subject.execute(%W[convert #{image_path(:gif)} -])
-            expect(stdout).to match("GIF")
-          end
-        end
-
-        it "returns an appropriate response when command wasn't found" do
-          stdout, stderr, code = subject.execute(%W[unexisting command])
-          expect(code).to eq 127
-        end
-
-        it "logs the command and execution time in debug mode" do
-          MiniMagick.logger = Logger.new(stream = StringIO.new)
-          MiniMagick.logger.level = Logger::DEBUG
-          subject.execute(%W[identify #{image_path(:gif)}])
-          stream.rewind
-          expect(stream.read).to match /\[\d+.\d+s\] identify #{image_path(:gif)}/
-        end
-
-        it "terminate long running commands if MiniMagick.timeout is set" do
-          MiniMagick.timeout = 0.1
-          expect { subject.execute(%w[sleep 1]) }.to raise_error(Timeout::Error)
-          MiniMagick.timeout = nil
-        end
-
-        it "doesn't break on spaces" do
-          stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
-          expect(stdout).to match(/\d+ \d+/)
-        end
+    it "handles larger output" do
+      Timeout.timeout(1) do
+        stdout, _, _ = subject.execute(%W[convert #{image_path(:gif)} -])
+        expect(stdout).to match("GIF")
       end
+    end
+
+    it "returns an appropriate response when command wasn't found" do
+      stdout, stderr, code = subject.execute(%W[unexisting command])
+      expect(code).to eq 127
+    end
+
+    it "logs the command and execution time in debug mode" do
+      MiniMagick.logger = Logger.new(stream = StringIO.new)
+      MiniMagick.logger.level = Logger::DEBUG
+      subject.execute(%W[identify #{image_path(:gif)}])
+      stream.rewind
+      expect(stream.read).to match /\[\d+.\d+s\] identify #{image_path(:gif)}/
+    end
+
+    it "terminate long running commands if MiniMagick.timeout is set" do
+      MiniMagick.timeout = 0.1
+      expect { subject.execute(%w[sleep 1]) }.to raise_error(Timeout::Error)
+      MiniMagick.timeout = nil
+    end
+
+    it "doesn't break on spaces" do
+      stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
+      expect(stdout).to match(/\d+ \d+/)
     end
   end
 end
