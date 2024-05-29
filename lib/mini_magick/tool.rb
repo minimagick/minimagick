@@ -181,7 +181,7 @@ module MiniMagick
     # Create an ImageMagick stack in the command (surround.
     #
     # @example
-    #   MiniMagick::Tool::Convert.new do |convert|
+    #   MiniMagick::Tool::Magick.new do |convert|
     #     convert << "wand.gif"
     #     convert.stack do |stack|
     #       stack << "wand.gif"
@@ -221,7 +221,7 @@ module MiniMagick
     # Adds ImageMagick's pseudo-filename `-` for standard output.
     #
     # @example
-    #   content = MiniMagick::Tool::Convert.new do |convert|
+    #   content = MiniMagick::Tool::Magick.new do |convert|
     #     convert << "input.jpg"
     #     convert.auto_orient
     #     convert.stdout

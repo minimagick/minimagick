@@ -30,23 +30,14 @@ ImageMagick or GraphicsMagick command-line tool has to be installed. You can
 check if you have it installed by running
 
 ```sh
-$ convert -version
-Version: ImageMagick 6.8.9-7 Q16 x86_64 2014-09-11 http://www.imagemagick.org
-Copyright: Copyright (C) 1999-2014 ImageMagick Studio LLC
-Features: DPC Modules
-Delegates: bzlib fftw freetype jng jpeg lcms ltdl lzma png tiff xml zlib
+$ magick -version
+Version: ImageMagick 7.1.1-33 Q16-HDRI aarch64 22263 https://imagemagick.org
+Copyright: (C) 1999 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+Features: Cipher DPC HDRI Modules OpenMP(5.0)
+Delegates (built-in): bzlib fontconfig freetype gslib heic jng jp2 jpeg jxl lcms lqr ltdl lzma openexr png ps raw tiff webp xml zlib zstd
+Compiler: gcc (4.2)
 ```
-
-MiniMagick has been tested on following Rubies:
-
-* MRI 2.6
-* MRI 2.5
-* MRI 2.4
-* MRI 2.3
-* MRI 2.2
-* MRI 2.1
-* MRI 2.0
-* JRuby 9k
 
 ## Installation
 
@@ -378,7 +369,7 @@ performance of your image processing. We will now show the features available.
 The most basic way of building a command is appending strings:
 
 ```rb
-MiniMagick::Tool::Convert.new do |convert|
+MiniMagick::Tool::Magick.new do |convert|
   convert << "input.jpg"
   convert.merge! ["-resize", "500x500", "-negate"]
   convert << "output.jpg"
@@ -426,7 +417,7 @@ MiniMagick knows which options each tool has, so you will get an explicit
 Every method call returns `self`, so you can chain them to create logical groups.
 
 ```rb
-MiniMagick::Tool::Convert.new do |convert|
+MiniMagick::Tool::Magick.new do |convert|
   convert << "input.jpg"
   convert.clone(0).background('gray').shadow('80x5+5+5')
   convert.negate
@@ -437,7 +428,7 @@ end
 #### "Plus" options
 
 ```rb
-MiniMagick::Tool::Convert.new do |convert|
+MiniMagick::Tool::Magick.new do |convert|
   convert << "input.jpg"
   convert.repage.+
   convert.distort.+("Perspective", "more args")
@@ -450,7 +441,7 @@ convert input.jpg +repage +distort Perspective 'more args'
 #### Stacks
 
 ```rb
-MiniMagick::Tool::Convert.new do |convert|
+MiniMagick::Tool::Magick.new do |convert|
   convert << "wand.gif"
 
   convert.stack do |stack|
@@ -483,7 +474,7 @@ MiniMagick also has `#stdout` alias for "-" for outputing file contents to
 standard output:
 
 ```rb
-content = MiniMagick::Tool::Convert.new do |convert|
+content = MiniMagick::Tool::Magick.new do |convert|
   convert << "input.jpg"
   convert.auto_orient
   convert.stdout # alias for "-"

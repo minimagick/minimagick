@@ -5,7 +5,7 @@ require "fileutils"
 require "stringio"
 require "webmock/rspec"
 
-["ImageMagick", "GraphicsMagick"].each do |cli|
+["ImageMagick7", "GraphicsMagick"].each do |cli|
   RSpec.context "With #{cli}", cli: cli.downcase.to_sym do
     describe MiniMagick::Image do
       subject { described_class.open(image_path) }
@@ -462,11 +462,11 @@ require "webmock/rspec"
       describe "#details" do
         it "returns a hash of verbose information" do
           expect(subject.details["Format"]).to match /^JPEG/
-          if MiniMagick.cli == :imagemagick
-            if Gem::Version.new(MiniMagick.cli_version) < Gem::Version.new('7.0.0')
-              expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
-            else
+          if MiniMagick.cli.to_s.start_with?("imagemagick")
+            if MiniMagick.imagemagick7?
               expect(subject.details["Channel depth"]["Red"]).to eq "8-bit"
+            else
+              expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
             end
 
             expect(subject.details).to have_key("Background color")
@@ -481,7 +481,7 @@ require "webmock/rspec"
           subject { described_class.new(image_path(:empty_identify_line)) }
 
           it "skips the empty line" do
-            if MiniMagick.cli == :imagemagick
+            if MiniMagick.imagemagick7?
               expect(subject.details["Properties"]).to have_key("date:create")
             else
               expect(subject.details).to have_key("Date:create")

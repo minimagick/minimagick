@@ -166,7 +166,7 @@ module MiniMagick
         raise Error, "MiniMagick::Image#data isn't supported on GraphicsMagick. Use MiniMagick::Image#details instead." if MiniMagick.graphicsmagick?
 
         @info["data"] ||= (
-          json = MiniMagick::Tool::Convert.new do |convert|
+          json = MiniMagick.convert do |convert|
             convert << path
             convert << "json:"
           end
