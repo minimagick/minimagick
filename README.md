@@ -410,7 +410,7 @@ convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
 ```
 
 MiniMagick knows which options each tool has, so you will get an explicit
-`NoMethodError` if you happen to have mispelled an option.
+`NoMethodError` if you happen to have misspelled an option.
 
 #### Chaining
 
@@ -470,7 +470,7 @@ identify.stdin # alias for "-"
 identify.call(stdin: image_content)
 ```
 
-MiniMagick also has `#stdout` alias for "-" for outputing file contents to
+MiniMagick also has `#stdout` alias for "-" for outputting file contents to
 standard output:
 
 ```rb

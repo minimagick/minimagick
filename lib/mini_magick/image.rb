@@ -274,7 +274,7 @@ module MiniMagick
     #
     attribute :resolution
     ##
-    # Returns the message digest of this image as a SHA-256, hexidecimal
+    # Returns the message digest of this image as a SHA-256, hexadecimal
     # encoded string. This signature uniquely identifies the image and is
     # convenient for determining if an image has been modified or whether two
     # images are identical.
