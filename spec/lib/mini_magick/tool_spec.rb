@@ -121,7 +121,7 @@ RSpec.describe MiniMagick::Tool do
   end
 
   describe "#stack" do
-    it "it surrounds added arguments with parantheses" do
+    it "it surrounds added arguments with parentheses" do
       subject.stack do |stack|
         stack << "foo"
         stack << "bar"
@@ -146,7 +146,7 @@ RSpec.describe MiniMagick::Tool do
       expect(subject.args).to eq %W[-clone 0]
     end
 
-    it "is convertable to plus version" do
+    it "is convertible to plus version" do
       subject.clone.+
       expect(subject.args).to eq %W[+clone]
     end

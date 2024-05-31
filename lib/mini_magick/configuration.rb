@@ -64,7 +64,7 @@ module MiniMagick
     ##
     # If set to `true`, it will `identify` every image that gets written (with
     # {MiniMagick::Image#write}), and raise `MiniMagick::Invalid` if the image
-    # is not valid. Useful for validating that processing was sucessful,
+    # is not valid. Useful for validating that processing was successful,
     # although it adds a bit of overhead. Defaults to `true`.
     #
     # @return [Boolean]
