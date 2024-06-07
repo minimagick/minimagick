@@ -482,6 +482,7 @@ RSpec.describe MiniMagick::Image do
         if MiniMagick.imagemagick7?
           expect(subject.details["Properties"]).to have_key("date:create")
         else
+          pp subject.details
           expect(subject.details).to have_key("date:create")
         end
       end
