@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ '**' ]
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -23,6 +26,13 @@ jobs:
           - "3.2"
           - "3.3"
           - "jruby-9.4"
+        channel: ["stable"]
+
+        include:
+          - ruby-version: "ruby-head"
+            channel: "experimental"
+
+    continue-on-error: ${{ matrix.channel != 'stable' }}
 
     steps:
       - uses: actions/checkout@v4
