@@ -48,6 +48,9 @@ jobs:
         run:
           sudo apt-get install -qq -o Acquire::Retries=3 imagemagick graphicsmagick
 
+      - name: ImageMagick version
+        run: magick -version
+
       - name: Run tests (ImageMagick)
         run: bundle exec rspec
 
