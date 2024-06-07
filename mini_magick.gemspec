@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.email       = ['probablycorey@gmail.com', 'hcatlin@gmail.com', 'peter@nulayer.com', 'bensie@gmail.com', 'thiagown@gmail.com',     'janko.marohnic@gmail.com']
   s.homepage    = 'https://github.com/minimagick/minimagick'
 
-  s.files        = Dir['README.rdoc', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
+  s.files        = Dir['README.md', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.require_paths = ['lib']
 
   s.required_ruby_version = '>= 2.3'
