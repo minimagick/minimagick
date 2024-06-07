@@ -479,8 +479,11 @@ RSpec.describe MiniMagick::Image do
       subject { described_class.new(image_path(:empty_identify_line)) }
 
       it "skips the empty line" do
-        pp subject.details
-        expect(subject.details["Properties"]).to have_key("date:create")
+        if MiniMagick.cli.to_s.start_with?("imagemagick")
+          expect(subject.details["Properties"]).to have_key("date:create")
+        else
+          expect(subject.details).to have_key("Date:create")
+        end
       end
     end
 
