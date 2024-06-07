@@ -77,6 +77,8 @@ module MiniMagick
       end
 
       def mime_type
+        warn "[MiniMagick] MiniMagick::Image#mime_type has been deprecated, because it wasn't returning correct result for all formats ImageMagick supports. Unfortunately, returning the correct MIME type would be very slow, because it would require ImageMagick to read the whole file. It's better to use Marcel and MimeMagic gems, which are able to determine the MIME type just from the image header."
+
         "image/#{self["format"].downcase}"
       end
 
