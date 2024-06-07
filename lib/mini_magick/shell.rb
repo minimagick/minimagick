@@ -14,7 +14,7 @@ module MiniMagick
       stdout, stderr, status = execute(command, stdin: options[:stdin])
 
       if status != 0 && options.fetch(:whiny, MiniMagick.whiny)
-        fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status} and error:\n#{stderr}"
+        fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
       end
 
       $stderr.print(stderr) unless options[:stderr] == false
@@ -28,7 +28,7 @@ module MiniMagick
           send("execute_#{MiniMagick.shell_api.tr("-", "_")}", command, options)
         end
 
-      [stdout, stderr, status.exitstatus]
+      [stdout, stderr, status&.exitstatus]
     rescue Errno::ENOENT, IOError
       ["", "executable not found: \"#{command.first}\"", 127]
     end
