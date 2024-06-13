@@ -61,15 +61,6 @@ module MiniMagick
     # @return [Boolean]
     #
     attr_accessor :validate_on_create
-    ##
-    # If set to `true`, it will `identify` every image that gets written (with
-    # {MiniMagick::Image#write}), and raise `MiniMagick::Invalid` if the image
-    # is not valid. Useful for validating that processing was successful,
-    # although it adds a bit of overhead. Defaults to `true`.
-    #
-    # @return [Boolean]
-    #
-    attr_accessor :validate_on_write
 
     ##
     # If set to `false`, it will not raise errors when ImageMagick returns
@@ -87,7 +78,6 @@ module MiniMagick
     def self.extended(base)
       base.tmpdir = Dir.tmpdir
       base.validate_on_create = true
-      base.validate_on_write = true
       base.whiny = true
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
