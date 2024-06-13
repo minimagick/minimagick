@@ -144,7 +144,7 @@ image["%[gamma]"] # "0.9"
 ```
 
 To get the all information about the image, MiniMagick gives you a handy method
-which returns the output from `identify -verbose` in hash format:
+which returns the output from `convert input.jpg json:`:
 
 ```rb
 image.data #=>

@@ -282,8 +282,8 @@ module MiniMagick
     #
     attribute :signature
     ##
-    # Returns the information from `identify -verbose` in a Hash format, for
-    # ImageMagick.
+    # Returns the information from `convert input.jpg json:` in a Hash format,
+    # on ImageMagick.
     #
     # @return [Hash]
     attribute :data
