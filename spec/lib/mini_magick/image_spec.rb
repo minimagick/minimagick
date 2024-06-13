@@ -757,13 +757,6 @@ RSpec.describe MiniMagick::Image do
     end
   end
 
-  describe "#run_command" do
-    it "runs the given command" do
-      output = subject.run_command("identify", "-format", "%w", subject.path)
-      expect(output).to eq subject.width.to_s
-    end
-  end
-
   describe "#landscape?" do
     it "returns true if image width greater than height" do
       image = described_class.open(image_path(:clipping_path))
