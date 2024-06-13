@@ -8,9 +8,7 @@ module MiniMagick
     # If you don't have the CLI tools in your PATH, you can set the path to the
     # executables.
     #
-    attr_writer :cli_path
-    # @private (for backwards compatibility)
-    attr_accessor :processor_path
+    attr_accessor :cli_path
 
     ##
     # Adds a prefix to the CLI command.
@@ -139,22 +137,6 @@ module MiniMagick
         raise ArgumentError,
           "CLI has to be set to either :imagemagick, :imagemagick7 or :graphicsmagick" \
           ", was set to #{@cli.inspect}"
-      end
-    end
-
-    ##
-    # If you set the path of CLI tools, you can get the path of the
-    # executables.
-    #
-    # @return [String]
-    #
-    def cli_path
-      if instance_variable_defined?("@cli_path")
-        instance_variable_get("@cli_path")
-      else
-        processor_path = instance_variable_get("@processor_path") if instance_variable_defined?("@processor_path")
-
-        instance_variable_set("@cli_path", processor_path)
       end
     end
 
