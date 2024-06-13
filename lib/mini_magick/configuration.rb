@@ -148,11 +148,5 @@ module MiniMagick
     def shell_api
       @shell_api || "open3"
     end
-
-    # Backwards compatibility
-    def reload_tools
-      warn "MiniMagick.reload_tools is deprecated because it is no longer necessary"
-    end
-
   end
 end
