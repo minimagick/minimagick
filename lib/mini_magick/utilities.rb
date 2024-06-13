@@ -24,12 +24,10 @@ module MiniMagick
     end
 
     def tempfile(extension)
-      Tempfile.new(["mini_magick", extension], MiniMagick.tmpdir).tap do |tempfile|
-        tempfile.binmode
-        yield tempfile if block_given?
-        tempfile.close
-      end
+      tempfile = Tempfile.new(["mini_magick", extension], MiniMagick.tmpdir, binmode: true)
+      yield tempfile if block_given?
+      tempfile.close
+      tempfile
     end
-
   end
 end
