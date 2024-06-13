@@ -55,7 +55,7 @@ module MiniMagick
         output_path = image.path.sub(/\.\w+$/, ".#{format}")
         # Use ImageMagick to convert the raw data file to an image file of the
         # desired format:
-        MiniMagick.convert do |convert|
+        MiniMagick::Tool::Convert.new do |convert|
           convert.size "#{columns}x#{rows}"
           convert.depth depth
           convert << "#{map}:#{image.path}"
@@ -367,7 +367,7 @@ module MiniMagick
     # @return [Array] Matrix of each color of each pixel
     def get_pixels(map="RGB")
       raise ArgumentError, "Invalid map value" unless ["RGB", "RGBA"].include?(map)
-      convert = MiniMagick.convert
+      convert = MiniMagick::Tool::Convert.new
       convert << path
       convert.depth(8)
       convert << "#{map}:-"
@@ -441,7 +441,7 @@ module MiniMagick
       input_path = path.dup
       input_path << "[#{page}]" if page && !layer?
 
-      MiniMagick.convert do |convert|
+      MiniMagick::Tool::Convert.new do |convert|
         read_opts.each do |opt, val|
           convert.send(opt.to_s, val)
         end
@@ -514,7 +514,7 @@ module MiniMagick
       case output_to
       when String, Pathname
         if layer?
-          MiniMagick.convert do |builder|
+          MiniMagick::Tool::Convert.new do |builder|
             builder << path
             builder << output_to
           end

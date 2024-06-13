@@ -55,15 +55,6 @@ module MiniMagick
     output[/\d+\.\d+\.\d+(-\d+)?/]
   end
 
-  ##
-  # Returns magick tool for ImageMagick 7, otherwise returns convert tool.
-  #
-  # @return [MiniMagick::Tool]
-  def self.convert(&block)
-    tool = imagemagick7? ? MiniMagick::Tool::Magick : MiniMagick::Tool::Convert
-    tool.new(&block)
-  end
-
   class Error < RuntimeError; end
   class Invalid < StandardError; end
 

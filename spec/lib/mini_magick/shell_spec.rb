@@ -39,6 +39,10 @@ RSpec.describe MiniMagick::Shell do
       allow(subject).to receive(:execute).and_return(["", "stderr", 1])
       expect { subject.run(%W[foo], whiny: false) }.to output("stderr").to_stderr
     end
+
+    it "ignores warnings about convert being deprecated on IM7" do
+      expect { subject.run %w[convert -help] }.not_to output.to_stderr
+    end
   end
 
   describe "#execute" do

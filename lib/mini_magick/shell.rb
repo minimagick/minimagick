@@ -17,7 +17,7 @@ module MiniMagick
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
       end
 
-      $stderr.print(stderr) unless options[:stderr] == false
+      $stderr.print(stderr) unless options[:stderr] == false || stderr.strip == %(WARNING: The convert command is deprecated in IMv7, use "magick")
 
       [stdout, stderr, status]
     end
