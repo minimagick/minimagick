@@ -408,9 +408,6 @@ convert.rotate(90)
 convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
 ```
 
-MiniMagick knows which options each tool has, so you will get an explicit
-`NoMethodError` if you happen to have misspelled an option.
-
 #### Chaining
 
 Every method call returns `self`, so you can chain them to create logical groups.
