@@ -86,7 +86,7 @@ module MiniMagick
       whiny = args.fetch(0, @whiny)
 
       options[:whiny] = whiny
-      options[:stderr] = false if block_given?
+      options[:stderr] = MiniMagick.warnings && !block_given?
 
       shell = MiniMagick::Shell.new
       stdout, stderr, status = shell.run(command, options)

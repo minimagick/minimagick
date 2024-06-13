@@ -523,6 +523,17 @@ The example directory `/my/new/tmp_dir` must exist and must be writable.
 
 If not configured, it will default to `Dir.tmpdir`.
 
+## Ignoring STDERR
+
+If you're receiving warnings from ImageMagick that you don't care about, you
+can avoid them being forwarded to standard error:
+
+```rb
+MiniMagick.configure do |config|
+  config.warnings = false
+end
+```
+
 ## Troubleshooting
 
 ### Errors being raised when they shouldn't

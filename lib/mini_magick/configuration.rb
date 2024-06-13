@@ -79,12 +79,18 @@ module MiniMagick
     #
     attr_accessor :whiny
 
+    ##
+    # If set to `false`, it will not forward warnings from ImageMagick to
+    # standard error.
+    attr_accessor :warnings
+
     def self.extended(base)
       base.tmpdir = Dir.tmpdir
       base.validate_on_create = true
       base.validate_on_write = true
       base.whiny = true
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
+      base.warnings = true
     end
 
     ##
