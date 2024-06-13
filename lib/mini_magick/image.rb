@@ -228,10 +228,6 @@ module MiniMagick
     #
     attribute :type, "format"
     ##
-    # @return [String]
-    #
-    attribute :mime_type
-    ##
     # @return [Integer]
     #
     attribute :width
@@ -397,10 +393,10 @@ module MiniMagick
     # @example
     #   # It is given in readme.md file
     ##
-    def self.get_image_from_pixels(pixels, dimension, map, depth, mime_type)
+    def self.get_image_from_pixels(pixels, dimension, map, depth, format)
       pixels = pixels.flatten
       blob = pixels.pack('C*')
-      import_pixels(blob, *dimension, depth, map, mime_type)
+      import_pixels(blob, *dimension, depth, map, format)
     end
 
     ##

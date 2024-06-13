@@ -126,7 +126,6 @@ A `MiniMagick::Image` has various handy attributes.
 
 ```rb
 image.type        #=> "JPEG"
-image.mime_type   #=> "image/jpeg"
 image.width       #=> 250
 image.height      #=> 300
 image.dimensions  #=> [250, 300]

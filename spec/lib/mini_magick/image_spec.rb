@@ -400,7 +400,6 @@ RSpec.describe MiniMagick::Image do
 
   it "has attributes" do
     expect(subject.type).to match(/^[A-Z]+$/)
-    expect(subject.mime_type).to match(/^image\/[a-z]+$/)
     expect(subject.width).to be_a(Integer).and be_nonzero
     expect(subject.height).to be_a(Integer).and be_nonzero
     expect(subject.dimensions).to all(be_a(Integer))
@@ -455,13 +454,6 @@ RSpec.describe MiniMagick::Image do
       expect(subject.resolution("PixelsPerCentimeter"))
         .not_to eq subject.resolution("PixelsPerInch")
     end unless ENV["GM"]
-  end
-
-  describe "#mime_type" do
-    it "returns the correct mime type" do
-      jpg = described_class.new(image_path(:jpg))
-      expect(jpg.mime_type).to eq 'image/jpeg'
-    end
   end
 
   describe "#details" do
