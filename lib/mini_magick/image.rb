@@ -216,7 +216,7 @@ module MiniMagick
     # @raise [MiniMagick::Invalid]
     #
     def validate!
-      @info.identify_with_cheap_info
+      identify
     rescue MiniMagick::Error => error
       raise MiniMagick::Invalid, error.message
     end
