@@ -178,6 +178,12 @@ module MiniMagick
         end
       end
 
+      def identify_with_cheap_info
+        # asking for any cheap_info value will trigger `identify` to fetch _all_ cheap_info values if necessary
+        # used by Image#validate! to avoid a second `identify` call just to populate cheap_info attributes
+        self['format']
+      end
+
       private
 
       def decode_comma_separated_ascii_characters(encoded_value)
