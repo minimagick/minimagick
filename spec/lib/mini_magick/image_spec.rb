@@ -110,7 +110,7 @@ RSpec.describe MiniMagick::Image do
     it "saves cheap info when validating to avoid an unnecessary second identify call" do
       expect_any_instance_of(MiniMagick::Tool::Identify).to receive(:call).exactly(:once).and_call_original
 
-      image = described_class.open(image_path)
+      image = described_class.open(image_path(:slow_svg))
       expect(image[:dimensions]).to all(be_a(Integer))
     end
 
