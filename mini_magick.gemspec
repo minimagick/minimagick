@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.5.0'
   s.add_development_dependency 'webmock'
+
+  s.metadata['changelog_uri'] = 'https://github.com/minimagick/minimagick/releases'
 end
