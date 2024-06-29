@@ -77,14 +77,5 @@ module MiniMagick
     def configure
       yield self
     end
-
-    def shell_api=(value)
-      warn "MiniMagick.shell_api is deprecated and will be removed in MiniMagick 5. The posix-spawn gem doesn't improve performance recent Ruby versions anymore, so support for it will be removed."
-      @shell_api = value
-    end
-
-    def shell_api
-      @shell_api || "open3"
-    end
   end
 end

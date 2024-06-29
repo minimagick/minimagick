@@ -23,10 +23,9 @@ module MiniMagick
     end
 
     def execute(command, options = {})
-      stdout, stderr, status =
-        log(command.join(" ")) do
-          send("execute_#{MiniMagick.shell_api.tr("-", "_")}", command, options)
-        end
+      stdout, stderr, status = log(command.join(" ")) do
+        execute_open3(command, options)
+      end
 
       [stdout, stderr, status&.exitstatus]
     rescue Errno::ENOENT, IOError
@@ -58,14 +57,6 @@ module MiniMagick
 
         [stdout_reader.value, stderr_reader.value, thread.value]
       end
-    end
-
-    def execute_posix_spawn(command, options = {})
-      require "posix-spawn"
-      child = POSIX::Spawn::Child.new(*command, input: options[:stdin].to_s, timeout: MiniMagick.timeout)
-      [child.out, child.err, child.status]
-    rescue POSIX::Spawn::TimeoutExceeded
-      raise Timeout::Error, "MiniMagick command timed out: #{command}"
     end
 
     def log(command, &block)
