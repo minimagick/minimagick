@@ -152,11 +152,4 @@ RSpec.describe MiniMagick::Tool do
     subject.radial_gradient.canvas "khaki"
     expect(subject.args).to eq %W[radial-gradient: canvas:khaki]
   end
-
-  it "doesn't raise errors when false is passed to the constructor" do
-    subject.help
-    subject.call(false)
-
-    MiniMagick::Tool::Identify.new(false, &:help)
-  end
 end

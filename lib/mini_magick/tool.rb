@@ -53,11 +53,9 @@ module MiniMagick
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
     def initialize(name, options = {})
-      warn "MiniMagick::Tool.new(false) is deprecated and will be removed in MiniMagick 5, use MiniMagick::Tool.new(whiny: false) instead." if !options.is_a?(Hash)
-
-      @name  = name
-      @args  = []
-      @whiny = options.is_a?(Hash) ? options.fetch(:whiny, MiniMagick.whiny) : options
+      @name = name
+      @args = []
+      @whiny = options.fetch(:whiny, MiniMagick.whiny)
     end
 
     ##
@@ -80,12 +78,8 @@ module MiniMagick
     #
     # @return [String] Returns the output of the command
     #
-    def call(*args)
-      options = args[-1].is_a?(Hash) ? args.pop : {}
-      warn "Passing whiny to MiniMagick::Tool#call is deprecated and will be removed in MiniMagick 5, use MiniMagick::Tool.new(whiny: false) instead." if args.any?
-      whiny = args.fetch(0, @whiny)
-
-      options[:whiny] = whiny
+    def call(options = {})
+      options[:whiny] = @whiny
       options[:stderr] = MiniMagick.warnings && !block_given?
 
       shell = MiniMagick::Shell.new
