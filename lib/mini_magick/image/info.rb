@@ -25,8 +25,6 @@ module MiniMagick
           raw_exif(value)
         when "exif"
           exif
-        when "details"
-          details
         when "data"
           data
         else
@@ -113,39 +111,6 @@ module MiniMagick
 
       def signature
         @info["signature"] ||= self["%#"]
-      end
-
-      def details
-        warn "[MiniMagick] MiniMagick::Image#details has been deprecated, as it was causing too many parsing errors. You should use MiniMagick::Image#data instead, which differs in a way that the keys are in camelcase."
-
-        @info["details"] ||= (
-          details_string = identify(&:verbose)
-          key_stack = []
-          details_string.lines.to_a[1..-1].each_with_object({}) do |line, details_hash|
-            next if !line.valid_encoding? || line.strip.length.zero?
-
-            level = line[/^\s*/].length / 2 - 1
-            if level >= 0
-              key_stack.pop until key_stack.size <= level
-            else
-              # Some metadata, such as SVG clipping paths, will be saved without
-              # indentation, resulting in a level of -1
-              last_key = details_hash.keys.last
-              details_hash[last_key] = '' if details_hash[last_key].empty?
-              details_hash[last_key] << line
-              next
-            end
-
-            key, _, value = line.partition(/:[\s]/).map(&:strip)
-            hash = key_stack.inject(details_hash) { |_hash, _key| _hash.fetch(_key) }
-            if value.empty?
-              hash[key] = {}
-              key_stack.push key
-            else
-              hash[key] = value
-            end
-          end
-        )
       end
 
       def data

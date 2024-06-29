@@ -191,9 +191,6 @@ image.data #=>
 # }
 ```
 
-Note that `MiniMagick::Image#data` is supported only on ImageMagick 6.8.8-3 or
-above, for older versions of ImageMagick use `MiniMagick::Image#details`.
-
 ### Pixels
 
 With MiniMagick you can retrieve a matrix of image pixels, where each member of

@@ -282,16 +282,10 @@ module MiniMagick
     #
     attribute :signature
     ##
-    # Returns the information from `convert input.jpg json:` in a Hash format,
-    # on ImageMagick.
+    # Returns the result of converting the image to JSON format.
     #
     # @return [Hash]
     attribute :data
-    ##
-    # Returns the information from `identify -verbose` in a Hash format.
-    #
-    # @return [Hash]
-    attribute :details
 
     ##
     # Use this method if you want to access raw Identify's format API.

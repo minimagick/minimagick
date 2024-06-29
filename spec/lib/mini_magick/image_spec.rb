@@ -446,37 +446,7 @@ RSpec.describe MiniMagick::Image do
     it "accepts units" do
       expect(subject.resolution("PixelsPerCentimeter"))
         .not_to eq subject.resolution("PixelsPerInch")
-    end unless ENV["GM"]
-  end
-
-  describe "#details" do
-    it "returns a hash of verbose information" do
-      expect(subject.details["Format"]).to match /^JPEG/
-      if MiniMagick.imagemagick7?
-        expect(subject.details["Channel depth"]["Red"]).to eq "8-bit"
-      else
-        expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
-      end
-
-      expect(subject.details).to have_key("Background color")
-      expect(subject.details["Properties"]).to have_key("date:create")
     end
-
-    context "when verbose information includes an empty line" do
-      subject { described_class.new(image_path(:empty_identify_line)) }
-
-      it "skips the empty line" do
-        expect(subject.details["Properties"]).to have_key("date:create")
-      end
-    end
-
-    context "when verbose information includes a badly encoded line do" do
-      subject { described_class.new(image_path(:badly_encoded_line)) }
-
-      it "skips the badly encoded line" do
-        expect(subject.details).not_to have_key("Software")
-      end
-    end unless ENV["GM"]
   end
 
   describe "#data" do
@@ -486,7 +456,7 @@ RSpec.describe MiniMagick::Image do
       it "returns image JSON data" do
         expect(subject.data["format"]).to eq "JPEG"
         expect(subject.data["colorspace"]).to eq "sRGB"
-      end unless ENV["GM"]
+      end
     end
 
     describe "when the data return is an array (ex png)" do
@@ -495,7 +465,7 @@ RSpec.describe MiniMagick::Image do
       it "returns image JSON data" do
         expect(subject.data["format"]).to eq "PNG"
         expect(subject.data["colorspace"]).to eq "sRGB"
-      end unless ENV["GM"]
+      end
     end
   end unless ENV["CI"] # problems installing newer ImageMagick versions on CI
 
