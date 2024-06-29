@@ -1,53 +1,22 @@
 require 'mini_magick/version'
 require 'mini_magick/configuration'
+require 'mini_magick/utilities'
 
 module MiniMagick
 
   extend MiniMagick::Configuration
 
   ##
-  # You might want to execute only certain blocks of processing with a
-  # different CLI, because for example that CLI does that particular thing
-  # faster. After the block CLI resets to its previous value.
-  #
-  # @example
-  #   MiniMagick.with_cli :graphicsmagick do
-  #     # operations that are better done with GraphicsMagick
-  #   end
-  def self.with_cli(cli)
-    old_cli = self.cli
-    self.cli = cli
-    yield
-  ensure
-    self.cli = old_cli
-  end
-
-  ##
-  # Checks whether the CLI used is ImageMagick.
-  #
-  # @return [Boolean]
-  def self.imagemagick?
-    cli == :imagemagick
-  end
-
-  ##
-  # Checks whether the CLI used is ImageMagick 7.
+  # Checks whether ImageMagick 7 is installed.
   #
   # @return [Boolean]
   def self.imagemagick7?
-    cli == :imagemagick7
+    return @imagemagick7 if defined?(@imagemagick7)
+    @imagemagick7 = !!MiniMagick::Utilities.which("magick")
   end
 
   ##
-  # Checks whether the CLI used is GraphicsMagick.
-  #
-  # @return [Boolean]
-  def self.graphicsmagick?
-    cli == :graphicsmagick
-  end
-
-  ##
-  # Returns ImageMagick's/GraphicsMagick's version.
+  # Returns ImageMagick version.
   #
   # @return [String]
   def self.cli_version

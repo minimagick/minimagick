@@ -4,8 +4,7 @@
 [![CI](https://github.com/minimagick/minimagick/actions/workflows/ci.yml/badge.svg)](https://github.com/minimagick/minimagick/actions/workflows/ci.yml)
 [![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
 
-A ruby wrapper for [ImageMagick](http://imagemagick.org/) or
-[GraphicsMagick](http://www.graphicsmagick.org/) command line.
+A ruby wrapper for [ImageMagick](http://imagemagick.org/) command line.
 
 ## Why?
 
@@ -26,8 +25,8 @@ MiniMagick gives you access to all the command line options ImageMagick has
 
 ## Requirements
 
-ImageMagick or GraphicsMagick command-line tool has to be installed. You can
-check if you have it installed by running
+ImageMagick command-line tool has to be installed. You can check if you have it
+installed by running
 
 ```sh
 $ magick -version
@@ -193,8 +192,7 @@ image.data #=>
 ```
 
 Note that `MiniMagick::Image#data` is supported only on ImageMagick 6.8.8-3 or
-above, for GraphicsMagick or older versions of ImageMagick use
-`MiniMagick::Image#details`.
+above, for older versions of ImageMagick use `MiniMagick::Image#details`.
 
 ### Pixels
 
@@ -237,7 +235,6 @@ In this example, the returned pixels should now have equal R, G, and B values.
 
 ```rb
 MiniMagick.configure do |config|
-  config.cli = :graphicsmagick
   config.timeout = 5
 end
 ```
@@ -307,30 +304,6 @@ D, [2016-03-19T07:31:36.755338 #87191] DEBUG -- : [0.01s] identify /var/folders/
 ```
 
 In Rails you'll probably want to set `MiniMagick.logger = Rails.logger`.
-
-### Switching CLIs (ImageMagick \<=\> GraphicsMagick)
-
-Default CLI is ImageMagick, but if you want to use GraphicsMagick, you can
-specify it in configuration:
-
-```rb
-MiniMagick.configure do |config|
-  config.cli = :graphicsmagick # or :imagemagick or :imagemagick7
-end
-```
-
-You can also use `.with_cli` to temporary switch the CLI:
-
-```rb
-MiniMagick.with_cli(:graphicsmagick) do
-  # Some processing that GraphicsMagick is better at
-end
-```
-
-**WARNING**: If you're building a multithreaded web application, you should
-change the CLI only on application startup. This is because the configuration is
-global, so if you change it in a controller action, other threads in the same
-process will also have their CLI changed, which could lead to race conditions.
 
 ### Metal
 
@@ -491,6 +464,20 @@ compare.call do |stdout, stderr, status|
   # ...
 end
 ```
+
+## GraphicsMagick
+
+As of MiniMagick 5+, [GraphicsMagick](http://www.graphicsmagick.org/) isn't
+officially supported. However, you can still configure MiniMagick to use it:
+
+```rb
+MiniMagick.configure do |config|
+  config.cli_prefix = "gm"
+end
+```
+
+Some MiniMagick features won't be supported, such as global timeout,
+`MiniMagick::Image#data` and `MiniMagick::Image#exif`.
 
 ## Limiting resources
 

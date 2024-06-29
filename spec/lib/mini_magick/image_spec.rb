@@ -452,30 +452,21 @@ RSpec.describe MiniMagick::Image do
   describe "#details" do
     it "returns a hash of verbose information" do
       expect(subject.details["Format"]).to match /^JPEG/
-      if MiniMagick.cli.to_s.start_with?("imagemagick")
-        if MiniMagick.imagemagick7?
-          expect(subject.details["Channel depth"]["Red"]).to eq "8-bit"
-        else
-          expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
-        end
-
-        expect(subject.details).to have_key("Background color")
-        expect(subject.details["Properties"]).to have_key("date:create")
+      if MiniMagick.imagemagick7?
+        expect(subject.details["Channel depth"]["Red"]).to eq "8-bit"
       else
-        expect(subject.details["Channel Depths"]["Red"]).to eq "8 bits"
-        expect(subject.details).to have_key("Resolution")
+        expect(subject.details["Channel depth"]["red"]).to eq "8-bit"
       end
+
+      expect(subject.details).to have_key("Background color")
+      expect(subject.details["Properties"]).to have_key("date:create")
     end
 
     context "when verbose information includes an empty line" do
       subject { described_class.new(image_path(:empty_identify_line)) }
 
       it "skips the empty line" do
-        if MiniMagick.cli.to_s.start_with?("imagemagick")
-          expect(subject.details["Properties"]).to have_key("date:create")
-        else
-          expect(subject.details).to have_key("Date:create")
-        end
+        expect(subject.details["Properties"]).to have_key("date:create")
       end
     end
 

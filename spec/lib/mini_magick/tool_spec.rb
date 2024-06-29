@@ -51,31 +51,20 @@ RSpec.describe MiniMagick::Tool do
   end
 
   describe "#executable" do
-    it "prepends 'gm' to the command list when using GraphicsMagick" do
-      allow(MiniMagick).to receive(:cli).and_return(:graphicsmagick)
-      expect(subject.executable).to eq %W[gm identify]
-    end
-
     it "prepends 'magick' to the command list when using ImageMagick 7" do
-      allow(MiniMagick).to receive(:cli).and_return(:imagemagick7)
+      allow(MiniMagick).to receive(:imagemagick7?).and_return(true)
       expect(subject.executable).to eq %W[magick identify]
       expect(MiniMagick::Tool::Magick.new.executable).to eq %W[magick]
     end
 
-    it "respects #cli_path" do
-      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
-      allow(MiniMagick).to receive(:cli_path).and_return("path/to/cli")
-      expect(subject.executable).to eq %W[path/to/cli/identify]
-    end
-
     it "respects #cli_prefix as a string" do
-      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
+      allow(MiniMagick).to receive(:imagemagick7?).and_return(false)
       allow(MiniMagick).to receive(:cli_prefix).and_return('firejail')
       expect(subject.executable).to eq %W[firejail identify]
     end
 
     it "respects #cli_prefix as an array" do
-      allow(MiniMagick).to receive(:cli).and_return(:imagemagick)
+      allow(MiniMagick).to receive(:imagemagick7?).and_return(false)
       allow(MiniMagick).to receive(:cli_prefix).and_return(['firejail', '--force'])
       expect(subject.executable).to eq %W[firejail --force identify]
     end

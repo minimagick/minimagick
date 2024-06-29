@@ -112,29 +112,24 @@ module MiniMagick
 
     ##
     # The executable used for this tool. Respects
-    # {MiniMagick::Configuration#cli}, {MiniMagick::Configuration#cli_path},
-    # and {MiniMagick::Configuration#cli_prefix}.
+    # {MiniMagick::Configuration#cli_prefix}.
     #
     # @return [Array<String>]
     #
     # @example
-    #   MiniMagick.configure { |config| config.cli = :graphicsmagick }
     #   identify = MiniMagick::Tool::Identify.new
-    #   identify.executable #=> ["gm", "identify"]
+    #   identify.executable #=> ["magick", "identify"]
     #
     # @example
     #   MiniMagick.configure do |config|
-    #     config.cli = :graphicsmagick
     #     config.cli_prefix = ['firejail', '--force']
     #   end
     #   identify = MiniMagick::Tool::Identify.new
-    #   identify.executable #=> ["firejail", "--force", "gm", "identify"]
+    #   identify.executable #=> ["firejail", "--force", "magick", "identify"]
     #
     def executable
       exe = [name]
       exe.unshift "magick" if MiniMagick.imagemagick7? && name != "magick"
-      exe.unshift "gm" if MiniMagick.graphicsmagick?
-      exe.unshift File.join(MiniMagick.cli_path, exe.shift) if MiniMagick.cli_path
       Array(MiniMagick.cli_prefix).reverse_each { |p| exe.unshift p } if MiniMagick.cli_prefix
       exe
     end
@@ -280,11 +275,6 @@ module MiniMagick
         help_page = tool.call(stderr: false)
 
         cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
-        if tool.name == "mogrify" && MiniMagick.graphicsmagick?
-          # These options were undocumented before 2015-06-14 (see gm bug 302)
-          cli_options |= %w[-box -convolve -gravity -linewidth -mattecolor -render -shave]
-        end
-
         cli_options.map { |o| o[1..-1].tr('-','_') }
       )
     end

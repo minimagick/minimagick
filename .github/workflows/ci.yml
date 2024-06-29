@@ -46,13 +46,10 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run:
-          sudo apt-get install -qq -o Acquire::Retries=3 imagemagick graphicsmagick
+          sudo apt-get install -qq -o Acquire::Retries=3 imagemagick
 
       - name: ImageMagick version
         run: convert -version
 
       - name: Run tests (ImageMagick)
         run: bundle exec rspec
-
-      - name: Run tests (GraphicsMagick)
-        run: GM=1 bundle exec rspec

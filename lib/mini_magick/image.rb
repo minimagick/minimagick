@@ -288,8 +288,7 @@ module MiniMagick
     # @return [Hash]
     attribute :data
     ##
-    # Returns the information from `identify -verbose` in a Hash format, for
-    # GraphicsMagick.
+    # Returns the information from `identify -verbose` in a Hash format.
     #
     # @return [Hash]
     attribute :details

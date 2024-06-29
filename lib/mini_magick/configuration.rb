@@ -5,12 +5,6 @@ module MiniMagick
   module Configuration
 
     ##
-    # If you don't have the CLI tools in your PATH, you can set the path to the
-    # executables.
-    #
-    attr_accessor :cli_path
-
-    ##
     # Adds a prefix to the CLI command.
     # For example, you could use `firejail` to run all commands in a sandbox.
     # Can be a string, or an array of strings.
@@ -77,67 +71,11 @@ module MiniMagick
     # @yield [self]
     # @example
     #   MiniMagick.configure do |config|
-    #     config.cli = :graphicsmagick
     #     config.timeout = 5
     #   end
     #
     def configure
       yield self
-    end
-
-    CLI_DETECTION = {
-      imagemagick7:   "magick",
-      imagemagick:    "mogrify",
-      graphicsmagick: "gm",
-    }
-
-    # @private (for backwards compatibility)
-    def processor
-      @processor ||= CLI_DETECTION.values.detect do |processor|
-        MiniMagick::Utilities.which(processor)
-      end
-    end
-
-    # @private (for backwards compatibility)
-    def processor=(processor)
-      @processor = processor.to_s
-
-      unless CLI_DETECTION.value?(@processor)
-        raise ArgumentError,
-          "processor has to be set to either \"magick\", \"mogrify\" or \"gm\"" \
-          ", was set to #{@processor.inspect}"
-      end
-    end
-
-    ##
-    # Get [ImageMagick](http://www.imagemagick.org) or
-    # [GraphicsMagick](http://www.graphicsmagick.org).
-    #
-    # @return [Symbol] `:imagemagick` or `:graphicsmagick`
-    #
-    def cli
-      if instance_variable_defined?("@cli")
-        instance_variable_get("@cli")
-      else
-        cli = CLI_DETECTION.key(processor) or
-          fail MiniMagick::Error, "You must have ImageMagick or GraphicsMagick installed"
-
-        instance_variable_set("@cli", cli)
-      end
-    end
-
-    ##
-    # Set whether you want to use [ImageMagick](http://www.imagemagick.org) or
-    # [GraphicsMagick](http://www.graphicsmagick.org).
-    #
-    def cli=(value)
-      @cli = value
-
-      if not CLI_DETECTION.key?(@cli)
-        raise ArgumentError,
-          "CLI has to be set to either :imagemagick, :imagemagick7 or :graphicsmagick" \
-          ", was set to #{@cli.inspect}"
-      end
     end
 
     def shell_api=(value)

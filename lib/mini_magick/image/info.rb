@@ -94,20 +94,12 @@ module MiniMagick
           output.each_line do |line|
             line = line.chomp("\n")
 
-            case MiniMagick.cli
-            when :imagemagick, :imagemagick7
-              if match = line.match(/^exif:/)
-                key, value = match.post_match.split("=", 2)
-                value = decode_comma_separated_ascii_characters(value) if ASCII_ENCODED_EXIF_KEYS.include?(key)
-                hash[key] = value
-              else
-                hash[hash.keys.last] << "\n#{line}"
-              end
-            when :graphicsmagick
-              next if line == "unknown"
-              key, value = line.split("=", 2)
-              value.gsub!("\\012", "\n") # convert "\012" characters to newlines
+            if match = line.match(/^exif:/)
+              key, value = match.post_match.split("=", 2)
+              value = decode_comma_separated_ascii_characters(value) if ASCII_ENCODED_EXIF_KEYS.include?(key)
               hash[key] = value
+            else
+              hash[hash.keys.last] << "\n#{line}"
             end
           end
 
@@ -124,7 +116,7 @@ module MiniMagick
       end
 
       def details
-        warn "[MiniMagick] MiniMagick::Image#details has been deprecated, as it was causing too many parsing errors. You should use MiniMagick::Image#data instead, which differs in a way that the keys are in camelcase." if MiniMagick.imagemagick? || MiniMagick.imagemagick7?
+        warn "[MiniMagick] MiniMagick::Image#details has been deprecated, as it was causing too many parsing errors. You should use MiniMagick::Image#data instead, which differs in a way that the keys are in camelcase."
 
         @info["details"] ||= (
           details_string = identify(&:verbose)
@@ -157,8 +149,6 @@ module MiniMagick
       end
 
       def data
-        raise Error, "MiniMagick::Image#data isn't supported on GraphicsMagick. Use MiniMagick::Image#details instead." if MiniMagick.graphicsmagick?
-
         @info["data"] ||= (
           json = MiniMagick::Tool::Convert.new do |convert|
             convert << path
