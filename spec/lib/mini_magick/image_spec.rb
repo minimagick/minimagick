@@ -616,11 +616,6 @@ RSpec.describe MiniMagick::Image do
       it "returns self" do
         expect(subject.resize('20x30!')).to eq subject
       end
-
-      it "can be responded to" do
-        expect(subject.respond_to?(:gravity)).to eq true
-        expect(subject.respond_to?(:bla)).to eq false
-      end
     end
   end
 

@@ -261,18 +261,6 @@ module MiniMagick
       self.merge!(args)
       self
     end
-
-    def self.option_methods
-      @option_methods ||= (
-        tool = new(whiny: false)
-        tool << "-help"
-        help_page = tool.call(stderr: false)
-
-        cli_options = help_page.scan(/^\s+-[a-z\-]+/).map(&:strip)
-        cli_options.map { |o| o[1..-1].tr('-','_') }
-      )
-    end
-
   end
 end
 
