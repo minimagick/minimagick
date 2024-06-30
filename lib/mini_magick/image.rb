@@ -51,7 +51,7 @@ module MiniMagick
     #
     def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
       # Create an image object with the raw pixel data string:
-      create(".dat", false) { |f| f.write(blob) }.tap do |image|
+      create(".dat") { |f| f.write(blob) }.tap do |image|
         output_path = image.path.sub(/\.\w+$/, ".#{format}")
         # Use ImageMagick to convert the raw data file to an image file of the
         # desired format:
@@ -118,18 +118,14 @@ module MiniMagick
     # we have a good tempfile.
     #
     # @param ext [String] Specify the extension you want to read it as
-    # @param validate [Boolean] If false, skips validation of the created
-    #   image. Defaults to true.
     # @yield [Tempfile] You can #write bits to this object to create the new
     #   Image
     # @return [MiniMagick::Image] The created image
     #
-    def self.create(ext = nil, validate = MiniMagick.validate_on_create, &block)
+    def self.create(ext = nil, &block)
       tempfile = MiniMagick::Utilities.tempfile(ext.to_s.downcase, &block)
 
-      new(tempfile.path, tempfile).tap do |image|
-        image.validate! if validate
-      end
+      new(tempfile.path, tempfile)
     end
 
     ##

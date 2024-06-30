@@ -102,11 +102,6 @@ RSpec.describe MiniMagick::Image do
       expect(File.extname(image.path)).to eq ".jpg"
     end
 
-    it "validates the image" do
-      expect { described_class.open(image_path(:not)) }
-        .to raise_error(MiniMagick::Invalid)
-    end
-
     it "does not mistake a path with a colon for a URI schema" do
       expect { described_class.open(image_path(:colon)) }
         .not_to raise_error
@@ -123,18 +118,6 @@ RSpec.describe MiniMagick::Image do
     it "creates an image" do
       image = create
       expect(File.exist?(image.path)).to eq true
-    end
-
-    it "validates the image if validation is set" do
-      allow(MiniMagick).to receive(:validate_on_create).and_return(true)
-      expect { create(image_path(:not)) }
-        .to raise_error(MiniMagick::Invalid)
-    end
-
-    it "doesn't validate image if validation is disabled" do
-      allow(MiniMagick).to receive(:validate_on_create).and_return(false)
-      expect { create(image_path(:not)) }
-        .not_to raise_error
     end
 
     context "when a tmpdir is configured" do
@@ -307,7 +290,7 @@ RSpec.describe MiniMagick::Image do
     end
 
     it "not change tempfile when convert failed" do
-      subject = described_class.create(nil, false) { |f| f.write(File.binread(image_path(:not))) }
+      subject = described_class.create(nil) { |f| f.write(File.binread(image_path(:not))) }
       current_path = subject.path
       new_tempfile = MiniMagick::Utilities.tempfile('png')
       new_path = new_tempfile.path

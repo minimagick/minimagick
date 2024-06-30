@@ -270,19 +270,7 @@ end
 
 ### Image validation
 
-By default, MiniMagick validates images each time it's opening them. It
-validates them by running `identify` on them, and see if ImageMagick finds
-them valid. This adds slight overhead to the whole processing. Sometimes it's
-safe to assume that all input and output images are valid by default and turn
-off validation:
-
-```rb
-MiniMagick.configure do |config|
-  config.validate_on_create = false
-end
-```
-
-You can test whether an image is valid:
+You can test whether an image is valid by running it through `identify`:
 
 ```rb
 image.valid?

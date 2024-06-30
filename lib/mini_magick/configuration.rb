@@ -38,15 +38,6 @@ module MiniMagick
     attr_accessor :tmpdir
 
     ##
-    # If set to `true`, it will `identify` every newly created image, and raise
-    # `MiniMagick::Invalid` if the image is not valid. Useful for validating
-    # user input, although it adds a bit of overhead. Defaults to `true`.
-    #
-    # @return [Boolean]
-    #
-    attr_accessor :validate_on_create
-
-    ##
     # If set to `false`, it will not raise errors when ImageMagick returns
     # status code different than 0. Defaults to `true`.
     #
@@ -61,7 +52,6 @@ module MiniMagick
 
     def self.extended(base)
       base.tmpdir = Dir.tmpdir
-      base.validate_on_create = true
       base.whiny = true
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
