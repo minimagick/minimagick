@@ -115,7 +115,7 @@ module MiniMagick
 
       def data
         @info["data"] ||= (
-          json = MiniMagick::Tool::Convert.new do |convert|
+          json = MiniMagick.convert do |convert|
             convert << path
             convert << "json:"
           end
@@ -127,7 +127,7 @@ module MiniMagick
       end
 
       def identify
-        MiniMagick::Tool::Identify.new do |builder|
+        MiniMagick.identify do |builder|
           yield builder if block_given?
           builder << path
         end

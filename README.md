@@ -116,7 +116,7 @@ image = MiniMagick::Image.new("input.jpg") do |b|
 end # the command gets executed
 ```
 
-The yielded builder is an instance of `MiniMagick::Tool::Mogrify`. To learn more
+The yielded builder is an instance of `MiniMagick::Tool`. To learn more
 about its interface, see [Metal](#metal) below.
 
 ### Attributes
@@ -296,27 +296,22 @@ If you want to be close to the metal, you can use ImageMagick's command-line
 tools directly.
 
 ```rb
-MiniMagick::Tool::Magick.new do |magick|
-  magick << "input.jpg"
-  magick.resize("100x100")
-  magick.negate
-  magick << "output.jpg"
+MiniMagick.convert do |convert|
+  convert << "input.jpg"
+  convert.resize("100x100")
+  convert.negate
+  convert << "output.jpg"
 end #=> `magick input.jpg -resize 100x100 -negate output.jpg`
 
 # OR
 
-convert = MiniMagick::Tool::Convert.new
+convert = MiniMagick.convert
 convert << "input.jpg"
 convert.resize("100x100")
 convert.negate
 convert << "output.jpg"
 convert.call #=> `convert input.jpg -resize 100x100 -negate output.jpg`
 ```
-
-If you're on ImageMagick 7, you should probably use `MiniMagick::Tool::Magick`,
-though the legacy `MiniMagick::Tool::Convert` and friends will work too. On
-ImageMagick 6 `MiniMagick::Tool::Magick` won't be available, so you should
-instead use `MiniMagick::Tool::Convert` and friends.
 
 This way of using MiniMagick is highly recommended if you want to maximize
 performance of your image processing. We will now show the features available.
@@ -326,7 +321,7 @@ performance of your image processing. We will now show the features available.
 The most basic way of building a command is appending strings:
 
 ```rb
-MiniMagick::Tool::Magick.new do |convert|
+MiniMagick.convert do |convert|
   convert << "input.jpg"
   convert.merge! ["-resize", "500x500", "-negate"]
   convert << "output.jpg"
@@ -371,7 +366,7 @@ convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
 Every method call returns `self`, so you can chain them to create logical groups.
 
 ```rb
-MiniMagick::Tool::Magick.new do |convert|
+MiniMagick.convert do |convert|
   convert << "input.jpg"
   convert.clone(0).background('gray').shadow('80x5+5+5')
   convert.negate
@@ -382,7 +377,7 @@ end
 #### "Plus" options
 
 ```rb
-MiniMagick::Tool::Magick.new do |convert|
+MiniMagick.convert do |convert|
   convert << "input.jpg"
   convert.repage.+
   convert.distort.+("Perspective", "more args")
@@ -395,7 +390,7 @@ convert input.jpg +repage +distort Perspective 'more args'
 #### Stacks
 
 ```rb
-MiniMagick::Tool::Magick.new do |convert|
+MiniMagick.convert do |convert|
   convert << "wand.gif"
 
   convert.stack do |stack|
@@ -419,7 +414,7 @@ If you want to pass something to standard input, you can pass the `:stdin`
 option to `#call`:
 
 ```rb
-identify = MiniMagick::Tool::Identify.new
+identify = MiniMagick.identify
 identify.stdin # alias for "-"
 identify.call(stdin: image_content)
 ```
@@ -428,7 +423,7 @@ MiniMagick also has `#stdout` alias for "-" for outputting file contents to
 standard output:
 
 ```rb
-content = MiniMagick::Tool::Magick.new do |convert|
+content = MiniMagick.convert do |convert|
   convert << "input.jpg"
   convert.auto_orient
   convert.stdout # alias for "-"
@@ -443,7 +438,7 @@ standard error, even if the command succeeded. The result of
 block, it will yield the stdout, stderr and exit status of the command:
 
 ```rb
-compare = MiniMagick::Tool::Compare.new
+compare = MiniMagick.compare
 # build the command
 compare.call do |stdout, stderr, status|
   # ...
@@ -521,7 +516,7 @@ If you're using the tool directly, you can pass `errors: false` value to the
 constructor:
 
 ```rb
-MiniMagick::Tool::Identify.new(errors: false) do |b|
+MiniMagick.identify(errors: false) do |b|
   b.help
 end
 ```

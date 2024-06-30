@@ -392,12 +392,12 @@ RSpec.describe MiniMagick::Image do
   end
 
   it "changes colorspace when called with an argument" do
-    expect_any_instance_of(MiniMagick::Tool::Mogrify).to receive(:call)
+    expect_any_instance_of(MiniMagick::Tool).to receive(:call)
     subject.colorspace("Gray")
   end
 
   it "changes size when called with an argument" do
-    expect_any_instance_of(MiniMagick::Tool::Mogrify).to receive(:call)
+    expect_any_instance_of(MiniMagick::Tool).to receive(:call)
     subject.size("20x20")
   end
 
@@ -610,7 +610,7 @@ RSpec.describe MiniMagick::Image do
 
     it "yields an optional block" do
       expect { |b| subject.composite(other_image, &b) }
-        .to yield_with_args(an_instance_of(MiniMagick::Tool::Composite))
+        .to yield_with_args(an_instance_of(MiniMagick::Tool))
     end
 
     it "makes the composited image with the provided extension" do

@@ -55,7 +55,7 @@ module MiniMagick
         output_path = image.path.sub(/\.\w+$/, ".#{format}")
         # Use ImageMagick to convert the raw data file to an image file of the
         # desired format:
-        MiniMagick::Tool::Convert.new do |convert|
+        MiniMagick.convert do |convert|
           convert.size "#{columns}x#{rows}"
           convert.depth depth
           convert << "#{map}:#{image.path}"
@@ -160,7 +160,7 @@ module MiniMagick
     # which creates a temporary file for you and protects your original.
     #
     # @param input_path [String, Pathname] The location of an image file
-    # @yield [MiniMagick::Tool::Mogrify] If block is given, {#combine_options}
+    # @yield [MiniMagick::Tool] If block is given, {#combine_options}
     #   is called.
     #
     def initialize(input_path, tempfile = nil, &block)
@@ -352,7 +352,7 @@ module MiniMagick
     # @return [Array] Matrix of each color of each pixel
     def get_pixels(map="RGB")
       raise ArgumentError, "Invalid map value" unless ["RGB", "RGBA"].include?(map)
-      convert = MiniMagick::Tool::Convert.new
+      convert = MiniMagick.convert
       convert << path
       convert.depth(8)
       convert << "#{map}:-"
@@ -411,7 +411,7 @@ module MiniMagick
     #   will convert all pages.
     # @param read_opts [Hash] Any read options to be passed to ImageMagick
     #   for example: image.format('jpg', page, {density: '300'})
-    # @yield [MiniMagick::Tool::Convert] It optionally yields the command,
+    # @yield [MiniMagick::Tool] It optionally yields the command,
     #   if you want to add something.
     # @return [self]
     #
@@ -426,7 +426,7 @@ module MiniMagick
       input_path = path.dup
       input_path << "[#{page}]" if page && !layer?
 
-      MiniMagick::Tool::Convert.new do |convert|
+      MiniMagick.convert do |convert|
         read_opts.each do |opt, val|
           convert.send(opt.to_s, val)
         end
@@ -462,7 +462,7 @@ module MiniMagick
     #     c.background "blue"
     #   end
     #
-    # @yield [MiniMagick::Tool::Mogrify]
+    # @yield [MiniMagick::Command]
     # @see http://www.imagemagick.org/script/mogrify.php
     # @return [self]
     #
@@ -495,7 +495,7 @@ module MiniMagick
       case output_to
       when String, Pathname
         if layer?
-          MiniMagick::Tool::Convert.new do |builder|
+          MiniMagick.convert do |builder|
             builder << path
             builder << output_to
           end
@@ -522,7 +522,7 @@ module MiniMagick
     def composite(other_image, output_extension = type.downcase, mask = nil)
       output_tempfile = MiniMagick::Utilities.tempfile(".#{output_extension}")
 
-      MiniMagick::Tool::Composite.new do |composite|
+      MiniMagick.composite do |composite|
         yield composite if block_given?
         composite << other_image.path
         composite << path
@@ -564,17 +564,17 @@ module MiniMagick
     #     b.verbose
     #   end # runs `identify -verbose image.jpg`
     # @return [String] Output from `identify`
-    # @yield [MiniMagick::Tool::Identify]
+    # @yield [MiniMagick::Tool]
     #
     def identify
-      MiniMagick::Tool::Identify.new do |builder|
+      MiniMagick.identify do |builder|
         yield builder if block_given?
         builder << path
       end
     end
 
     def mogrify(page = nil)
-      MiniMagick::Tool::Mogrify.new do |builder|
+      MiniMagick.mogrify do |builder|
         yield builder if block_given?
         if builder.args.include?("-format")
           fail MiniMagick::Error, "you must call #format on a MiniMagick::Image directly"

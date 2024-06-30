@@ -2,13 +2,12 @@ require "mini_magick/shell"
 
 module MiniMagick
   ##
-  # Abstract class that wraps command-line tools. It shouldn't be used directly,
-  # but through one of its subclasses (e.g. {MiniMagick::Tool::Mogrify}). Use
-  # this class if you want to be closer to the metal and execute ImageMagick
-  # commands directly, but still with a nice Ruby interface.
+  # Abstract class that wraps command-line tools. Use this class if you want to
+  # be closer to the metal and execute ImageMagick commands directly, but still
+  # with a nice Ruby interface.
   #
   # @example
-  #   MiniMagick::Tool::Mogrify.new do |builder|
+  #   MiniMagick.mogrify do |builder|
   #     builder.resize "500x500"
   #     builder << "path/to/image.jpg"
   #   end
@@ -23,8 +22,7 @@ module MiniMagick
     # executes the command in the end.
     #
     # @example
-    #   version = MiniMagick::Tool::Identify.new { |b| b.version }
-    #   puts version
+    #   puts MiniMagick.identify(&:version)
     #
     # @return [MiniMagick::Tool, String] If no block is given, returns an
     #   instance of the tool, if block is given, returns the output of the
@@ -51,7 +49,7 @@ module MiniMagick
     # @option options [Boolean] :warnings Whether to print warnings to stderrr.
     # @option options [String] :stdin Content to send to standard input stream.
     # @example
-    #   MiniMagick::Tool::Identify.new(errors: false) do |identify|
+    #   MiniMagick.identify(errors: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
     def initialize(name, **options)
@@ -64,13 +62,13 @@ module MiniMagick
     # Executes the command that has been built up.
     #
     # @example
-    #   mogrify = MiniMagick::Tool::Mogrify.new
+    #   mogrify = MiniMagick.mogrify
     #   mogrify.resize("500x500")
     #   mogrify << "path/to/image.jpg"
     #   mogrify.call # executes `mogrify -resize 500x500 path/to/image.jpg`
     #
     # @example
-    #   mogrify = MiniMagick::Tool::Mogrify.new
+    #   mogrify = MiniMagick.mogrify
     #   # build the command
     #   mogrify.call do |stdout, stderr, status|
     #     # ...
@@ -97,7 +95,7 @@ module MiniMagick
     # @return [Array<String>]
     #
     # @example
-    #   mogrify = MiniMagick::Tool::Mogrify.new
+    #   mogrify = MiniMagick.mogrify
     #   mogrify.resize "500x500"
     #   mogrify.contrast
     #   mogrify.command #=> ["mogrify", "-resize", "500x500", "-contrast"]
@@ -113,14 +111,14 @@ module MiniMagick
     # @return [Array<String>]
     #
     # @example
-    #   identify = MiniMagick::Tool::Identify.new
+    #   identify = MiniMagick.identify
     #   identify.executable #=> ["magick", "identify"]
     #
     # @example
     #   MiniMagick.configure do |config|
     #     config.cli_prefix = ['firejail', '--force']
     #   end
-    #   identify = MiniMagick::Tool::Identify.new
+    #   identify = MiniMagick.identify
     #   identify.executable #=> ["firejail", "--force", "magick", "identify"]
     #
     def executable
@@ -154,7 +152,7 @@ module MiniMagick
     # Changes the last operator to its "plus" form.
     #
     # @example
-    #   MiniMagick::Tool::Mogrify.new do |mogrify|
+    #   MiniMagick.mogrify do |mogrify|
     #     mogrify.antialias.+
     #     mogrify.distort.+("Perspective", "0,0,4,5 89,0,45,46")
     #   end
@@ -172,7 +170,7 @@ module MiniMagick
     # Create an ImageMagick stack in the command (surround.
     #
     # @example
-    #   MiniMagick::Tool::Magick.new do |convert|
+    #   MiniMagick.convert do |convert|
     #     convert << "wand.gif"
     #     convert.stack do |stack|
     #       stack << "wand.gif"
@@ -199,7 +197,7 @@ module MiniMagick
     # Adds ImageMagick's pseudo-filename `-` for standard input.
     #
     # @example
-    #   identify = MiniMagick::Tool::Identify.new
+    #   identify = MiniMagick.identify
     #   identify.stdin
     #   identify.call(stdin: image_content)
     #   # executes `identify -` with the given standard input
@@ -212,7 +210,7 @@ module MiniMagick
     # Adds ImageMagick's pseudo-filename `-` for standard output.
     #
     # @example
-    #   content = MiniMagick::Tool::Magick.new do |convert|
+    #   content = MiniMagick.convert do |convert|
     #     convert << "input.jpg"
     #     convert.auto_orient
     #     convert.stdout
@@ -263,18 +261,15 @@ module MiniMagick
       self.merge!(args)
       self
     end
+
+    # deprecated tool subclasses
+    %w[animate compare composite conjure convert display identify import magick mogrify montage stream].each do |tool|
+      const_set(tool.capitalize, Class.new(self) {
+        define_method(:initialize) do |*args|
+          super(tool, *args)
+        end
+      })
+      deprecate_constant(tool.capitalize)
+    end
   end
 end
-
-require "mini_magick/tool/animate"
-require "mini_magick/tool/compare"
-require "mini_magick/tool/composite"
-require "mini_magick/tool/conjure"
-require "mini_magick/tool/convert"
-require "mini_magick/tool/display"
-require "mini_magick/tool/identify"
-require "mini_magick/tool/import"
-require "mini_magick/tool/magick"
-require "mini_magick/tool/mogrify"
-require "mini_magick/tool/montage"
-require "mini_magick/tool/stream"

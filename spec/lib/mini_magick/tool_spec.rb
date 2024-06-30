@@ -1,7 +1,7 @@
 require "spec_helper"
 
 RSpec.describe MiniMagick::Tool do
-  subject { MiniMagick::Tool::Identify.new }
+  subject { MiniMagick.identify }
 
   describe "#call" do
     it "calls the shell to run the command" do
@@ -49,7 +49,7 @@ RSpec.describe MiniMagick::Tool do
     it "prepends 'magick' to the command list when using ImageMagick 7" do
       allow(MiniMagick).to receive(:imagemagick7?).and_return(true)
       expect(subject.executable).to eq %W[magick identify]
-      expect(MiniMagick::Tool::Magick.new.executable).to eq %W[magick]
+      expect(MiniMagick.convert.executable).to eq %W[magick]
     end
 
     it "respects #cli_prefix as a string" do
