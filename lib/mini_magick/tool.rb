@@ -46,16 +46,16 @@ module MiniMagick
 
     # @param name [String]
     # @param options [Hash]
-    # @option options [Boolean] :whiny Whether to raise errors on non-zero
+    # @option options [Boolean] :errors Whether to raise errors on non-zero
     #   exit codes.
     # @example
-    #   MiniMagick::Tool::Identify.new(whiny: false) do |identify|
+    #   MiniMagick::Tool::Identify.new(errors: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
-    def initialize(name, options = {})
+    def initialize(name, errors: MiniMagick.errors)
       @name = name
       @args = []
-      @whiny = options.fetch(:whiny, MiniMagick.whiny)
+      @errors = errors
     end
 
     ##
@@ -79,7 +79,7 @@ module MiniMagick
     # @return [String] Returns the output of the command
     #
     def call(options = {})
-      options[:whiny] = @whiny
+      options[:errors] = @errors
       options[:stderr] = MiniMagick.warnings && !block_given?
 
       shell = MiniMagick::Shell.new

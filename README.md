@@ -513,15 +513,15 @@ following configuration:
 
 ```rb
 MiniMagick.configure do |config|
-  config.whiny = false
+  config.errors = false
 end
 ```
 
-If you're using the tool directly, you can pass `whiny: false` value to the
+If you're using the tool directly, you can pass `errors: false` value to the
 constructor:
 
 ```rb
-MiniMagick::Tool::Identify.new(whiny: false) do |b|
+MiniMagick::Tool::Identify.new(errors: false) do |b|
   b.help
 end
 ```

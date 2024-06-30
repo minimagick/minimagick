@@ -13,7 +13,7 @@ module MiniMagick
     def run(command, options = {})
       stdout, stderr, status = execute(command, stdin: options[:stdin])
 
-      if status != 0 && options.fetch(:whiny, MiniMagick.whiny)
+      if status != 0 && options.fetch(:errors, MiniMagick.errors)
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
       end
 

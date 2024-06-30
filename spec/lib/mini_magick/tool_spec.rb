@@ -37,9 +37,9 @@ RSpec.describe MiniMagick::Tool do
       expect(output).to match("GIF")
     end
 
-    it "defaults whiny to MiniMagick.whiny" do
-      allow(MiniMagick).to receive(:whiny).and_return(false)
-      expect(subject.instance_variable_get("@whiny")).to eq false
+    it "defaults errors to MiniMagick.errors" do
+      allow(MiniMagick).to receive(:errors).and_return(false)
+      expect(subject.instance_variable_get("@errors")).to eq false
     end
   end
 

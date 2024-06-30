@@ -30,14 +30,14 @@ RSpec.describe MiniMagick::Shell do
         .to raise_error(MiniMagick::Error, /not found/)
     end
 
-    it "raises errors only in whiny mode" do
+    it "raises errors only in error mode" do
       allow(subject).to receive(:execute).and_return(["stdout", "", 127])
-      expect { subject.run(%W[foo], whiny: false) }.not_to raise_error
+      expect { subject.run(%W[foo], errors: false) }.not_to raise_error
     end
 
-    it "prints to stderr output to $stderr in non-whiny mode" do
+    it "prints to stderr output to $stderr in non-error mode" do
       allow(subject).to receive(:execute).and_return(["", "stderr", 1])
-      expect { subject.run(%W[foo], whiny: false) }.to output("stderr").to_stderr
+      expect { subject.run(%W[foo], errors: false) }.to output("stderr").to_stderr
     end
 
     it "ignores warnings about convert being deprecated on IM7" do

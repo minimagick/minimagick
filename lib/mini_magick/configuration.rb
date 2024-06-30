@@ -43,7 +43,7 @@ module MiniMagick
     #
     # @return [Boolean]
     #
-    attr_accessor :whiny
+    attr_accessor :errors
 
     ##
     # If set to `false`, it will not forward warnings from ImageMagick to
@@ -52,7 +52,7 @@ module MiniMagick
 
     def self.extended(base)
       base.tmpdir = Dir.tmpdir
-      base.whiny = true
+      base.errors = true
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
     end
