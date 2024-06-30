@@ -574,8 +574,11 @@ module MiniMagick
     end
 
     def mogrify(page = nil)
-      MiniMagick::Tool::MogrifyRestricted.new do |builder|
+      MiniMagick::Tool::Mogrify.new do |builder|
         yield builder if block_given?
+        if builder.args.include?("-format")
+          fail MiniMagick::Error, "you must call #format on a MiniMagick::Image directly"
+        end
         builder << (page ? "#{path}[#{page}]" : path)
       end
 

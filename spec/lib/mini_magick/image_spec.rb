@@ -581,7 +581,7 @@ RSpec.describe MiniMagick::Image do
 
     it "doesn't allow calling of #format" do
       expect { subject.combine_options { |c| c.format("png") } }
-        .to raise_error(NoMethodError)
+        .to raise_error(MiniMagick::Error, "you must call #format on a MiniMagick::Image directly")
     end
 
     it "clears the info only at the end" do
