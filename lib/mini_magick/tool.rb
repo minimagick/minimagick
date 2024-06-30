@@ -48,14 +48,16 @@ module MiniMagick
     # @param options [Hash]
     # @option options [Boolean] :errors Whether to raise errors on non-zero
     #   exit codes.
+    # @option options [Boolean] :warnings Whether to print warnings to stderrr.
+    # @option options [String] :stdin Content to send to standard input stream.
     # @example
     #   MiniMagick::Tool::Identify.new(errors: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
     #   end
-    def initialize(name, errors: MiniMagick.errors)
+    def initialize(name, **options)
       @name = name
       @args = []
-      @errors = errors
+      @options = options
     end
 
     ##
@@ -78,12 +80,12 @@ module MiniMagick
     #
     # @return [String] Returns the output of the command
     #
-    def call(options = {})
-      options[:errors] = @errors
-      options[:stderr] = MiniMagick.warnings && !block_given?
+    def call(**options)
+      options = @options.merge(options)
+      options[:warnings] = false if block_given?
 
       shell = MiniMagick::Shell.new
-      stdout, stderr, status = shell.run(command, options)
+      stdout, stderr, status = shell.run(command, **options)
       yield stdout, stderr, status if block_given?
 
       stdout.chomp("\n")

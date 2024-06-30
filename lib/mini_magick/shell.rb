@@ -10,14 +10,14 @@ module MiniMagick
   #
   class Shell
 
-    def run(command, options = {})
-      stdout, stderr, status = execute(command, stdin: options[:stdin])
+    def run(command, stdin: nil, errors: MiniMagick.errors, warnings: MiniMagick.warnings)
+      stdout, stderr, status = execute(command, stdin: stdin)
 
-      if status != 0 && options.fetch(:errors, MiniMagick.errors)
+      if status != 0 && errors
         fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
       end
 
-      $stderr.print(stderr) unless options[:stderr] == false || stderr.strip == %(WARNING: The convert command is deprecated in IMv7, use "magick")
+      $stderr.print(stderr) if warnings && stderr.strip != %(WARNING: The convert command is deprecated in IMv7, use "magick")
 
       [stdout, stderr, status]
     end

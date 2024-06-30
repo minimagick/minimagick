@@ -36,11 +36,6 @@ RSpec.describe MiniMagick::Tool do
       end
       expect(output).to match("GIF")
     end
-
-    it "defaults errors to MiniMagick.errors" do
-      allow(MiniMagick).to receive(:errors).and_return(false)
-      expect(subject.instance_variable_get("@errors")).to eq false
-    end
   end
 
   describe "#command" do
