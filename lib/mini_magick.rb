@@ -26,6 +26,7 @@ module MiniMagick
 
   class Error < RuntimeError; end
   class Invalid < StandardError; end
+  class TimeoutError < Error; end
 
 end
 

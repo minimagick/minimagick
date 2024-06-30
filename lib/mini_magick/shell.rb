@@ -1,4 +1,4 @@
-require "timeout"
+require "open3"
 require "benchmark"
 
 module MiniMagick
@@ -10,11 +10,15 @@ module MiniMagick
   #
   class Shell
 
-    def run(command, stdin: nil, errors: MiniMagick.errors, warnings: MiniMagick.warnings)
-      stdout, stderr, status = execute(command, stdin: stdin)
+    def run(command, errors: MiniMagick.errors, warnings: MiniMagick.warnings, **options)
+      stdout, stderr, status = execute(command, **options)
 
-      if status != 0 && errors
-        fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
+      if status != 0
+        if stderr.include?("time limit exceeded")
+          fail MiniMagick::TimeoutError, "`#{command.join(" ")}` has timed out"
+        elsif errors
+          fail MiniMagick::Error, "`#{command.join(" ")}` failed with status: #{status.inspect} and error:\n#{stderr}"
+        end
       end
 
       $stderr.print(stderr) if warnings && stderr.strip != %(WARNING: The convert command is deprecated in IMv7, use "magick")
@@ -22,9 +26,9 @@ module MiniMagick
       [stdout, stderr, status]
     end
 
-    def execute(command, options = {})
+    def execute(command, stdin: "", timeout: MiniMagick.timeout)
       stdout, stderr, status = log(command.join(" ")) do
-        execute_open3(command, options)
+        Open3.capture3({ "MAGICK_TIME_LIMIT" => timeout&.to_s }, *command, stdin_data: stdin)
       end
 
       [stdout, stderr, status&.exitstatus]
@@ -33,31 +37,6 @@ module MiniMagick
     end
 
     private
-
-    def execute_open3(command, options = {})
-      require "open3"
-
-      # We would ideally use Open3.capture3, but it wouldn't allow us to
-      # terminate the command after timing out.
-      Open3.popen3(*command) do |in_w, out_r, err_r, thread|
-        [in_w, out_r, err_r].each(&:binmode)
-        stdout_reader = Thread.new { out_r.read }
-        stderr_reader = Thread.new { err_r.read }
-        begin
-          in_w.write options[:stdin].to_s
-        rescue Errno::EPIPE
-        end
-        in_w.close
-
-        unless thread.join(MiniMagick.timeout)
-          Process.kill("TERM", thread.pid) rescue nil
-          Process.waitpid(thread.pid)      rescue nil
-          raise Timeout::Error, "MiniMagick command timed out: #{command}"
-        end
-
-        [stdout_reader.value, stderr_reader.value, thread.value]
-      end
-    end
 
     def log(command, &block)
       value = nil

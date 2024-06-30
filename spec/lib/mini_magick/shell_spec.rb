@@ -43,6 +43,11 @@ RSpec.describe MiniMagick::Shell do
     it "ignores warnings about convert being deprecated on IM7" do
       expect { subject.run %w[convert -help] }.not_to output.to_stderr
     end
+
+    it "terminate long running commands if timeout is set" do
+      expect { subject.run(%W[convert #{image_path} -resize 100000x100000 null:], timeout: 1) }
+        .to raise_error(MiniMagick::TimeoutError)
+    end
   end
 
   describe "#execute" do
@@ -60,13 +65,6 @@ RSpec.describe MiniMagick::Shell do
       expect(status).to eq 1
     end
 
-    it "handles larger output" do
-      Timeout.timeout(1) do
-        stdout, _, _ = subject.execute(%W[convert #{image_path(:gif)} -])
-        expect(stdout).to match("GIF")
-      end
-    end
-
     it "returns an appropriate response when command wasn't found" do
       stdout, stderr, code = subject.execute(%W[unexisting command])
       expect(code).to eq 127
@@ -78,12 +76,6 @@ RSpec.describe MiniMagick::Shell do
       subject.execute(%W[identify #{image_path(:gif)}])
       stream.rewind
       expect(stream.read).to match /\[\d+.\d+s\] identify #{image_path(:gif)}/
-    end
-
-    it "terminate long running commands if MiniMagick.timeout is set" do
-      MiniMagick.timeout = 0.1
-      expect { subject.execute(%w[sleep 1]) }.to raise_error(Timeout::Error)
-      MiniMagick.timeout = nil
     end
 
     it "doesn't break on spaces" do
