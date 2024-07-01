@@ -51,7 +51,7 @@ module MiniMagick
     #
     def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
       # Create an image object with the raw pixel data string:
-      create(".dat") { |f| f.write(blob) }.tap do |image|
+      read(blob, ".dat").tap do |image|
         output_path = image.path.sub(/\.\w+$/, ".#{format}")
         # Use ImageMagick to convert the raw data file to an image file of the
         # desired format:
