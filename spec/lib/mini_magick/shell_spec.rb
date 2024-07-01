@@ -11,7 +11,7 @@ RSpec.describe MiniMagick::Shell do
 
     it "returns stdout, stderr and status" do
       allow(subject).to receive(:execute).and_return(["stdout", "stderr", 0])
-      output = subject.run(%W[foo])
+      output = subject.run(%W[foo], warnings: false)
       expect(output).to eq ["stdout", "stderr", 0]
     end
 
