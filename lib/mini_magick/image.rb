@@ -80,29 +80,14 @@ module MiniMagick
     # @return [MiniMagick::Image] The loaded image
     #
     def self.open(path_or_url, ext = nil, **options)
-      # Don't use Kernel#open, but reuse its logic
-      openable =
-        if path_or_url.respond_to?(:open)
-          path_or_url
-        elsif path_or_url.respond_to?(:to_str) &&
-              %r{\A[A-Za-z][A-Za-z0-9+\-\.]*://} =~ path_or_url &&
-              (uri = URI.parse(path_or_url)).respond_to?(:open)
-          uri
-        else
-          Pathname(path_or_url)
-        end
-
-      if openable.is_a?(URI::Generic)
-        ext ||= File.extname(openable.path)
+      if path_or_url.to_s =~ %r{\A(https?|ftp)://}
+        uri = URI(path_or_url)
+        ext ||= File.extname(uri.path).sub(/:.*/, '') # handle URL including a colon
+        uri.open(options) { |file| read(file, ext) }
       else
-        ext ||= File.extname(openable.to_s)
-      end
-      ext.sub!(/:.*/, '') # hack for filenames or URLs that include a colon
-
-      if openable.is_a?(URI::Generic)
-        openable.open(options) { |file| read(file, ext) }
-      else
-        openable.open(binmode: true, **options) { |file| read(file, ext) }
+        pathname = Pathname(path_or_url)
+        ext ||= File.extname(pathname.to_s)
+        pathname.open(binmode: true, **options) { |file| read(file, ext) }
       end
     end
 
