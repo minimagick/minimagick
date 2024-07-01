@@ -91,8 +91,8 @@ RSpec.describe MiniMagick::Image do
       stub_request(:get, "http://example.com/image.jpg")
         .with(headers: {"Foo" => "Bar"})
         .to_return(body: File.read(image_path))
-      described_class.open("http://example.com/image.jpg", {"Foo" => "Bar"})
-      described_class.open("http://example.com/image.jpg", ".jpg", {"Foo" => "Bar"})
+      described_class.open("http://example.com/image.jpg", "Foo" => "Bar")
+      described_class.open("http://example.com/image.jpg", ".jpg", "Foo" => "Bar")
     end
 
     it "strips out colons from URL" do

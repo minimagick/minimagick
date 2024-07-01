@@ -79,9 +79,7 @@ module MiniMagick
     # @param options [Hash] Specify options for the open method
     # @return [MiniMagick::Image] The loaded image
     #
-    def self.open(path_or_url, ext = nil, options = {})
-      options, ext = ext, nil if ext.is_a?(Hash)
-
+    def self.open(path_or_url, ext = nil, **options)
       # Don't use Kernel#open, but reuse its logic
       openable =
         if path_or_url.respond_to?(:open)
@@ -91,7 +89,6 @@ module MiniMagick
               (uri = URI.parse(path_or_url)).respond_to?(:open)
           uri
         else
-          options = { binmode: true }.merge(options)
           Pathname(path_or_url)
         end
 
@@ -105,7 +102,7 @@ module MiniMagick
       if openable.is_a?(URI::Generic)
         openable.open(options) { |file| read(file, ext) }
       else
-        openable.open(**options) { |file| read(file, ext) }
+        openable.open(binmode: true, **options) { |file| read(file, ext) }
       end
     end
 
