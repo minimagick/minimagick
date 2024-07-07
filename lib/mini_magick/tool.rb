@@ -2,14 +2,13 @@ require "mini_magick/shell"
 
 module MiniMagick
   ##
-  # Abstract class that wraps command-line tools. Use this class if you want to
-  # be closer to the metal and execute ImageMagick commands directly, but still
-  # with a nice Ruby interface.
+  # Class that wraps command-line tools directly, as opposed MiniMagick::Image
+  # which is more high-level.
   #
   # @example
-  #   MiniMagick.mogrify do |builder|
-  #     builder.resize "500x500"
-  #     builder << "path/to/image.jpg"
+  #   MiniMagick.mogrify do |mogrify|
+  #     mogrify.resize "500x500"
+  #     mogrify << "path/to/image.jpg"
   #   end
   #
   class Tool
