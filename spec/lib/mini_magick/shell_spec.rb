@@ -40,10 +40,6 @@ RSpec.describe MiniMagick::Shell do
       expect { subject.run(%W[foo], errors: false) }.to output("stderr").to_stderr
     end
 
-    it "ignores warnings about convert being deprecated on IM7" do
-      expect { subject.run %w[convert -help] }.not_to output.to_stderr
-    end
-
     it "terminate long running commands if timeout is set" do
       expect { subject.run(%W[convert #{image_path} -resize 100000x100000 null:], timeout: 1) }
         .to raise_error(MiniMagick::TimeoutError)

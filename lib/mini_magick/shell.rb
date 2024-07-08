@@ -21,7 +21,7 @@ module MiniMagick
         end
       end
 
-      $stderr.print(stderr) if warnings && stderr.strip != %(WARNING: The convert command is deprecated in IMv7, use "magick")
+      $stderr.print(stderr) if warnings
 
       [stdout, stderr, status]
     end
