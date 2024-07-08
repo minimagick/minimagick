@@ -93,7 +93,7 @@ RSpec.describe MiniMagick::Image do
         .to_return(body: File.read(image_path))
       described_class.open("http://example.com/image.jpg", "Foo" => "Bar")
       described_class.open("http://example.com/image.jpg", ".jpg", "Foo" => "Bar")
-    end
+    end if RUBY_VERSION >= "2.7"
 
     it "strips out colons from URL" do
       stub_request(:get, "http://example.com/image.jpg:large")
