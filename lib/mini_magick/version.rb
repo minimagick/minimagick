@@ -7,8 +7,8 @@ module MiniMagick
   end
 
   module VERSION
-    MAJOR = 4
-    MINOR = 13
+    MAJOR = 5
+    MINOR = 0
     TINY  = 0
     PRE   = nil
 
