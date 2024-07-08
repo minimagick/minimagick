@@ -41,7 +41,7 @@ RSpec.describe MiniMagick::Shell do
     end
 
     it "terminate long running commands if timeout is set" do
-      expect { subject.run(%W[convert #{image_path} -resize 100000x100000 null:], timeout: 1) }
+      expect { subject.run(%W[convert #{image_path} -resize 10000x10000 -blur 0x20 null:], timeout: 1) }
         .to raise_error(MiniMagick::TimeoutError)
     end
   end

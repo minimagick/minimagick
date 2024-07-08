@@ -22,8 +22,8 @@ module MiniMagick
   end
 
   %w[animate compare composite conjure convert display identify import mogrify montage stream].each do |tool|
-    name = imagemagick7? && tool == "convert" ? "magick" : tool
     define_singleton_method(tool) do |**options, &block|
+      name = imagemagick7? && tool == "convert" ? "magick" : tool
       MiniMagick::Tool.new(name, **options, &block)
     end
   end
