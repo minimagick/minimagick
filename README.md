@@ -48,7 +48,7 @@ $ bundle add mini_magick
 
 ## Information
 
-* [API documentation](http://rubydoc.info/github/minimagick/minimagick)
+* [API documentation](https://rubydoc.info/gems/mini_magick)
 
 ## Usage
 
