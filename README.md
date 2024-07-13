@@ -244,7 +244,7 @@ end
 ```
 
 For a more information, see
-[Configuration](http://rubydoc.info/github/minimagick/minimagick/MiniMagick/Configuration) API documentation.
+[Configuration](https://rubydoc.info/gems/mini_magick/MiniMagick/Configuration) API documentation.
 
 ### Composite
 
