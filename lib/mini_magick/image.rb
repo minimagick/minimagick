@@ -466,6 +466,13 @@ module MiniMagick
     end
 
     ##
+    # Prevents ruby from calling `#to_ary` on the image when checking if it's a
+    # splattable data structure in certain cases.
+    def respond_to_missing?(name, include_all)
+      false
+    end
+
+    ##
     # Writes the temporary file out to either a file location (by passing in a
     # String) or by passing in a Stream that you can #write(chunk) to
     # repeatedly

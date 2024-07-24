@@ -559,16 +559,18 @@ RSpec.describe MiniMagick::Image do
     end
   end
 
-  describe "missing methods" do
-    context "for a known method" do
-      it "is executed by #method_missing" do
-        expect { subject.resize '20x30!' }
-          .to change { subject.dimensions }.to [20, 30]
-      end
+  context "missing methods" do
+    it "is executed by #method_missing" do
+      expect { subject.resize '20x30!' }
+        .to change { subject.dimensions }.to [20, 30]
+    end
 
-      it "returns self" do
-        expect(subject.resize('20x30!')).to eq subject
-      end
+    it "returns self" do
+      expect(subject.resize('20x30!')).to eq subject
+    end
+
+    it "doesn't let ruby call #to_ary when flattening" do
+      [subject, subject].flatten(1)
     end
   end
 
