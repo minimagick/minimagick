@@ -171,7 +171,7 @@ RSpec.describe MiniMagick::Image do
     it "is not #== nor #eql? to an instance of a different image" do
       expect(image).not_to eq(other_image)
       expect(image).not_to eql(other_image)
-    end
+    end unless Gem::Version.new(MiniMagick.cli_version) >= Gem::Version.new("7.1.1-35")
 
     it "generates the same hash code for an instance of the same image" do
       expect(image.hash).to eq(same_image.hash)
@@ -179,7 +179,7 @@ RSpec.describe MiniMagick::Image do
 
     it "generates different same hash codes for a different image" do
       expect(image.hash).not_to eq(other_image.hash)
-    end
+    end unless Gem::Version.new(MiniMagick.cli_version) >= Gem::Version.new("7.1.1-35")
   end
 
   describe "#tempfile" do
