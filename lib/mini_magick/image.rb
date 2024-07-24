@@ -487,8 +487,6 @@ module MiniMagick
       else
         IO.copy_stream File.open(path, "rb"), output_to
       end
-    ensure
-      destroy! if tempfile
     end
 
     ##

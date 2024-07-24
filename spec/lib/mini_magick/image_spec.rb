@@ -328,14 +328,8 @@ RSpec.describe MiniMagick::Image do
     end
 
     it "works when writing to the same path" do
-      image = MiniMagick::Image.new(subject.path)
-      image.write(image.path)
-      expect(File.read(image.path)).not_to be_empty
-    end
-
-    it "deletes the tempfile" do
-      subject.write(random_path)
-      expect(File.exist?(subject.path)).to eq false
+      subject.write(subject.path)
+      expect(File.read(subject.path)).not_to be_empty
     end
   end
 
