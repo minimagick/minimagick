@@ -78,5 +78,41 @@ RSpec.describe MiniMagick::Shell do
       stdout, * = subject.execute(["identify", "-format", "%w %h", image_path])
       expect(stdout).to match(/\d+ \d+/)
     end
+
+    it "sets MAGICK_TIME_LIMIT to MiniMagick.timeout or the given timeout" do
+      allow(MiniMagick).to receive(:timeout).and_return(123)
+
+      stdout, stderr, status = subject.execute(%W[env])
+
+      expect(stdout).to match("MAGICK_TIME_LIMIT=123")
+      expect(stderr).to eq ""
+      expect(status).to eq 0
+
+      stdout, stderr, status = subject.execute(%W[env], timeout: 456)
+
+      expect(stdout).to match("MAGICK_TIME_LIMIT=456")
+      expect(stderr).to eq ""
+      expect(status).to eq 0
+    end
+
+    it "executes the command with the environment variables from MiniMagick.cli_env set in the shell" do
+      allow(MiniMagick).to receive(:cli_env).and_return({'MY_ENV' => 'my value'})
+
+      stdout, stderr, status = subject.execute(%W[env])
+
+      expect(stdout).to match("MY_ENV=my value")
+      expect(stderr).to eq ""
+      expect(status).to eq 0
+    end
+
+    it "does not override the timeout if MAGICK_TIME_LIMIT is set in MiniMagick.cli_env" do
+      allow(MiniMagick).to receive(:cli_env).and_return({'MAGICK_TIME_LIMIT' => 'override'})
+
+      stdout, stderr, status = subject.execute(%W[env], timeout: 1)
+
+      expect(stdout).to match("MAGICK_TIME_LIMIT=1")
+      expect(stderr).to eq ""
+      expect(status).to eq 0
+    end
   end
 end
