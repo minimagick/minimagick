@@ -16,6 +16,16 @@ module MiniMagick
     attr_accessor :cli_prefix
 
     ##
+    # Adds environment variables to every CLI command call.
+    # For example, you could use it to set `LD_PRELOAD="/path/to/libsomething.so"`.
+    # Must be a hash of strings keyed to valid environment variable name strings.
+    # e.g. {'MY_ENV' => 'my value'}
+    #
+    # @return [Hash]
+    #
+    attr_accessor :cli_env
+
+    ##
     # If you don't want commands to take too long, you can set a timeout (in
     # seconds).
     #
