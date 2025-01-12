@@ -65,6 +65,7 @@ module MiniMagick
       base.errors = true
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
+      base.cli_env = {}.freeze
     end
 
     ##

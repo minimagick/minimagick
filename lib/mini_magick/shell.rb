@@ -28,8 +28,8 @@ module MiniMagick
 
     def execute(command, stdin: "", timeout: MiniMagick.timeout)
       env = {}
-      env.merge!(MiniMagick.cli_env) if MiniMagick.cli_env.is_a?(Hash)
-      env["MAGICK_TIME_LIMIT"] = timeout&.to_s
+      env.merge!(MiniMagick.cli_env)
+      env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
       stdout, stderr, status = log(command.join(" ")) do
         Open3.capture3(env, *command, stdin_data: stdin)

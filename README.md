@@ -240,6 +240,7 @@ MiniMagick.configure do |config|
   config.tmdir = Dir.tmpdir # alternative directory for tempfiles
   config.logger = Logger.new($stdout) # where to log IM commands
   config.cli_prefix = nil # add prefix to all IM commands
+  config.cli_env = {} # environment variables to set for IM commands
 end
 ```
 
@@ -468,16 +469,27 @@ Some MiniMagick features won't be supported, such as global timeout,
 
 ### Limiting resources
 
-ImageMagick supports a number of environment variables for controlling its
+ImageMagick supports a number of [environment variables] for controlling its
 resource limits. For example, you can enforce memory or execution time limits by
-setting the following variables in your application's process environment:
+setting the following:
 
-* `MAGICK_MEMORY_LIMIT=128MiB`
-* `MAGICK_MAP_LIMIT=64MiB`
-* `MAGICK_TIME_LIMIT=30`
+```rb
+MiniMagick.configure do |config|
+  config.cli_env = {
+    "MAGICK_MEMORY_LIMIT" => "128MiB",
+    "MAGICK_MAP_LIMIT" => "64MiB",
+    "MAGICK_TIME_LIMIT" => "30"
+  }
+end
+```
 
-For a full list of variables and description, see [ImageMagick's resources
-documentation](http://www.imagemagick.org/script/resources.php#environment).
+For time limit you can also use the `timeout` configuration:
+
+```rb
+MiniMagick.configure do |config|
+  config.timeout = 30 # 30 seconds
+end
+```
 
 ### Changing temporary directory
 
@@ -538,3 +550,5 @@ Unlike RMagick, MiniMagick is a much thinner wrapper around ImageMagick.
 * To open files with MiniMagick you use `MiniMagick::Image.open` as you would
   `Magick::Image.read`. To open a file and directly edit it, use
   `MiniMagick::Image.new`.
+
+[environment variables]: https://imagemagick.org/script/resources.php#environment
