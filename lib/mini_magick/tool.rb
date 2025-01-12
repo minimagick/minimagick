@@ -123,7 +123,7 @@ module MiniMagick
     def executable
       exe = [name]
       exe.unshift "magick" if MiniMagick.imagemagick7? && name != "magick"
-      Array(MiniMagick.cli_prefix).reverse_each { |p| exe.unshift p } if MiniMagick.cli_prefix
+      exe.unshift *Array(MiniMagick.cli_prefix)
       exe
     end
 
