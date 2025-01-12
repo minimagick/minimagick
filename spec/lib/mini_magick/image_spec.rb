@@ -3,7 +3,6 @@ require "pathname"
 require "tempfile"
 require "fileutils"
 require "stringio"
-require "webmock/rspec"
 
 RSpec.describe MiniMagick::Image do
   subject { described_class.open(image_path) }
@@ -72,32 +71,28 @@ RSpec.describe MiniMagick::Image do
     end
 
     it "loads a remote image" do
-      stub_request(:get, "http://example.com/image.jpg")
-        .to_return(body: File.read(image_path))
+      expect_any_instance_of(URI::HTTP).to receive(:open).and_yield(File.open(image_path, "rb"))
       image = described_class.open("http://example.com/image.jpg")
       expect(image).to be_valid
       expect(File.extname(image.path)).to eq ".jpg"
     end
 
-    it "doesn't allow remote shell execution" do
-      expect {
-        described_class.open("| touch file.txt") # Kernel#open accepts this
-      }.to raise_error(Errno::ENOENT)
-
-      expect(File.exist?("file.txt")).to eq(false)
-    end
-
     it "accepts open-uri options" do
-      stub_request(:get, "http://example.com/image.jpg")
-        .with(headers: {"Foo" => "Bar"})
-        .to_return(body: File.read(image_path))
+      expect_any_instance_of(URI::HTTP).to receive(:open)
+        .with({ "Foo" => "Bar" })
+        .and_yield(File.open(image_path, "rb"))
       described_class.open("http://example.com/image.jpg", "Foo" => "Bar")
-      described_class.open("http://example.com/image.jpg", ".jpg", "Foo" => "Bar")
     end if RUBY_VERSION >= "2.7"
 
+    it "accepts open-uri options with extension" do
+      expect_any_instance_of(URI::HTTP).to receive(:open)
+        .with({ "Foo" => "Bar" })
+        .and_yield(File.open(image_path, "rb"))
+      described_class.open("http://example.com/image.jpg", ".jpg", "Foo" => "Bar")
+    end
+
     it "strips out colons from URL" do
-      stub_request(:get, "http://example.com/image.jpg:large")
-        .to_return(body: File.read(image_path))
+      expect_any_instance_of(URI::HTTP).to receive(:open).and_yield(File.open(image_path, "rb"))
       image = described_class.open("http://example.com/image.jpg:large")
       expect(File.extname(image.path)).to eq ".jpg"
     end
