@@ -17,6 +17,7 @@ module MiniMagick
   #
   # @return [Boolean]
   def self.imagemagick7?
+    return false if graphicsmagick
     return @imagemagick7 if defined?(@imagemagick7)
     @imagemagick7 = !!MiniMagick::Utilities.which("magick")
   end

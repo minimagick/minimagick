@@ -5,6 +5,13 @@ module MiniMagick
   module Configuration
 
     ##
+    # Uses [GraphicsMagick](http://www.graphicsmagick.org/) instead of
+    # ImageMagick, by prefixing commands with `gm` instead of `magick`.
+    #
+    # @return [Boolean]
+    attr_accessor :graphicsmagick
+
+    ##
     # Adds a prefix to the CLI command.
     # For example, you could use `firejail` to run all commands in a sandbox.
     # Can be a string, or an array of strings.
@@ -66,6 +73,7 @@ module MiniMagick
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
       base.cli_env = {}.freeze
+      base.graphicsmagick = false
     end
 
     ##

@@ -46,10 +46,16 @@ RSpec.describe MiniMagick::Tool do
   end
 
   describe "#executable" do
-    it "prepends 'magick' to the command list when using ImageMagick 7" do
+    it "prepends 'magick' to the command when using ImageMagick 7" do
       allow(MiniMagick).to receive(:imagemagick7?).and_return(true)
       expect(subject.executable).to eq %W[magick identify]
       expect(MiniMagick.convert.executable).to eq %W[magick]
+    end
+
+    it "prepends 'gm' to the command when using GraphicsMagick" do
+      allow(MiniMagick).to receive(:graphicsmagick).and_return(true)
+      expect(subject.executable).to eq %W[gm identify]
+      expect(MiniMagick.convert.executable).to eq %W[gm convert]
     end
 
     it "respects #cli_prefix as a string" do

@@ -456,11 +456,14 @@ end
 ### GraphicsMagick
 
 As of MiniMagick 5+, [GraphicsMagick](http://www.graphicsmagick.org/) isn't
-officially supported. However, you can still configure MiniMagick to use it:
+officially supported. This means its installation won't be auto-detected, and no
+attempts will be made to handle differences in GraphicsMagick API or output.
+
+However, you can still configure MiniMagick to use it:
 
 ```rb
 MiniMagick.configure do |config|
-  config.cli_prefix = "gm"
+  config.graphicsmagick = true
 end
 ```
 
