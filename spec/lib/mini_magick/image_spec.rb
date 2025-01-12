@@ -89,7 +89,7 @@ RSpec.describe MiniMagick::Image do
         .with({ "Foo" => "Bar" })
         .and_yield(File.open(image_path, "rb"))
       described_class.open("http://example.com/image.jpg", ".jpg", "Foo" => "Bar")
-    end
+    end if RUBY_VERSION >= "2.7"
 
     it "strips out colons from URL" do
       expect_any_instance_of(URI::HTTP).to receive(:open).and_yield(File.open(image_path, "rb"))
