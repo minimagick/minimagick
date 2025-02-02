@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.3'
 
   s.add_dependency 'logger'
+  s.add_dependency 'benchmark'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.5'
