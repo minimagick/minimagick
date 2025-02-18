@@ -96,9 +96,9 @@ RSpec.describe MiniMagick::Shell do
       stdout, * = subject.execute(['echo "SOMETHING_SECRET=$SOMETHING_SECRET HOME=$HOME PATH=$PATH"'])
 
       expect(stdout).to eq("SOMETHING_SECRET= HOME=#{Dir.home} PATH=/usr/bin\n")
-    ensure
-      ENV.delete('SOMETHING_SECRET')
     end
+
+    after { ENV.delete('SOMETHING_SECRET') }
 
     it "does not override the timeout if MAGICK_TIME_LIMIT is set in MiniMagick.cli_env" do
       allow(MiniMagick).to receive(:timeout).and_return(1)
