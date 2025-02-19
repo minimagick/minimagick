@@ -27,11 +27,17 @@ module MiniMagick
     end
 
     def execute(command, stdin: "", timeout: MiniMagick.timeout)
-      env = {
-        'HOME' => ENV['HOME'],
-        'PATH' => ENV['PATH'],
-        'LANG' => ENV['LANG'],
-      }
+      env =
+        if MiniMagick.restricted_env
+          {
+            'HOME' => ENV['HOME'],
+            'PATH' => ENV['PATH'],
+            'LANG' => ENV['LANG'],
+          }
+        else
+          {}
+        end
+
       env.merge!(MiniMagick.cli_env)
       env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
