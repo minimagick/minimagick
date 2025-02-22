@@ -27,12 +27,22 @@ module MiniMagick
     end
 
     def execute(command, stdin: "", timeout: MiniMagick.timeout)
-      env = {}
+      env =
+        if MiniMagick.restricted_env
+          {
+            'HOME' => ENV['HOME'],
+            'PATH' => ENV['PATH'],
+            'LANG' => ENV['LANG'],
+          }
+        else
+          {}
+        end
+
       env.merge!(MiniMagick.cli_env)
       env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
       stdout, stderr, status = log(command.join(" ")) do
-        Open3.capture3(env, *command, stdin_data: stdin)
+        Open3.capture3(env, *command, stdin_data: stdin, unsetenv_others: MiniMagick.restricted_env)
       end
 
       [stdout, stderr, status&.exitstatus]

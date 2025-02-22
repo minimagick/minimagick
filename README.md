@@ -241,6 +241,7 @@ MiniMagick.configure do |config|
   config.logger = Logger.new($stdout) # where to log IM commands
   config.cli_prefix = nil # add prefix to all IM commands
   config.cli_env = {} # environment variables to set for IM commands
+  config.restricted_env = false # when true, block IM commands from accessing system environment variables other than those in cli_env
 end
 ```
 

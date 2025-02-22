@@ -33,6 +33,16 @@ module MiniMagick
     attr_accessor :cli_env
 
     ##
+    # If set to true, Open3 will restrict system calls to access only
+    # environment variables defined in :cli_env, plus HOME, PATH, and LANG
+    # since those are required for such system calls. It will not pass on any
+    # other environment variables from the system.
+    #
+    # @return [Boolean]
+    #
+    attr_accessor :restricted_env
+
+    ##
     # If you don't want commands to take too long, you can set a timeout (in
     # seconds).
     #
@@ -73,6 +83,7 @@ module MiniMagick
       base.logger = Logger.new($stdout).tap { |l| l.level = Logger::INFO }
       base.warnings = true
       base.cli_env = {}.freeze
+      base.restricted_env = false
       base.graphicsmagick = false
     end
 
