@@ -121,11 +121,10 @@ module MiniMagick
     #   identify.executable #=> ["firejail", "--force", "magick", "identify"]
     #
     def executable
-      exe = [name]
-      exe.unshift "gm" if MiniMagick.graphicsmagick
-      exe.unshift "magick" if MiniMagick.imagemagick7? && name != "magick"
-      exe.unshift *Array(MiniMagick.cli_prefix)
-      exe
+      exe = Array(MiniMagick.cli_prefix)
+      exe << "magick" if MiniMagick.imagemagick7? && name != "magick"
+      exe << "gm" if MiniMagick.graphicsmagick
+      exe << name
     end
 
     ##
