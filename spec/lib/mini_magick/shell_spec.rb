@@ -57,7 +57,7 @@ RSpec.describe MiniMagick::Shell do
       stdout, stderr, status = subject.execute(%W[identify foo])
 
       expect(stdout).to eq ""
-      expect(stderr).to match("unable to open image")
+      expect(stderr).to match("(unable to open image|identify: no decode delegate for this image format)")
       expect(status).to eq 1
     end
 
