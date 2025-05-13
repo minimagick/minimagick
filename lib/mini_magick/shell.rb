@@ -1,5 +1,4 @@
 require "open3"
-require "benchmark"
 
 module MiniMagick
   ##
@@ -43,8 +42,9 @@ module MiniMagick
     private
 
     def log(command, &block)
-      value = nil
-      duration = Benchmark.realtime { value = block.call }
+      time_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      value = block.call
+      duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - time_start
       MiniMagick.logger.debug "[%.2fs] %s" % [duration, command]
       value
     end
