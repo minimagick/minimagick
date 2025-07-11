@@ -237,7 +237,7 @@ MiniMagick.configure do |config|
   config.timeout = nil # number of seconds IM commands may take
   config.errors = true # raise errors non nonzero exit status
   config.warnings = true # forward warnings to standard error
-  config.tmdir = Dir.tmpdir # alternative directory for tempfiles
+  config.tmpdir = Dir.tmpdir # alternative directory for tempfiles
   config.logger = Logger.new($stdout) # where to log IM commands
   config.cli_prefix = nil # add prefix to all IM commands
   config.cli_env = {} # environment variables to set for IM commands
