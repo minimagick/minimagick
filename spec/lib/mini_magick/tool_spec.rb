@@ -30,6 +30,10 @@ RSpec.describe MiniMagick::Tool do
   end
 
   describe ".new" do
+    it "accepts options" do
+      expect { described_class.new("compare", errors: false) }.not_to raise_error
+    end
+
     it "accepts a block, and immediately executes the command" do
       output = described_class.new("identify") do |builder|
         builder << image_path(:gif)

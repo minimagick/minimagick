@@ -27,8 +27,8 @@ module MiniMagick
     #   instance of the tool, if block is given, returns the output of the
     #   command.
     #
-    def self.new(*args)
-      instance = super(*args)
+    def self.new(*args, **options)
+      instance = super
 
       if block_given?
         yield instance
