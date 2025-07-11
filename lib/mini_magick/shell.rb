@@ -26,7 +26,7 @@ module MiniMagick
     end
 
     def execute(command, stdin: "", timeout: MiniMagick.timeout)
-      env = MiniMagick.restricted_env ? ENV.slice("HOME", "PATH", "LANG") : {}
+      env = MiniMagick.restricted_env ? ENV.to_h.slice("HOME", "PATH", "LANG") : {} # Using #to_h for Ruby 2.5 compatibility.
       env.merge!(MiniMagick.cli_env)
       env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
