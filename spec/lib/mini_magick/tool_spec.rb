@@ -32,6 +32,7 @@ RSpec.describe MiniMagick::Tool do
   describe ".new" do
     it "accepts options" do
       expect { described_class.new("compare", errors: false) }.not_to raise_error
+      expect { MiniMagick.compare(errors: false) }.not_to raise_error
     end
 
     it "accepts a block, and immediately executes the command" do
