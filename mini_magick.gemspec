@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.files        = Dir['README.md', 'VERSION', 'MIT-LICENSE', 'Rakefile', 'lib/**/*']
   s.require_paths = ['lib']
 
-  s.required_ruby_version = '>= 2.3'
+  s.required_ruby_version = '>= 2.5'
 
   s.add_dependency 'logger'
 
