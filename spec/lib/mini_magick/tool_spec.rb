@@ -70,9 +70,11 @@ RSpec.describe MiniMagick::Tool do
     end
 
     it "respects #cli_prefix as an array" do
+      prefix = ['firejail', '--force']
       allow(MiniMagick).to receive(:imagemagick7?).and_return(false)
-      allow(MiniMagick).to receive(:cli_prefix).and_return(['firejail', '--force'])
+      allow(MiniMagick).to receive(:cli_prefix).and_return(prefix)
       expect(subject.executable).to eq %W[firejail --force identify]
+      expect(prefix).to eq(['firejail', '--force'])
     end
   end
 
