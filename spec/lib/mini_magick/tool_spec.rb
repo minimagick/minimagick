@@ -41,6 +41,13 @@ RSpec.describe MiniMagick::Tool do
       end
       expect(output).to match("GIF")
     end
+
+    it "supports deprecated tool subclasses instantiated without arguments" do
+      output = MiniMagick::Tool::Identify.new do |builder|
+        builder << image_path(:gif)
+      end
+      expect(output).to match("GIF")
+    end
   end
 
   describe "#command" do
