@@ -31,7 +31,33 @@ module MiniMagick
       env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
       stdout, stderr, status = log(command.join(" ")) do
-        Open3.capture3(env, *command, stdin_data: stdin, unsetenv_others: MiniMagick.restricted_env)
+        # We would ideally use Open3.capture3, but it doesn't allow us to
+        # terminate the command after timing out. We can't rely solely on
+        # ImageMagick's own $MAGICK_TIME_LIMIT for this, because it's only
+        # checked periodically inside ImageMagick's processing loops, so it
+        # can fire too late (or not at all) depending on the operation.
+        Open3.popen3(env, *command, unsetenv_others: MiniMagick.restricted_env) do |stdin_io, stdout_io, stderr_io, wait_thread|
+          stdin_io.binmode
+          stdout_io.binmode
+          stderr_io.binmode
+
+          stdout_reader = Thread.new { stdout_io.read }
+          stderr_reader = Thread.new { stderr_io.read }
+
+          begin
+            stdin_io.write(stdin)
+          rescue Errno::EPIPE
+          end
+          stdin_io.close
+
+          if timeout && !wait_thread.join(timeout)
+            Process.kill("TERM", wait_thread.pid) rescue nil
+            wait_thread.join
+            fail MiniMagick::TimeoutError, "`#{command.join(" ")}` has timed out"
+          end
+
+          [stdout_reader.value, stderr_reader.value, wait_thread.value]
+        end
       end
 
       [stdout, stderr, status&.exitstatus]
