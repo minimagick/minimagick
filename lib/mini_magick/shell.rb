@@ -45,7 +45,12 @@ module MiniMagick
           stderr_reader = Thread.new { stderr_io.read }
 
           begin
-            stdin_io.write(stdin)
+            # Matches how Open3.capture3 detects IO objects.
+            if stdin.respond_to?(:readpartial)
+              IO.copy_stream(stdin, stdin_io)
+            else
+              stdin_io.write(stdin)
+            end
           rescue Errno::EPIPE
           end
           stdin_io.close

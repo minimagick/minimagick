@@ -61,6 +61,22 @@ RSpec.describe MiniMagick::Shell do
       expect(status).to eq 1
     end
 
+    it "accepts a string as standard input" do
+      stdout, * = subject.execute(%W[identify -], stdin: File.binread(image_path(:gif)))
+
+      expect(stdout).to match("GIF")
+    end
+
+    it "accepts an IO object as standard input" do
+      stdout, * = subject.execute(%W[identify -], stdin: File.open(image_path(:gif), "rb"))
+
+      expect(stdout).to match("GIF")
+
+      stdout, * = subject.execute(%W[identify -], stdin: StringIO.new(File.binread(image_path(:gif))))
+
+      expect(stdout).to match("GIF")
+    end
+
     it "returns an appropriate response when command wasn't found" do
       stdout, stderr, code = subject.execute(%W[unexisting command])
       expect(code).to eq 127

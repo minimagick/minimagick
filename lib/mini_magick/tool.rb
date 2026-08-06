@@ -46,7 +46,8 @@ module MiniMagick
     # @option options [Boolean] :errors Whether to raise errors on non-zero
     #   exit codes.
     # @option options [Boolean] :warnings Whether to print warnings to stderrr.
-    # @option options [String] :stdin Content to send to standard input stream.
+    # @option options [String, IO] :stdin Content to send to standard input
+    #   stream, either a string or a readable IO object.
     # @example
     #   MiniMagick.identify(errors: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
