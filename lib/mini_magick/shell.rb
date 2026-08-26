@@ -25,18 +25,24 @@ module MiniMagick
       [stdout, stderr, status]
     end
 
-    def execute(command, stdin: "", timeout: MiniMagick.timeout)
+    def execute(command, stdin: "", timeout: MiniMagick.timeout, inherit_fds: [])
       env = MiniMagick.restricted_env ? ENV.to_h.slice("HOME", "PATH", "LANG") : {} # Using #to_h for Ruby 2.5 compatibility.
       env.merge!(MiniMagick.cli_env)
       env["MAGICK_TIME_LIMIT"] = timeout.to_s if timeout
 
       stdout, stderr, status = log(command.join(" ")) do
+        options = { unsetenv_others: MiniMagick.restricted_env }
+        # Descriptors are close-on-exec, and spawn clears that only for the ones
+        # its redirect map names, so /dev/fd/N does not exist in the command
+        # unless the descriptor is named here.
+        inherit_fds.each { |io| options[io.fileno] = io.fileno }
+
         # We would ideally use Open3.capture3, but it doesn't allow us to
         # terminate the command after timing out. We can't rely solely on
         # ImageMagick's own $MAGICK_TIME_LIMIT for this, because it's only
         # checked periodically inside ImageMagick's processing loops, so it
         # can fire too late (or not at all) depending on the operation.
-        Open3.popen3(env, *command, unsetenv_others: MiniMagick.restricted_env) do |stdin_io, stdout_io, stderr_io, wait_thread|
+        Open3.popen3(env, *command, options) do |stdin_io, stdout_io, stderr_io, wait_thread|
           stdin_io.binmode
           stdout_io.binmode
           stderr_io.binmode
