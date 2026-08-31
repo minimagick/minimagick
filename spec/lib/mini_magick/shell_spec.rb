@@ -61,6 +61,25 @@ RSpec.describe MiniMagick::Shell do
       expect(status).to eq 1
     end
 
+    it "lets the command inherit the file descriptors listed in :inherit_fds" do
+      output_path = random_path
+
+      File.open(image_path(:jpg), "rb") do |jpg|
+        File.open(image_path(:png), "rb") do |png|
+          File.open(output_path, "wb") do |output|
+            command = %W[convert /dev/fd/#{jpg.fileno} /dev/fd/#{png.fileno} +append png:/dev/fd/#{output.fileno}]
+            *, status = subject.execute(command, inherit_fds: [jpg, png, output])
+
+            expect(status).to eq 0
+          end
+        end
+      end
+
+      # Both inputs were read and the output written through their descriptors: +append lays the
+      # 200x276 JPEG beside the 300x225 PNG.
+      expect(MiniMagick::Image.open(output_path).dimensions).to eq [500, 276]
+    end
+
     it "accepts a string as standard input" do
       stdout, * = subject.execute(%W[identify -], stdin: File.binread(image_path(:gif)))
 

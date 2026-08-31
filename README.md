@@ -437,6 +437,25 @@ content = MiniMagick.convert do |convert|
 end
 ```
 
+### Inheriting file descriptors
+
+If the input is a file this process already has open, you can have the command
+inherit the descriptor with the `:inherit_fds` option and name it as
+`/dev/fd/N`, rather than writing out a copy for the command to read:
+
+```rb
+File.open("input.jpg", "rb") do |file|
+  MiniMagick.identify(inherit_fds: [file]) do |identify|
+    identify << "/dev/fd/#{file.fileno}"
+  end
+end
+```
+
+Each IO given to `:inherit_fds` is inherited at the same file descriptor
+number. Without it the descriptor is close-on-exec, so `/dev/fd/N` does not
+exist in the command. The command's own standard streams occupy 0, 1 and 2, so
+those cannot be inherited.
+
 ### Capturing STDERR
 
 Some MiniMagick tools such as `compare` output the result of the command on
