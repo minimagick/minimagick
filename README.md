@@ -1,10 +1,9 @@
 # MiniMagick
-[![Gem Version](https://img.shields.io/gem/v/mini_magick.svg)](http://rubygems.org/gems/mini_magick)
-[![Gem Downloads](https://img.shields.io/gem/dt/mini_magick.svg)](http://rubygems.org/gems/mini_magick)
+[![Gem Version](https://img.shields.io/gem/v/mini_magick.svg)](https://rubygems.org/gems/mini_magick)
+[![Gem Downloads](https://img.shields.io/gem/dt/mini_magick.svg)](https://rubygems.org/gems/mini_magick)
 [![CI](https://github.com/minimagick/minimagick/actions/workflows/ci.yml/badge.svg)](https://github.com/minimagick/minimagick/actions/workflows/ci.yml)
-[![Code Climate](https://codeclimate.com/github/minimagick/minimagick/badges/gpa.svg)](https://codeclimate.com/github/minimagick/minimagick)
 
-A ruby wrapper for [ImageMagick](http://imagemagick.org/) command line.
+A ruby wrapper for the [ImageMagick](https://imagemagick.org/) command line.
 
 ## Why?
 
@@ -16,12 +15,12 @@ ruby apps would crash because of their 100MB memory limit.
 ## Solution!
 
 Using MiniMagick the ruby processes memory remains small (it spawns
-ImageMagick's command line program mogrify which takes up some memory as well,
-but is much smaller compared to RMagick). See [Thinking of switching from
+ImageMagick's command line programs, which take up some memory as well, but
+much less compared to RMagick). See [Thinking of switching from
 RMagick?](#thinking-of-switching-from-rmagick) below.
 
 MiniMagick gives you access to all the command line options ImageMagick has
-(found [here](http://www.imagemagick.org/script/command-line-options.php)).
+(found [here](https://imagemagick.org/script/command-line-options.php)).
 
 ## Requirements
 
@@ -49,6 +48,7 @@ $ bundle add mini_magick
 ## Information
 
 * [API documentation](https://rubydoc.info/gems/mini_magick)
+* [Changelog](https://github.com/minimagick/minimagick/releases)
 
 ## Usage
 
@@ -58,7 +58,7 @@ Let's first see a basic example of resizing an image.
 require "mini_magick"
 
 image = MiniMagick::Image.open("input.jpg")
-image.path #=> "/var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/magick20140921-75881-1yho3zc.jpg"
+image.path #=> "/var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/mini_magick20140921-75881-1yho3zc.jpg"
 image.resize "100x100"
 image.format "png"
 image.write "output.png"
@@ -66,10 +66,11 @@ image.write "output.png"
 
 `MiniMagick::Image.open` makes a copy of the image, and further methods modify
 that copy (the original stays untouched). We then
-[resize](http://www.imagemagick.org/script/command-line-options.php#resize)
+[resize](https://imagemagick.org/script/command-line-options.php#resize)
 the image, and write it to a file. The writing part is necessary because
 the copy is just temporary, it gets garbage collected when we lose reference
-to the image.
+to the image. If you want to delete the temporary copy right away, you can call
+`MiniMagick::Image#destroy!`.
 
 `MiniMagick::Image.open` also accepts URLs, and options passed in will be
 forwarded to [open-uri](https://github.com/ruby/open-uri).
@@ -80,6 +81,13 @@ image.contrast
 image.write("from_internets.jpg")
 ```
 
+If the file extension cannot be determined from the path or URL, you can pass
+it in explicitly:
+
+```rb
+image = MiniMagick::Image.open("http://example.com/image", ".jpg")
+```
+
 On the other hand, if we want the original image to actually *get* modified,
 we can use `MiniMagick::Image.new`.
 
@@ -88,6 +96,28 @@ image = MiniMagick::Image.new("input.jpg")
 image.path #=> "input.jpg"
 image.resize "100x100"
 # Not calling #write, because it's not a copy
+```
+
+### Reading from a blob or an IO
+
+If you already have the image content in memory, or in an IO object, you can
+use `MiniMagick::Image.read`, which copies it into a temporary file.
+
+```rb
+image = MiniMagick::Image.read(File.binread("input.jpg"))
+image = MiniMagick::Image.read(File.open("input.jpg", "rb"))
+image = MiniMagick::Image.read(io, ".jpg") # explicit file extension
+```
+
+### Writing
+
+`MiniMagick::Image#write` accepts either a file path or an IO object, and
+`MiniMagick::Image#to_blob` returns the image content as a binary string.
+
+```rb
+image.write("output.jpg")
+image.write(io) # anything that responds to #write
+image.to_blob   #=> "\xFF\xD8\xFF\xE0\x00\x10JFIF..."
 ```
 
 ### Combine options
@@ -119,6 +149,43 @@ end # the command gets executed
 The yielded builder is an instance of `MiniMagick::Tool`. To learn more
 about its interface, see [Tools](#tools) below.
 
+### Changing format
+
+Changing the image format is done with `MiniMagick::Image#format`, which
+converts the image into a new file with the new extension, and updates the
+image path.
+
+```rb
+image = MiniMagick::Image.open("input.png")
+image.format "jpg"
+image.path #=> "/var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/mini_magick20140921-75881-1yho3zc.jpg"
+```
+
+Note that with `MiniMagick::Image.new` the original file is **deleted** and
+replaced with the converted file, so use `MiniMagick::Image.open` if you want to
+keep the original.
+
+For multi-page images (e.g. GIFs or PDFs) only the first page is converted by
+default. You can choose a different page, or pass `nil` to convert all pages:
+
+```rb
+image.format "png", 2   # converts the 3rd page
+image.format "gif", nil # converts all pages
+```
+
+You can pass additional options which should be applied when reading the
+image, as well as a block for further modifying the `convert` command:
+
+```rb
+image.format "png", 0, density: 300 do |convert|
+  convert.background "white"
+  convert.flatten
+end
+```
+
+Because `-format` means something else to `mogrify`, `#format` cannot be called
+inside `#combine_options`.
+
 ### Attributes
 
 A `MiniMagick::Image` has various handy attributes.
@@ -128,15 +195,22 @@ image.type        #=> "JPEG"
 image.width       #=> 250
 image.height      #=> 300
 image.dimensions  #=> [250, 300]
+image.landscape?  #=> false
+image.portrait?   #=> true
 image.size        #=> 3451 (in bytes)
+image.human_size  #=> "3451B"
 image.colorspace  #=> "DirectClass sRGB"
 image.exif        #=> {"DateTimeOriginal" => "2013:09:04 08:03:39", ...}
 image.resolution  #=> [75, 75]
 image.signature   #=> "60a7848c4ca6e36b8e2c5dea632ecdc29e9637791d2c59ebf7a54c0c6a74ef7e"
 ```
 
+The attribute values are cached, and the cache is cleared whenever the image is
+modified through MiniMagick. Two images are considered equal (`==`) when their
+signatures match.
+
 If you need more control, you can also access [raw image
-attributes](http://www.imagemagick.org/script/escape.php):
+attributes](https://imagemagick.org/script/escape.php):
 
 ```rb
 image["%[gamma]"] # "0.9"
@@ -203,6 +277,14 @@ pixels = image.get_pixels
 pixels[3][2][1] # the green channel value from the 4th-row, 3rd-column pixel
 ```
 
+You can also include the alpha channel by passing `"RGBA"`, in which case each
+member will be a 4-element array:
+
+```rb
+pixels = image.get_pixels("RGBA")
+pixels[3][2][3] # the alpha channel value from the 4th-row, 3rd-column pixel
+```
+
 It can also be called after applying transformations:
 
 ```rb
@@ -212,46 +294,37 @@ image.colorspace "Gray"
 pixels = image.get_pixels
 ```
 
-### Pixels To Image
-
-Sometimes when you have pixels and want to create image from pixels, you can do this to form an image:
-
-```rb
-image = MiniMagick::Image.open('/Users/rabin/input.jpg')
-pixels = image.get_pixels
-depth = 8
-dimension = [image.width, image.height]
-map = 'rgb'
-image = MiniMagick::Image.get_image_from_pixels(pixels, dimension, map, depth ,'jpg')
-image.write('/Users/rabin/output.jpg')
-```
-
 In this example, the returned pixels should now have equal R, G, and B values.
 
-### Configuration
+### Pixels To Image
 
-Here are the available configuration options with their default values:
+If you have a matrix of pixels (in the same format as returned by
+`#get_pixels`), you can create an image from them:
 
 ```rb
-MiniMagick.configure do |config|
-  config.timeout = nil # number of seconds IM commands may take
-  config.errors = true # raise errors non nonzero exit status
-  config.warnings = true # forward warnings to standard error
-  config.tmpdir = Dir.tmpdir # alternative directory for tempfiles
-  config.logger = Logger.new($stdout) # where to log IM commands
-  config.cli_prefix = nil # add prefix to all IM commands
-  config.cli_env = {} # environment variables to set for IM commands
-  config.restricted_env = false # when true, block IM commands from accessing system environment variables other than those in cli_env
-end
+image = MiniMagick::Image.open("input.jpg")
+pixels = image.get_pixels
+# ... modify pixels ...
+dimension = [image.width, image.height]
+depth = 8
+map = "rgb"
+image = MiniMagick::Image.get_image_from_pixels(pixels, dimension, map, depth, "jpg")
+image.write("output.jpg")
 ```
 
-For a more information, see
-[Configuration](https://rubydoc.info/gems/mini_magick/MiniMagick/Configuration) API documentation.
+If you instead have a binary string of raw pixel data, you can use
+`MiniMagick::Image.import_pixels`:
+
+```rb
+image = MiniMagick::Image.import_pixels(blob, width, height, 8, "rgb", "png")
+```
+
+Note that both of these can be expensive for larger images.
 
 ### Composite
 
 MiniMagick also allows you to
-[composite](http://www.imagemagick.org/script/composite.php) images:
+[composite](https://imagemagick.org/script/composite.php) images:
 
 ```rb
 first_image  = MiniMagick::Image.new("first.jpg")
@@ -261,6 +334,14 @@ result = first_image.composite(second_image) do |c|
   c.geometry "+20+20" # copy second_image onto first_image from (20, 20)
 end
 result.write "output.jpg"
+```
+
+The result is a new image in a temporary file, and neither of the source images
+are modified. By default the result has the same format as the first image, but
+you can choose a different output extension, and also pass a mask image:
+
+```rb
+result = first_image.composite(second_image, "png", mask_image)
 ```
 
 ### Layers/Frames/Pages
@@ -275,6 +356,14 @@ psd.layers #=> [...]
 gif.frames.each_with_index do |frame, idx|
   frame.write("frame#{idx}.jpg")
 end
+```
+
+To collapse a multilayered image to a single frame, you can use
+`MiniMagick::Image#collapse!`:
+
+```rb
+gif.collapse!    # keeps only the first frame
+gif.collapse!(2) # keeps only the 3rd frame
 ```
 
 ### Image validation
@@ -294,10 +383,23 @@ You can choose to log MiniMagick commands and their execution times:
 MiniMagick.logger.level = Logger::DEBUG
 ```
 ```
-D, [2016-03-19T07:31:36.755338 #87191] DEBUG -- : [0.01s] identify /var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/mini_magick20160319-87191-1ve31n1.jpg
+D, [2016-03-19T07:31:36.755338 #87191] DEBUG -- : [0.01s] magick identify /var/folders/k7/6zx6dx6x7ys3rv3srh0nyfj00000gn/T/mini_magick20160319-87191-1ve31n1.jpg
 ```
 
-In Rails you'll probably want to set `MiniMagick.logger = Rails.logger`.
+By default MiniMagick logs to standard output with `INFO` level, so commands
+aren't logged. In Rails you'll probably want to set
+`MiniMagick.logger = Rails.logger`.
+
+### Errors
+
+MiniMagick raises the following errors:
+
+* `MiniMagick::Error` – when an ImageMagick command exits with a nonzero exit
+  status, or the executable is not found
+* `MiniMagick::TimeoutError` (subclass of `MiniMagick::Error`) – when an
+  ImageMagick command exceeds the configured [timeout](#limiting-resources)
+* `MiniMagick::Invalid` – when an image is invalid or its data can't be read
+  (e.g. `#validate!`, `#width`)
 
 ## Tools
 
@@ -321,7 +423,31 @@ convert << "output.jpg"
 convert.call #=> `magick input.jpg -resize 100x100 -negate output.jpg`
 ```
 
-This way of using MiniMagick is highly recommended if you want to maximize performance of your image processing. There are class methods for each CLI tool: `animate`, `compare`, `composite`, `conjure`, `convert`, `display`, `identify`, `import`, `mogrify` and `stream`. The `MiniMagick.convert` method will use `magick` on ImageMagick 7 and `convert` on ImageMagick 6.
+This way of using MiniMagick is highly recommended if you want to maximize
+performance of your image processing. There are class methods for each CLI
+tool: `animate`, `compare`, `composite`, `conjure`, `convert`, `display`,
+`identify`, `import`, `mogrify`, `montage` and `stream`. On ImageMagick 7 the
+tools are executed through `magick` (e.g. `magick identify`), except
+`MiniMagick.convert` which runs `magick` itself (`convert` is deprecated on
+ImageMagick 7). On ImageMagick 6 the tools are executed directly (e.g.
+`identify`, `convert`).
+
+When called with a block, the command is executed at the end and its standard
+output is returned. Otherwise the tool instance is returned, and the command is
+executed with `#call`. You can inspect the built command with `#command`:
+
+```rb
+convert = MiniMagick.convert
+convert << "input.jpg" << "output.png"
+convert.command #=> ["magick", "input.jpg", "output.png"]
+```
+
+You can also check which ImageMagick version is being used:
+
+```rb
+MiniMagick.imagemagick7? #=> true
+MiniMagick.cli_version   #=> "7.1.1-33"
+```
 
 ### Appending
 
@@ -346,8 +472,9 @@ convert << "-resize" << "500x500"
 convert << "-resize 500x500"
 ```
 
-Shell escaping is also handled for you. If an option has a value that has
-spaces inside it, just pass it as a regular string.
+Commands are executed directly, without going through a shell, so you don't need
+to escape anything. If an option has a value that has spaces inside it, just
+pass it as a regular string.
 
 ```rb
 convert << "-distort"
@@ -360,12 +487,30 @@ magick -distort Perspective '0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35'
 
 ### Methods
 
-Instead of passing in options directly, you can use Ruby methods:
+Instead of passing in options directly, you can use Ruby methods. Underscores
+in method names are converted to dashes.
 
 ```rb
 convert.resize("500x500")
 convert.rotate(90)
+convert.auto_orient # -auto-orient
 convert.distort("Perspective", "0,0,0,0 0,45,0,45 69,0,60,10 69,45,60,35")
+```
+
+There are also methods for [creation
+operators](https://imagemagick.org/script/formats.php#pseudo), which are
+added without a leading dash: `xc`, `canvas`, `logo`, `rose`, `gradient`,
+`radial_gradient`, `plasma`, `pattern`, `text` and `pango`.
+
+```rb
+MiniMagick.convert do |convert|
+  convert.size "100x100"
+  convert.xc "white"
+  convert << "output.png"
+end
+```
+```
+magick -size 100x100 xc:white output.png
 ```
 
 ### Chaining
@@ -412,18 +557,20 @@ MiniMagick.convert do |convert|
 end
 ```
 ```
-magick wand.gif \( wand.gif -rotate 90 -foo bar baz \) images.gif
+magick wand.gif \( wand.gif -rotate 30 -foo bar baz \) images.gif
 ```
 
 ### STDIN and STDOUT
 
 If you want to pass something to standard input, you can pass the `:stdin`
-option to `#call`:
+option to `#call`, either as a string or an IO object:
 
 ```rb
 identify = MiniMagick.identify
 identify.stdin # alias for "-"
 identify.call(stdin: image_content)
+# or
+identify.call(stdin: File.open("image.jpg", "rb"))
 ```
 
 MiniMagick also has `#stdout` alias for "-" for outputting file contents to
@@ -436,6 +583,10 @@ content = MiniMagick.convert do |convert|
   convert.stdout # alias for "-"
 end
 ```
+
+Note that `#call` strips a trailing newline from the output. You can use the
+block form described in [Capturing STDERR](#capturing-stderr) if you need the
+exact output.
 
 ### Inheriting file descriptors
 
@@ -461,17 +612,60 @@ those cannot be inherited.
 Some MiniMagick tools such as `compare` output the result of the command on
 standard error, even if the command succeeded. The result of
 `MiniMagick::Tool#call` is always the standard output, but if you pass it a
-block, it will yield the stdout, stderr and exit status of the command:
+block, it will yield the stdout, stderr and exit status of the command, and
+standard error won't be forwarded to `$stderr`:
 
 ```rb
-compare = MiniMagick.compare
+compare = MiniMagick.compare(errors: false)
 # build the command
 compare.call do |stdout, stderr, status|
   # ...
 end
 ```
 
-## Configuring
+Note that `compare` exits with status 1 when the images are different, so you'll
+want to pass `errors: false` to avoid an error being raised in that case.
+
+### Command options
+
+The following options can be passed either when creating the tool or to
+`#call`, and they override the global [configuration](#configuration):
+
+| Option         | Description                                                          |
+| :------------- | :------------------------------------------------------------------- |
+| `:errors`      | whether to raise an error on nonzero exit status                     |
+| `:warnings`    | whether to forward standard error to `$stderr`                       |
+| `:timeout`     | number of seconds after which the command is terminated              |
+| `:stdin`       | string or IO object to write to the command's standard input         |
+| `:inherit_fds` | IO objects whose file descriptors the command should inherit         |
+
+```rb
+MiniMagick.identify(errors: false, timeout: 5) { |b| b.help }
+# or
+MiniMagick.identify.help.call(errors: false, timeout: 5)
+```
+
+## Configuration
+
+Here are the available configuration options with their default values:
+
+```rb
+MiniMagick.configure do |config|
+  config.timeout = nil # number of seconds IM commands may take
+  config.errors = true # raise errors on nonzero exit status
+  config.warnings = true # forward warnings to standard error
+  config.tmpdir = Dir.tmpdir # alternative directory for tempfiles
+  config.logger = Logger.new($stdout) # where to log IM commands (INFO level)
+  config.cli_prefix = nil # add prefix to all IM commands
+  config.cli_env = {} # environment variables to set for IM commands
+  config.restricted_env = false # when true, block IM commands from accessing system environment variables other than those in cli_env
+  config.graphicsmagick = false # use GraphicsMagick instead of ImageMagick
+end
+```
+
+For more information, see the
+[Configuration](https://rubydoc.info/gems/mini_magick/MiniMagick/Configuration)
+API documentation.
 
 ### GraphicsMagick
 
@@ -487,8 +681,8 @@ MiniMagick.configure do |config|
 end
 ```
 
-Some MiniMagick features won't be supported, such as global timeout,
-`MiniMagick::Image#data` and `MiniMagick::Image#exif`.
+Some MiniMagick features won't be supported, such as `MiniMagick::Image#data`
+and `MiniMagick::Image#exif`.
 
 ### Limiting resources
 
@@ -514,19 +708,53 @@ MiniMagick.configure do |config|
 end
 ```
 
-### Changing temporary directory
+When the timeout is set, MiniMagick will both set `MAGICK_TIME_LIMIT` (taking
+precedence over the value in `cli_env`) and terminate the command itself once
+the timeout has elapsed, raising `MiniMagick::TimeoutError`. This is because
+ImageMagick checks its time limit only periodically, so it may fire too late or
+not at all depending on the operation.
 
-ImageMagick allows you to change the temporary directory to process the image file:
+### Restricting environment
+
+By default, ImageMagick commands inherit all environment variables of the Ruby
+process. If you don't want that, you can enable `restricted_env`, in which case
+only `HOME`, `PATH` and `LANG` will be passed through, along with any
+variables set in `cli_env`:
 
 ```rb
 MiniMagick.configure do |config|
-  config.tmpdir = File.join(Dir.tmpdir, "/my/new/tmp_dir")
+  config.restricted_env = true
+  config.cli_env = { "MAGICK_MEMORY_LIMIT" => "128MiB" }
 end
 ```
 
-The example directory `/my/new/tmp_dir` must exist and must be writable.
+### Command prefix
 
-If not configured, it will default to `Dir.tmpdir`.
+You can prefix all commands with another command using `cli_prefix`, for
+example to run them in a sandbox:
+
+```rb
+MiniMagick.configure do |config|
+  config.cli_prefix = ["firejail", "--force"]
+end
+
+MiniMagick.identify.command #=> ["firejail", "--force", "magick", "identify"]
+```
+
+### Changing temporary directory
+
+By default, MiniMagick creates temporary files (e.g. for
+`MiniMagick::Image.open`) in `Dir.tmpdir`. You can change that directory:
+
+```rb
+MiniMagick.configure do |config|
+  config.tmpdir = "/my/new/tmp_dir"
+end
+```
+
+The directory must exist and must be writable. Note that this doesn't affect
+where ImageMagick itself writes its temporary files, for which you can set
+`MAGICK_TEMPORARY_PATH` in `cli_env`.
 
 ### Ignoring STDERR
 
@@ -559,6 +787,9 @@ MiniMagick.identify(errors: false) do |b|
   b.help
 end
 ```
+
+Timeouts will still raise `MiniMagick::TimeoutError` even when errors are
+disabled.
 
 ## Thinking of switching from RMagick?
 

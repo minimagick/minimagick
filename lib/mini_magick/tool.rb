@@ -2,7 +2,7 @@ require "mini_magick/shell"
 
 module MiniMagick
   ##
-  # Class that wraps command-line tools directly, as opposed MiniMagick::Image
+  # Class that wraps command-line tools directly, as opposed to MiniMagick::Image
   # which is more high-level.
   #
   # @example
@@ -45,9 +45,14 @@ module MiniMagick
     # @param options [Hash]
     # @option options [Boolean] :errors Whether to raise errors on non-zero
     #   exit codes.
-    # @option options [Boolean] :warnings Whether to print warnings to stderrr.
+    # @option options [Boolean] :warnings Whether to print warnings to stderr.
+    # @option options [Numeric] :timeout Number of seconds after which the
+    #   command is terminated.
     # @option options [String, IO] :stdin Content to send to standard input
     #   stream, either a string or a readable IO object.
+    # @option options [Array<IO>] :inherit_fds IO objects whose file
+    #   descriptors the command should inherit (at the same numbers), so that
+    #   they can be referenced as `/dev/fd/N`.
     # @example
     #   MiniMagick.identify(errors: false) do |identify|
     #     identify.help # returns exit status 1, which would otherwise throw an error
@@ -74,9 +79,17 @@ module MiniMagick
     #     # ...
     #   end
     #
-    # @yield [Array] Optionally yields stdout, stderr, and exit status
+    # @param options [Hash] Overrides options given to {#initialize}.
     #
-    # @return [String] Returns the output of the command
+    # @yield [stdout, stderr, status] Optionally yields the unmodified stdout,
+    #   stderr, and exit status. In this case stderr isn't forwarded to
+    #   `$stderr`.
+    #
+    # @return [String] Returns the output of the command, without the trailing
+    #   newline.
+    #
+    # @raise [MiniMagick::Error] if the command fails and errors are enabled.
+    # @raise [MiniMagick::TimeoutError] if the command times out.
     #
     def call(**options)
       options = @options.merge(options)
@@ -167,7 +180,8 @@ module MiniMagick
     end
 
     ##
-    # Create an ImageMagick stack in the command (surround.
+    # Create an ImageMagick stack in the command (surrounded with parentheses).
+    # Accepts strings (appended as-is) and hashes (option name to arguments).
     #
     # @example
     #   MiniMagick.convert do |convert|
@@ -179,7 +193,13 @@ module MiniMagick
     #     convert.append.+
     #     convert << "images.gif"
     #   end
-    #   # executes `convert wand.gif \( wizard.gif -rotate 30 \) +append images.gif`
+    #   # executes `convert wand.gif \( wand.gif -rotate 30 \) +append images.gif`
+    #
+    # @example
+    #   convert.stack("wand.gif", { rotate: 30, foo: ["bar", "baz"] })
+    #   # adds `\( wand.gif -rotate 30 -foo bar baz \)`
+    #
+    # @return [self]
     #
     def stack(*args)
       self << "("
@@ -222,7 +242,8 @@ module MiniMagick
     end
 
     ##
-    # Define creator operator methods
+    # Define creator operator methods (`xc`, `canvas`, `logo`, `rose`,
+    # `gradient`, `radial_gradient`, `plasma`, `pattern`, `text`, `pango`).
     #
     # @example
     #   mogrify = MiniMagick::Tool.new("mogrify")
@@ -247,7 +268,8 @@ module MiniMagick
     end
 
     ##
-    # Any undefined method will be transformed into a CLI option
+    # Any undefined method will be transformed into a CLI option, with
+    # underscores converted to dashes, and any arguments appended after it.
     #
     # @example
     #   mogrify = MiniMagick::Tool.new("mogrify")

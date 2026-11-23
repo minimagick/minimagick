@@ -15,7 +15,7 @@ module MiniMagick
     # methods.
     #
     # Use this to pass in a stream object. Must respond to #read(size) or be a
-    # binary string object (BLOB)
+    # binary string object (BLOB). The content is copied into a tempfile.
     #
     # Probably easier to use the {.open} method if you want to open a file or a
     # URL.
@@ -45,8 +45,7 @@ module MiniMagick
     # @param map [String] A code for the mapping of the pixel data. Example:
     #   'gray' or 'rgb'.
     # @param format [String] The file extension of the image format to be
-    #   used when creating the image object.
-    # Defaults to 'png'.
+    #   used when creating the image object. Defaults to 'png'.
     # @return [MiniMagick::Image] The loaded image.
     #
     def self.import_pixels(blob, columns, rows, depth, map, format = 'png')
@@ -73,10 +72,11 @@ module MiniMagick
     # Extension is either guessed from the path or you can specify it as a
     # second parameter.
     #
-    # @param path_or_url [String] Either a local file path or a URL that
-    #   open-uri can read
+    # @param path_or_url [String, Pathname] Either a local file path or a URL
+    #   that open-uri can read
     # @param ext [String] Specify the extension you want to read it as
-    # @param options [Hash] Specify options for the open method
+    # @param options [Hash] Specify options for the open method (forwarded
+    #   to `URI#open` for URLs, and `Pathname#open` for local files)
     # @return [MiniMagick::Image] The loaded image
     #
     def self.open(path_or_url, ext = nil, **options)
@@ -224,7 +224,7 @@ module MiniMagick
     #
     attribute :size
     ##
-    # Returns the file size in a human readable format.
+    # Returns the file size in a human readable format (e.g. "26295B").
     #
     # @return [String]
     #
@@ -243,7 +243,7 @@ module MiniMagick
     #
     # @example
     #   image.resolution("PixelsPerInch") #=> [250, 250]
-    # @see http://www.imagemagick.org/script/command-line-options.php#units
+    # @see https://imagemagick.org/script/command-line-options.php#units
     # @return [Array<Integer>]
     #
     attribute :resolution
@@ -255,12 +255,13 @@ module MiniMagick
     #
     # @example
     #   image.signature #=> "60a7848c4ca6e36b8e2c5dea632ecdc29e9637791d2c59ebf7a54c0c6a74ef7e"
-    # @see http://www.imagemagick.org/api/signature.php
+    # @see https://imagemagick.org/api/signature.php
     # @return [String]
     #
     attribute :signature
     ##
-    # Returns the result of converting the image to JSON format.
+    # Returns the result of converting the image to JSON format (the output
+    # of `magick input.jpg json:`).
     #
     # @return [Hash]
     attribute :data
@@ -273,7 +274,7 @@ module MiniMagick
     #    image["%r"]          #=> "DirectClass sRGB"
     #
     # @param value [String]
-    # @see http://www.imagemagick.org/script/escape.php
+    # @see https://imagemagick.org/script/escape.php
     # @return [String]
     #
     def [](value)
@@ -305,9 +306,9 @@ module MiniMagick
     # Returns a matrix of pixels from the image. The matrix is constructed as
     # an array (1) of arrays (2) of arrays (3) of unsigned integers:
     #
-    # 1) one for each row of pixels
-    # 2) one for each column of pixels
-    # 3) three or four elements in the range 0-255, one for each of the RGB(A) color channels
+    # 1. one for each row of pixels
+    # 2. one for each column of pixels
+    # 3. three or four elements in the range 0-255, one for each of the RGB(A) color channels
     #
     # @example
     #   img = MiniMagick::Image.open 'image.jpg'
@@ -327,7 +328,7 @@ module MiniMagick
     #   img.colorspace 'Gray'
     #   pixels = img.get_pixels
     #
-    # In this example, all pixels in pix should now have equal R, G, and B values.
+    # In this example, all returned pixels should now have equal R, G, and B values.
     #
     # @param map [String] A code for the mapping of the pixel data. Must be either
     #   'RGB' or 'RGBA'. Default to 'RGB'
@@ -355,15 +356,26 @@ module MiniMagick
 
     ##
     # This is used to create image from pixels. This might be required if you
-    # create pixels for some image processing reasons and you want to form 
+    # create pixels for some image processing reasons and you want to form
     # image from those pixels.
     #
     # *DANGER*: This operation can be very expensive. Please try to use with
-    # caution. 
-    # 
+    # caution.
+    #
     # @example
-    #   # It is given in readme.md file
-    ##
+    #   image = MiniMagick::Image.open("input.jpg")
+    #   pixels = image.get_pixels
+    #   image = MiniMagick::Image.get_image_from_pixels(pixels, [image.width, image.height], "rgb", 8, "jpg")
+    #   image.write("output.jpg")
+    #
+    # @param pixels [Array] Matrix of pixels, as returned by {#get_pixels}.
+    # @param dimension [Array<Integer>] Width and height of the image.
+    # @param map [String] A code for the mapping of the pixel data (e.g.
+    #   'rgb' or 'rgba').
+    # @param depth [Integer] Bit depth of the pixel data.
+    # @param format [String] The file extension of the image format.
+    # @return [MiniMagick::Image]
+    #
     def self.get_image_from_pixels(pixels, dimension, map, depth, format)
       pixels = pixels.flatten
       blob = pixels.pack('C*')
@@ -444,8 +456,8 @@ module MiniMagick
     #     c.background "blue"
     #   end
     #
-    # @yield [MiniMagick::Command]
-    # @see http://www.imagemagick.org/script/mogrify.php
+    # @yield [MiniMagick::Tool]
+    # @see https://imagemagick.org/script/mogrify.php
     # @return [self]
     #
     def combine_options(&block)
@@ -456,7 +468,7 @@ module MiniMagick
     # If an unknown method is called then it is sent through the mogrify
     # program.
     #
-    # @see http://www.imagemagick.org/script/mogrify.php
+    # @see https://imagemagick.org/script/mogrify.php
     # @return [self]
     #
     def method_missing(name, *args)
@@ -477,8 +489,8 @@ module MiniMagick
     # String) or by passing in a Stream that you can #write(chunk) to
     # repeatedly
     #
-    # @param output_to [String, Pathname, #read] Some kind of stream object
-    #   that needs to be read or a file path as a String
+    # @param output_to [String, Pathname, #write] A file path, or an IO-like
+    #   object to write the image content to
     #
     def write(output_to)
       case output_to
@@ -497,6 +509,9 @@ module MiniMagick
     end
 
     ##
+    # Composites the other image over this image, returning the result as a
+    # new image (neither of the images are modified).
+    #
     # @example
     #  first_image = MiniMagick::Image.open "first.jpg"
     #  second_image = MiniMagick::Image.open "second.jpg"
@@ -506,7 +521,13 @@ module MiniMagick
     #  end
     #  result.write "output.jpg"
     #
-    # @see http://www.imagemagick.org/script/composite.php
+    # @param other_image [MiniMagick::Image] The image to composite.
+    # @param output_extension [String] Format of the resulting image, defaults
+    #   to the format of this image.
+    # @param mask [MiniMagick::Image, nil] Optional mask image.
+    # @yield [MiniMagick::Tool] The `composite` command, for adding options.
+    # @return [MiniMagick::Image] The new image
+    # @see https://imagemagick.org/script/composite.php
     #
     def composite(other_image, output_extension = type.downcase, mask = nil)
       output_tempfile = MiniMagick::Utilities.tempfile(".#{output_extension}")
@@ -562,6 +583,14 @@ module MiniMagick
       end
     end
 
+    ##
+    # Runs `mogrify` on itself, yielding the command for adding options.
+    # This is used by {#combine_options} and {#method_missing}.
+    #
+    # @param page [Integer, nil] Modify only the given page/frame.
+    # @yield [MiniMagick::Tool]
+    # @return [self]
+    #
     def mogrify(page = nil)
       MiniMagick.mogrify do |builder|
         yield builder if block_given?
@@ -576,31 +605,27 @@ module MiniMagick
       self
     end
 
+    ##
+    # Whether the image represents a single layer of a multilayered image
+    # (i.e. its path ends with `[N]`).
+    #
+    # @return [Boolean]
+    #
     def layer?
       path =~ /\[\d+\]$/
     end
 
     ##
-    # Compares if image width
-    # is greater than height
-    # ============
-    # |          |
-    # |          |
-    # ============
+    # Returns whether image width is greater than height.
+    #
     # @return [Boolean]
     def landscape?
       width > height
     end
 
     ##
-    # Compares if image height
-    # is greater than width
-    # ======
-    # |    |
-    # |    |
-    # |    |
-    # |    |
-    # ======
+    # Returns whether image height is greater than width.
+    #
     # @return [Boolean]
     def portrait?
       height > width

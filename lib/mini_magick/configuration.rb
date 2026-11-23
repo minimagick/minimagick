@@ -7,6 +7,9 @@ module MiniMagick
     ##
     # Uses [GraphicsMagick](http://www.graphicsmagick.org/) instead of
     # ImageMagick, by prefixing commands with `gm` instead of `magick`.
+    # GraphicsMagick isn't officially supported, so some features (e.g.
+    # {MiniMagick::Image#data} and {MiniMagick::Image#exif}) won't work.
+    # Defaults to `false`.
     #
     # @return [Boolean]
     attr_accessor :graphicsmagick
@@ -16,6 +19,10 @@ module MiniMagick
     # For example, you could use `firejail` to run all commands in a sandbox.
     # Can be a string, or an array of strings.
     # e.g. 'firejail', or ['firejail', '--force']
+    #
+    # @example
+    #   MiniMagick.cli_prefix = ["firejail", "--force"]
+    #   MiniMagick.identify.command #=> ["firejail", "--force", "magick", "identify"]
     #
     # @return [String]
     # @return [Array<String>]
@@ -28,15 +35,19 @@ module MiniMagick
     # Must be a hash of strings keyed to valid environment variable name strings.
     # e.g. {'MY_ENV' => 'my value'}
     #
+    # This is also useful for setting ImageMagick's resource limits, such as
+    # `MAGICK_MEMORY_LIMIT`. Defaults to `{}`.
+    #
     # @return [Hash]
     #
     attr_accessor :cli_env
 
     ##
-    # If set to true, Open3 will restrict system calls to access only
-    # environment variables defined in :cli_env, plus HOME, PATH, and LANG
-    # since those are required for such system calls. It will not pass on any
-    # other environment variables from the system.
+    # If set to `true`, commands will only have access to environment
+    # variables defined in {#cli_env}, plus `HOME`, `PATH` and `LANG` from the
+    # current environment, since those are required for running commands. It
+    # will not pass on any other environment variables from the system.
+    # Defaults to `false`.
     #
     # @return [Boolean]
     #
@@ -44,18 +55,25 @@ module MiniMagick
 
     ##
     # If you don't want commands to take too long, you can set a timeout (in
-    # seconds).
+    # seconds). This sets ImageMagick's `MAGICK_TIME_LIMIT` environment
+    # variable (overriding the one in {#cli_env}), and also terminates the
+    # command once the timeout has elapsed, raising {MiniMagick::TimeoutError}.
+    # Defaults to `nil` (no timeout).
     #
-    # @return [Integer]
+    # @return [Integer, nil]
     #
     attr_accessor :timeout
+
     ##
-    # Logger for commands, default is `Logger.new($stdout)`, but you can
-    # override it, for example if you want the logs to be written to a file.
+    # Logger for commands, default is `Logger.new($stdout)` with `INFO` level,
+    # but you can override it, for example if you want the logs to be written
+    # to a file. Commands and their execution times are logged with `DEBUG`
+    # level.
     #
     # @return [Logger]
     #
     attr_accessor :logger
+
     ##
     # Temporary directory used by MiniMagick, default is `Dir.tmpdir`, but
     # you can override it.
@@ -74,7 +92,10 @@ module MiniMagick
 
     ##
     # If set to `false`, it will not forward warnings from ImageMagick to
-    # standard error.
+    # standard error. Defaults to `true`.
+    #
+    # @return [Boolean]
+    #
     attr_accessor :warnings
 
     def self.extended(base)
