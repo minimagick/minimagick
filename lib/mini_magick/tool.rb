@@ -284,6 +284,17 @@ module MiniMagick
       self
     end
 
+    private
+
+    # Prevents #method_missing from handling this hook, which JRuby calls on
+    # #inspect even when the object doesn't respond to it. Returning nil keeps
+    # the default behaviour of inspecting all instance variables.
+    def instance_variables_to_inspect
+      nil
+    end
+
+    public
+
     # deprecated tool subclasses
     %w[animate compare composite conjure convert display identify import magick mogrify montage stream].each do |tool|
       const_set(tool.capitalize, Class.new(self) {
